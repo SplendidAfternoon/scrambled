@@ -212,14 +212,40 @@ def retro_md():
               f"stuck at \"{(f.get('progress') or {}).get('detail', '')}\" since {f['created_at']}. That is the "
               "same render-stage stall seen in the four earlier jobs, two of which ended `engine_timeout` and "
               "two `internal_error`."]
+    acts = json.loads((R / "acts.json").read_text(encoding="utf-8")) if (R / "acts.json").exists() else None
+    acts_ab = json.loads((R / "acts_ab.json").read_text(encoding="utf-8")) if (R / "acts_ab.json").exists() else {}
+    if acts:
+        p = acts["params"]
+        L += ["", "### Track echo rendered on Atlas (per act)", "",
+              "Each act's cooking-stem segment went through `retrocausal-echo-v1` with `ir` = that act's measured "
+              f"`otoc-echo-v1` n = 12 trajectory (`core/retro_acts.py`; decay {p['decay']}, negative_mode "
+              f"{p['negative_mode']}, min_level {p['min_level']}, master_ms {p['master_ms']} = 32 sixteenth-note "
+              f"steps at 90 bpm, mix {p['mix']} wet only, emit {p['emit']}). The three jobs were submitted in "
+              "parallel. The A/B columns compare each engine render with `dsp.tap_ir` on the same segment and IR "
+              "(`measurements/retro/acts_ab.json`).", "",
+              "| act | IR (otoc-echo-v1 job) | retrocausal job | status | engine s | bus_gain | waveform xcorr | "
+              "envelope corr | log-spectral dist dB |", "|---|---|---|---|---|---|---|---|---|"]
+        for name, r in acts["acts"].items():
+            ab_r = acts_ab.get(name, {})
+            L.append(f"| {name} | `{r['ir_job_id'][:8]}` | `{(r.get('job_id') or '')[:8]}` | {r.get('status')} | "
+                     f"{fmt(r.get('seconds'))} | {fmt(ab_r.get('bus_gain'))} | {fmt(ab_r.get('waveform_xcorr_max'))} | "
+                     f"{fmt(ab_r.get('envelope_corr'))} | {fmt(ab_r.get('log_spectral_distance_db'))} |")
+        L += ["", "The engine power-normalises each render's tap bus (`tap_map.bus_norm: power`; `bus_gain` is "
+              "1/sqrt(sum of squared tap levels)). That normalisation would erase the act-to-act contrast the "
+              "measurement produces, so `core/arrange.py` divides the reported `bus_gain` (and n = 12) back out "
+              "and applies one common echo gain to all three acts. After that the engine/local level ratio is "
+              "within about 2 dB across acts, and the mastered act loudness matches the local-render mix to "
+              "within 0.3 LU. The engine's per-tap rendering differs in detail from `core/dsp.py` (engine-side "
+              "grain and pan handling), which shows most in the scrambling act's many inverted taps. With "
+              "`--echo engine` (the default) the track's echo layer is these three engine renders; `--echo local` "
+              "reproduces the earlier local render. `out/piece/track_manifest.json` records the renderer per act."]
     if ab:
         L += ["", f"A/B against the local render (`measurements/retro/ab.json`): waveform cross-correlation "
               f"{ab['waveform_xcorr_max']:.2f}, envelope correlation {ab['envelope_corr']:.2f}, "
               f"log-spectral distance {ab['log_spectral_distance_db']:.1f} dB "
               f"(engine output {ab['engine_seconds']:.2f} s vs local {ab['local_seconds']:.2f} s). Same spectrum "
               "and envelope, but not sample-identical, so the engine's tap rendering differs in detail from "
-              "`core/dsp.py`. The engine output arrived after the track was mixed: the track's echo layer is "
-              "still the local render, as `out/piece/track_manifest.json` and the end card state."]
+              "`core/dsp.py`."]
     else:
         L += ["", "No `retrocausal-echo-v1` output completed, so there is no A/B. The track's echo layer is the "
               "local render of the same documented tap mapping (`core/dsp.py`). `out/piece/track_manifest.json` "

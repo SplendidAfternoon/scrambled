@@ -40,11 +40,11 @@ ROLE = {
                       "extra/qdrive/front_circuits.png, extra/qdrive/out/"),
     "tessa-image-v1": ("Attempted for game sprites; every job ended in engine_timeout.",
                        "web/public/data/sprites.json, extra/README.md"),
-    "retrocausal-echo-v1": ("Renders the measured tap map as audio. Early jobs stalled or failed; one 8 s "
-                            "clip completed (job e10a5f6a) after the track was mixed and is A/B'd against the "
-                            "local render. The track uses the documented local render.",
-                            "measurements/retro/fresh_attempt.json, measurements/retro/ab.json, "
-                            "measurements/retro/status_log.jsonl"),
+    "retrocausal-echo-v1": ("Renders the track's echo layer: each act's stem segment through that act's measured "
+                            "otoc-echo-v1 IR (control 45dddb1f, gentle cb1d37e3, scrambling 4c4e6d2a). An 8 s "
+                            "test clip (e10a5f6a) came first; early jobs stalled or failed.",
+                            "measurements/retro/acts.json, measurements/retro/acts_ab.json, "
+                            "out/piece/track_manifest.json"),
 }
 
 

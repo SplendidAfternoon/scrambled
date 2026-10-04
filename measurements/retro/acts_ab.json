@@ -1,0 +1,26 @@
+{
+  "control": {
+    "job_id": "45dddb1f-041e-4884-9c8c-5ba59b7070ee",
+    "waveform_xcorr_max": 0.821,
+    "envelope_corr": 0.972,
+    "log_spectral_distance_db": 4.48,
+    "bus_gain": 0.052778,
+    "rms_ratio_after_bus_gain": 11.35
+  },
+  "lowx": {
+    "job_id": "cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee",
+    "waveform_xcorr_max": 0.826,
+    "envelope_corr": 0.931,
+    "log_spectral_distance_db": 1.11,
+    "bus_gain": 0.100873,
+    "rms_ratio_after_bus_gain": 9.02
+  },
+  "scrambling": {
+    "job_id": "4c4e6d2a-1877-44a0-8a38-efe2921ecfa6",
+    "waveform_xcorr_max": 0.681,
+    "envelope_corr": 0.692,
+    "log_spectral_distance_db": 3.11,
+    "bus_gain": 0.14953,
+    "rms_ratio_after_bus_gain": 9.57
+  }
+}

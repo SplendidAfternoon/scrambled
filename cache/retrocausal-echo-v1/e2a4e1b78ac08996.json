@@ -1,0 +1,50 @@
+{
+  "engine_id": "retrocausal-echo-v1",
+  "params": {
+    "min_level": 0.02,
+    "decay": 1.0,
+    "master_ms": 5333,
+    "negative_mode": "invert",
+    "mix": 1.0,
+    "include_tap_map": true,
+    "emit": "audio"
+  },
+  "input_files": {
+    "audio": "d5c05070-8293-4102-ab9f-b61a7db4d9a6",
+    "ir": "22e8392b-b422-42fa-9806-622507ea5d81"
+  },
+  "job_id": "cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee",
+  "seconds": 65.8,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "ir",
+        "output_asset_id": "3bc2f2b6-08f5-4871-9ba5-b2ce8cfa439e",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee/outputs/ir?<signature-removed>",
+        "expires_at": "2026-10-04T18:23:24.416044243Z",
+        "content_type": "application/json",
+        "filename": "retrocausal-echo-v1-cb1d37e3-ir.json",
+        "size_bytes": 84933
+      },
+      {
+        "slot": "result",
+        "output_asset_id": "d167a876-213f-499f-8167-01745e81d5df",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee/result?<signature-removed>",
+        "expires_at": "2026-10-04T18:23:24.416130912Z",
+        "content_type": "audio/wav",
+        "filename": "retrocausal-echo-v1-cb1d37e3-result.wav",
+        "size_bytes": 5478380
+      },
+      {
+        "slot": "taps",
+        "output_asset_id": "4c1e5a09-ec20-4b67-8b0a-b1442f0bcb76",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee/outputs/taps?<signature-removed>",
+        "expires_at": "2026-10-04T18:23:24.416287974Z",
+        "content_type": "application/json",
+        "filename": "retrocausal-echo-v1-cb1d37e3-taps.json",
+        "size_bytes": 45390
+      }
+    ]
+  }
+}

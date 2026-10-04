@@ -1,0 +1,79 @@
+{
+  "engine": "retrocausal-echo-v1",
+  "params": {
+    "min_level": 0.02,
+    "decay": 1.0,
+    "master_ms": 5333,
+    "negative_mode": "invert",
+    "mix": 1.0,
+    "include_tap_map": true,
+    "emit": "audio"
+  },
+  "checked": "2026-10-05T02:08:34",
+  "acts": {
+    "control": {
+      "act": "control",
+      "run": "control_clifford_n12",
+      "ir_job_id": "89c7f269-9a0c-473a-936d-a0ac2a08aa77",
+      "cache_key": "558065b3213f6325",
+      "job_id": "45dddb1f-041e-4884-9c8c-5ba59b7070ee",
+      "status": "completed",
+      "progress": "Writing WAV",
+      "error": null,
+      "seconds": 66.2,
+      "outputs": {
+        "ir": "renders\\core\\retro\\acts\\45dddb1f_ir_retrocausal-echo-v1-45dddb1f-ir.json",
+        "result": "renders\\core\\retro\\acts\\45dddb1f_result_retrocausal-echo-v1-45dddb1f-result.wav",
+        "taps": "renders\\core\\retro\\acts\\45dddb1f_taps_retrocausal-echo-v1-45dddb1f-taps.json"
+      }
+    },
+    "lowx": {
+      "act": "lowx",
+      "run": "lowx_n12",
+      "ir_job_id": "6e5e76ef-0227-4f18-8b78-fadef0b48ae9",
+      "cache_key": "e2a4e1b78ac08996",
+      "job_id": "cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee",
+      "status": "completed",
+      "progress": "Writing WAV",
+      "error": null,
+      "seconds": 65.8,
+      "outputs": {
+        "ir": "renders\\core\\retro\\acts\\cb1d37e3_ir_retrocausal-echo-v1-cb1d37e3-ir.json",
+        "result": "renders\\core\\retro\\acts\\cb1d37e3_result_retrocausal-echo-v1-cb1d37e3-result.wav",
+        "taps": "renders\\core\\retro\\acts\\cb1d37e3_taps_retrocausal-echo-v1-cb1d37e3-taps.json"
+      }
+    },
+    "scrambling": {
+      "act": "scrambling",
+      "run": "scrambling_n12",
+      "ir_job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c",
+      "cache_key": "bd76e0f861206bee",
+      "job_id": "4c4e6d2a-1877-44a0-8a38-efe2921ecfa6",
+      "status": "completed",
+      "progress": "Writing WAV",
+      "error": null,
+      "seconds": 66.7,
+      "outputs": {
+        "ir": "renders\\core\\retro\\acts\\4c4e6d2a_ir_retrocausal-echo-v1-4c4e6d2a-ir.json",
+        "result": "renders\\core\\retro\\acts\\4c4e6d2a_result_retrocausal-echo-v1-4c4e6d2a-result.wav",
+        "taps": "renders\\core\\retro\\acts\\4c4e6d2a_taps_retrocausal-echo-v1-4c4e6d2a-taps.json"
+      }
+    }
+  },
+  "history": [
+    {
+      "control": [
+        "45dddb1f-041e-4884-9c8c-5ba59b7070ee",
+        "completed"
+      ],
+      "lowx": [
+        "cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee",
+        "completed"
+      ],
+      "scrambling": [
+        "4c4e6d2a-1877-44a0-8a38-efe2921ecfa6",
+        "completed"
+      ]
+    }
+  ]
+}

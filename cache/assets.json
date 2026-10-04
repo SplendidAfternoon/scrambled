@@ -122,5 +122,13 @@
   "a02a4470bae57ca183936c414b5e416bf44f69e48088efaaa16c19cd1f92a4d9": {
     "asset_id": "5c7f6b81-0eed-4202-87ac-7a40f0173370",
     "file": "tessa_input_A_64.png"
+  },
+  "9fea1c8f782d2d19d04ced06326798ef68e8498779787e7c03817086b98175e6": {
+    "asset_id": "d5c05070-8293-4102-ab9f-b61a7db4d9a6",
+    "file": "dry_lowx.wav"
+  },
+  "af8db18560e624d1b6aa024d0d46af493788947775edf2296f3520713a1409dd": {
+    "asset_id": "22e8392b-b422-42fa-9806-622507ea5d81",
+    "file": "ir_lowx_n12.json"
   }
 }

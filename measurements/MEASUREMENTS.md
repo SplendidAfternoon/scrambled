@@ -97,4 +97,16 @@ Earlier `retrocausal-echo-v1` jobs, polled every 2 min by `core/retro_poll.py` (
 
 Fresh attempt (`core/retro_submit.py`, 8 s clip through the measured n = 12 scrambling IR): **completed** after 5 failed submission(s), job `e10a5f6a-51fd-4ac6-87f4-64b66fc568e7`.
 
-A/B against the local render (`measurements/retro/ab.json`): waveform cross-correlation 0.65, envelope correlation 0.83, log-spectral distance 1.1 dB (engine output 13.53 s vs local 13.33 s). Same spectrum and envelope, but not sample-identical, so the engine's tap rendering differs in detail from `core/dsp.py`. The engine output arrived after the track was mixed: the track's echo layer is still the local render, as `out/piece/track_manifest.json` and the end card state.
+### Track echo rendered on Atlas (per act)
+
+Each act's cooking-stem segment went through `retrocausal-echo-v1` with `ir` = that act's measured `otoc-echo-v1` n = 12 trajectory (`core/retro_acts.py`; decay 1.0, negative_mode invert, min_level 0.02, master_ms 5333 = 32 sixteenth-note steps at 90 bpm, mix 1.0 wet only, emit audio). The three jobs were submitted in parallel. The A/B columns compare each engine render with `dsp.tap_ir` on the same segment and IR (`measurements/retro/acts_ab.json`).
+
+| act | IR (otoc-echo-v1 job) | retrocausal job | status | engine s | bus_gain | waveform xcorr | envelope corr | log-spectral dist dB |
+|---|---|---|---|---|---|---|---|---|
+| control | `89c7f269` | `45dddb1f` | completed | 66.2 | 0.052778 | 0.821 | 0.972 | 4.48 |
+| lowx | `6e5e76ef` | `cb1d37e3` | completed | 65.8 | 0.100873 | 0.826 | 0.931 | 1.11 |
+| scrambling | `8df5cfa2` | `4c4e6d2a` | completed | 66.7 | 0.14953 | 0.681 | 0.692 | 3.11 |
+
+The engine power-normalises each render's tap bus (`tap_map.bus_norm: power`; `bus_gain` is 1/sqrt(sum of squared tap levels)). That normalisation would erase the act-to-act contrast the measurement produces, so `core/arrange.py` divides the reported `bus_gain` (and n = 12) back out and applies one common echo gain to all three acts. After that the engine/local level ratio is within about 2 dB across acts, and the mastered act loudness matches the local-render mix to within 0.3 LU. The engine's per-tap rendering differs in detail from `core/dsp.py` (engine-side grain and pan handling), which shows most in the scrambling act's many inverted taps. With `--echo engine` (the default) the track's echo layer is these three engine renders; `--echo local` reproduces the earlier local render. `out/piece/track_manifest.json` records the renderer per act.
+
+A/B against the local render (`measurements/retro/ab.json`): waveform cross-correlation 0.65, envelope correlation 0.83, log-spectral distance 1.1 dB (engine output 13.53 s vs local 13.33 s). Same spectrum and envelope, but not sample-identical, so the engine's tap rendering differs in detail from `core/dsp.py`.

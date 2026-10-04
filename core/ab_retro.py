@@ -64,5 +64,36 @@ def main():
     return res
 
 
+def acts():
+    """Per act: the engine's wet render (core/retro_acts.py) vs dsp.tap_ir on the same dry segment and IR."""
+    from timeline import STEP_S
+    st = json.loads((ROOT / "measurements" / "retro" / "acts.json").read_text(encoding="utf-8"))
+    res = {}
+    for name, r in st["acts"].items():
+        if r.get("status") != "completed":
+            continue
+        e, sr = sf.read(ROOT / r["outputs"]["result"], always_2d=True)
+        x, _ = sf.read(RETRO / "acts" / f"dry_{name}.wav")
+        F, _ = F_of(r["run"])
+        F = np.where(np.abs(F) >= st["params"]["min_level"], F, 0)
+        loc = dsp.convolve_stereo(x, dsp.tap_ir(F, STEP_S, decay=st["params"]["decay"]))
+        n = min(len(e), len(loc))
+        em, lm = e[:n].mean(axis=1), loc[:n].mean(axis=1)
+        lag = int(0.05 * sr)
+        xc = correlate(em, lm, mode="full")[n - 1 - lag:n + lag] / (np.linalg.norm(em) * np.linalg.norm(lm) + 1e-12)
+        _, pe = welch(em, sr, nperseg=4096)
+        _, pl = welch(lm, sr, nperseg=4096)
+        bus = json.loads((ROOT / r["outputs"]["taps"]).read_text(encoding="utf-8"))["extras"]["tap_map"]["bus_gain"]
+        res[name] = {"job_id": r["job_id"], "waveform_xcorr_max": round(float(np.abs(xc).max()), 3),
+                     "envelope_corr": round(float(np.corrcoef(env(e[:n], sr), env(loc[:n], sr))[0, 1]), 3),
+                     "log_spectral_distance_db": round(float(np.sqrt(np.mean(
+                         (10 * np.log10((pe + 1e-15) / (pl + 1e-15))) ** 2))), 2),
+                     "bus_gain": bus,
+                     "rms_ratio_after_bus_gain": round(float(np.sqrt(((e[:n] / bus) ** 2).mean() / (loc[:n] ** 2).mean())), 2)}
+    (ROOT / "measurements" / "retro" / "acts_ab.json").write_text(json.dumps(res, indent=2), encoding="utf-8")
+    print(json.dumps(res, indent=2))
+    return res
+
+
 if __name__ == "__main__":
-    main()
+    acts() if "--acts" in sys.argv else main()

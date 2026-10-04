@@ -305,8 +305,9 @@ def render(allow_classical=False, audio=None, out=None, t_range=None):
            "-r", str(FPS), "-i", "-", "-ss", f"{n0 / FPS}", "-i", str(audio),
            "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "slow", "-crf", "17",
            "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-           "-af", "volume=-0.3dB",  # AAC encoding overshoots the WAV's -1.05 dBTP by ~0.2 dB
-           "-c:a", "aac", "-b:a", "256k", "-shortest",
+           # the native AAC encoder's default lowpass rings by ~2 dB on the stem's sharpest clank (scrambling act);
+           # an explicit 20 kHz cutoff plus a 0.3 dB trim keeps the mp4 at <= -1 dBTP like the WAV
+           "-af", "volume=-0.3dB", "-c:a", "aac", "-b:a", "320k", "-cutoff", "20000", "-shortest",
            "-metadata", "title=SCRAMBLED", str(out)]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     for i in range(n0, n1):

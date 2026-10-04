@@ -1,13 +1,15 @@
 """Arrange the SCRAMBLED track (classical mixing of quantum-derived material) -> out/piece/scrambled_track.wav/.mp3.
 
 Layers per act (timeline.py):
-  echo   : the cooking stem convolved with a tap map built from that act's measured F(site, t) (dsp.tap_ir).
-           One common gain for all acts, so the physics sets the contrast: the Clifford control returns loud,
-           regular echoes; the scrambling run's taps invert and cancel, leaving a quiet diffuse wash.
+  echo   : the act's cooking-stem segment through a tap map built from that act's measured F(site, t).
+           --echo engine (default when renders exist): the wet output of retrocausal-echo-v1 on Atlas
+           (core/retro_acts.py, measurements/retro/acts.json). The engine power-normalises each render's bus; its
+           reported bus_gain is divided back out so all acts share one gain. --echo local: the same mapping
+           rendered here (dsp.tap_ir). Either way one common gain, so the physics sets the contrast: the
+           Clifford control returns loud, regular echoes; the scrambling run's taps invert and cancel.
   melody : the qrc-midi-v1 re-sequenced seed melody, blurred by blur-midi-v1 with that act's F-derived
            strength, rendered by core/synth.py. The same melody each act, increasingly smeared.
   drone  : a soft D/A pad under the whole piece (classical, constant).
-If retrocausal-echo-v1 outputs exist (renders/core/retro/*.wav) they are reported for A/B by core/ab_retro.py.
 """
 import json
 import subprocess
@@ -50,6 +52,28 @@ def place(buf, x, t0):
     buf[a:a + len(x)] += x
 
 
+ENGINE_ACTS = ROOT / "measurements" / "retro" / "acts.json"
+ENGINE_DECAY = 1.0     # the engine renders were made with decay 1.0 (core/retro_acts.py)
+
+
+def engine_wet(name, run, dry):
+    """retrocausal-echo-v1's wet render for this act on the local tap scale (level Re F / n), or None."""
+    if not ENGINE_ACTS.exists():
+        return None, None
+    r = json.loads(ENGINE_ACTS.read_text(encoding="utf-8"))["acts"].get(name)
+    if not r or r.get("status") != "completed" or r.get("run") != run:
+        return None, None
+    sent, _ = sf.read(ROOT / "renders" / "core" / "retro" / "acts" / f"dry_{name}.wav")
+    if len(sent) != len(dry) or np.abs(sent - dry).max() > 1e-4:
+        return None, None      # stem window changed since the render: fall back to local
+    e, sr = sf.read(ROOT / r["outputs"]["result"], always_2d=True)
+    assert sr == SR, sr
+    tm = json.loads((ROOT / r["outputs"]["taps"]).read_text(encoding="utf-8"))["extras"]["tap_map"]
+    n_sites = json.loads((ROOT / r["outputs"]["taps"]).read_text(encoding="utf-8"))["extras"]["spec"]["n_sites"]
+    return e / tm["bus_gain"] / n_sites, {"job_id": r["job_id"], "bus_gain": tm["bus_gain"],
+                                          "params": json.loads(ENGINE_ACTS.read_text(encoding="utf-8"))["params"]}
+
+
 def act_midi(act):
     idx = json.loads((MIDI / "index.json").read_text(encoding="utf-8"))
     if act in idx:
@@ -57,19 +81,21 @@ def act_midi(act):
     return None, None
 
 
-def build(allow_classical=False):
+LOCAL_RENDERER = "local tap-map convolution (core/dsp.py tap_ir, the documented retrocausal-echo-v1 mapping)"
+
+
+def build(allow_classical=False, echo="engine"):
     dry_all = stem()
     total = np.zeros((int(DURATION * SR) + SR, 2))
     melody_bus = np.zeros_like(total)
-    manifest = {"echo_renderer": "local tap-map convolution (core/dsp.py tap_ir), the documented "
-                                 "retrocausal-echo-v1 mapping; retrocausal-echo-v1 itself did not complete "
-                                 "(measurements/retro/)",
-                "sources": {}, "midi": {}, "gains": {}}
+    manifest = {"echo_mode": echo, "echo_renderer": {}, "sources": {}, "midi": {}, "gains": {}}
 
     # common echo gain: normalise by the control tap map's total signed weight, so 1.0 = "everything returns"
     Fc, _ = F_of("control_clifford_n12")
     g_echo = ECHO_SUM / np.abs(dsp.tap_ir(Fc, STEP_S, decay=ECHO_DECAY)).sum(axis=0).max()
+    g_engine = ECHO_SUM / np.abs(dsp.tap_ir(Fc, STEP_S, decay=ENGINE_DECAY)).sum(axis=0).max()
     manifest["gains"]["echo"] = float(g_echo)
+    manifest["gains"]["echo_engine"] = float(g_engine)
 
     acts = []
     for name, t0, t1, run in SEGMENTS:
@@ -85,8 +111,19 @@ def build(allow_classical=False):
             continue
         F, ex = F_of(run, allow_classical=allow_classical)
         manifest["sources"][name] = {"run": run, "source": ex["source"], "job_id": ex.get("job_id")}
-        ir = dsp.tap_ir(F, STEP_S, decay=ECHO_DECAY) * g_echo
-        wet = dsp.convolve_stereo(dry, ir)[: int((seg_len + TAIL_S) * SR)]
+        eng, info = engine_wet(name, run, dry) if echo == "engine" else (None, None)
+        if eng is not None:
+            wet = eng[: int((seg_len + TAIL_S) * SR)] * g_engine
+            manifest["echo_renderer"][name] = {
+                "renderer": "retrocausal-echo-v1 (Moth Atlas; IR = this act's otoc-echo-v1 aer measurement)",
+                **info, "ir_job_id": ex.get("job_id"),
+                "level_scale": "engine output / reported bus_gain / n_sites, then the common echo gain"}
+        else:
+            ir = dsp.tap_ir(F, STEP_S, decay=ECHO_DECAY) * g_echo
+            wet = dsp.convolve_stereo(dry, ir)[: int((seg_len + TAIL_S) * SR)]
+            manifest["echo_renderer"][name] = {"renderer": LOCAL_RENDERER, "ir_job_id": ex.get("job_id")}
+        if len(wet) < int((seg_len + TAIL_S) * SR):
+            wet = np.pad(wet, ((0, int((seg_len + TAIL_S) * SR) - len(wet)), (0, 0)))
         wet = sosfiltfilt(ECHO_HP, wet, axis=0)
         part = np.zeros_like(wet)
         part[: len(dry_st)] += 0.42 * dry_st[: len(part)]
@@ -135,9 +172,9 @@ def build(allow_classical=False):
     return mastered, manifest
 
 
-def main(allow_classical=False):
+def main(allow_classical=False, echo="engine"):
     OUT.mkdir(parents=True, exist_ok=True)
-    y, manifest = build(allow_classical)
+    y, manifest = build(allow_classical, echo)
     wav = OUT / "scrambled_track.wav"
     sf.write(wav, y, SR, subtype="PCM_24")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(wav), "-codec:a", "libmp3lame", "-b:a", "320k",
@@ -149,4 +186,5 @@ def main(allow_classical=False):
 
 
 if __name__ == "__main__":
-    main(allow_classical="--allow-classical" in sys.argv)
+    main(allow_classical="--allow-classical" in sys.argv,
+         echo=sys.argv[sys.argv.index("--echo") + 1] if "--echo" in sys.argv else "engine")

@@ -1,5 +1,55 @@
 {
-  "echo_renderer": "local tap-map convolution (core/dsp.py tap_ir), the documented retrocausal-echo-v1 mapping; retrocausal-echo-v1 itself did not complete (measurements/retro/)",
+  "echo_mode": "engine",
+  "echo_renderer": {
+    "control": {
+      "renderer": "retrocausal-echo-v1 (Moth Atlas; IR = this act's otoc-echo-v1 aer measurement)",
+      "job_id": "45dddb1f-041e-4884-9c8c-5ba59b7070ee",
+      "bus_gain": 0.052778,
+      "params": {
+        "min_level": 0.02,
+        "decay": 1.0,
+        "master_ms": 5333,
+        "negative_mode": "invert",
+        "mix": 1.0,
+        "include_tap_map": true,
+        "emit": "audio"
+      },
+      "ir_job_id": "89c7f269-9a0c-473a-936d-a0ac2a08aa77",
+      "level_scale": "engine output / reported bus_gain / n_sites, then the common echo gain"
+    },
+    "lowx": {
+      "renderer": "retrocausal-echo-v1 (Moth Atlas; IR = this act's otoc-echo-v1 aer measurement)",
+      "job_id": "cb1d37e3-6b9c-4f92-bf5f-bb1c2c5e61ee",
+      "bus_gain": 0.100873,
+      "params": {
+        "min_level": 0.02,
+        "decay": 1.0,
+        "master_ms": 5333,
+        "negative_mode": "invert",
+        "mix": 1.0,
+        "include_tap_map": true,
+        "emit": "audio"
+      },
+      "ir_job_id": "6e5e76ef-0227-4f18-8b78-fadef0b48ae9",
+      "level_scale": "engine output / reported bus_gain / n_sites, then the common echo gain"
+    },
+    "scrambling": {
+      "renderer": "retrocausal-echo-v1 (Moth Atlas; IR = this act's otoc-echo-v1 aer measurement)",
+      "job_id": "4c4e6d2a-1877-44a0-8a38-efe2921ecfa6",
+      "bus_gain": 0.14953,
+      "params": {
+        "min_level": 0.02,
+        "decay": 1.0,
+        "master_ms": 5333,
+        "negative_mode": "invert",
+        "mix": 1.0,
+        "include_tap_map": true,
+        "emit": "audio"
+      },
+      "ir_job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c",
+      "level_scale": "engine output / reported bus_gain / n_sites, then the common echo gain"
+    }
+  },
   "sources": {
     "control": {
       "run": "control_clifford_n12",
@@ -66,9 +116,10 @@
   },
   "gains": {
     "echo": 0.3085566500489268,
-    "level_control": -1.16,
-    "level_lowx": 0.24,
-    "level_scrambling": 0.91
+    "echo_engine": 0.19413731172307638,
+    "level_control": -1.18,
+    "level_lowx": 0.39,
+    "level_scrambling": 0.79
   },
   "loudness_lufs": -14.11,
   "true_peak_dbtp": -1.05,
