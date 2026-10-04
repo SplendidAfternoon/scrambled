@@ -35,6 +35,13 @@
       "at_s": 26862
     }
   ],
-  "status": "failed_or_timeout",
-  "waited_s": 26862
+  "status": "completed",
+  "waited_s": 26862,
+  "job_id": "e10a5f6a-51fd-4ac6-87f4-64b66fc568e7",
+  "seconds": 39.2,
+  "outputs": {
+    "ir": "renders\\core\\retro\\e10a5f6a_ir_retrocausal-echo-v1-e10a5f6a-ir.json",
+    "result": "renders\\core\\retro\\e10a5f6a_result_retrocausal-echo-v1-e10a5f6a-result.wav",
+    "taps": "renders\\core\\retro\\e10a5f6a_taps_retrocausal-echo-v1-e10a5f6a-taps.json"
+  }
 }

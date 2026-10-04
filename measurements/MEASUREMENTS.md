@@ -95,8 +95,6 @@ Earlier `retrocausal-echo-v1` jobs, polled every 2 min by `core/retro_poll.py` (
 | `bc6516c5-c5c5-430d-a66a-fa2785a8ceb4` | failed | `engine_timeout` The engine did not respond in time — retry the job | Rendering 26.6s through 348 taps | 2026-10-03T19:25:37+00:00 |
 | `c4eefe4b-402a-4da8-8f54-259114c39e3f` | failed | `engine_timeout` The engine did not respond in time — retry the job | Building the tap map | 2026-10-03T19:25:38+00:00 |
 
-Fresh attempt (`core/retro_submit.py`, 8 s clip through the measured n = 12 scrambling IR): **failed_or_timeout** after 1 failed submission(s).
+Fresh attempt (`core/retro_submit.py`, 8 s clip through the measured n = 12 scrambling IR): **completed** after 5 failed submission(s), job `e10a5f6a-51fd-4ac6-87f4-64b66fc568e7`.
 
-Its next submission, `e3e80d2b-9d0f-4aed-a40e-e35bb37485e1`, was still `processing` at 2026-10-03T20:42:26+00:00 UTC, stuck at "Building the tap map" since 2026-10-03T19:30:33Z. That is the same render-stage stall seen in the four earlier jobs, two of which ended `engine_timeout` and two `internal_error`.
-
-No `retrocausal-echo-v1` output completed, so there is no A/B. The track's echo layer is the local render of the same documented tap mapping (`core/dsp.py`). `out/piece/track_manifest.json` records this, and the end card credits the mixing as classical.
+A/B against the local render (`measurements/retro/ab.json`): waveform cross-correlation 0.65, envelope correlation 0.83, log-spectral distance 1.1 dB (engine output 13.53 s vs local 13.33 s). Same spectrum and envelope, but not sample-identical, so the engine's tap rendering differs in detail from `core/dsp.py`. The engine output arrived after the track was mixed: the track's echo layer is still the local render, as `out/piece/track_manifest.json` and the end card state.

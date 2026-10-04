@@ -1,0 +1,50 @@
+{
+  "engine_id": "retrocausal-echo-v1",
+  "params": {
+    "min_level": 0.02,
+    "decay": 1.0,
+    "master_ms": 5333,
+    "negative_mode": "invert",
+    "mix": 0.6,
+    "include_tap_map": true,
+    "emit": "audio"
+  },
+  "input_files": {
+    "audio": "60bff4d8-0967-4073-9ec3-f8ca34946e34",
+    "ir": "11e52d63-d6e0-4ff8-950f-fb05fd38f8d2"
+  },
+  "job_id": "e10a5f6a-51fd-4ac6-87f4-64b66fc568e7",
+  "seconds": 39.2,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "ir",
+        "output_asset_id": "df01184f-26f4-4118-b802-bdb95b57cf90",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/e10a5f6a-51fd-4ac6-87f4-64b66fc568e7/outputs/ir?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA6G75DOFZ4ZELFQV3%2F20261004%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261004T174153Z&X-Amz-Expires=900&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAIaCXVzLWVhc3QtMSJGMEQCIFV37MGPoFOj8XH%2FMFRAAaecXOFe4Yj0b%2FZ%2FaU7wx3W5AiB0BA%2BOCYtGkfW9qglIDGZTJW%2Balu8Qzeyo6EGC0aQ7KSqlBQjL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDk3NzA5ODk5NDAzNSIM1i1hCIJdku%2F3SkSfKvkEnDnCsZxanZemCbCVD5Qv3DRfi9CTd7wpvCW%2FFVSIj5hgy4OThcU36VgGbAG8vDMbWFLeQdemgooJykilXE2aJ6cgubMF5hSaZp3sqICzG3eWr4wYRP7bocP6WQU7FwAy1RFG1ZVadiPkDjJmquyMnQ7lpk%2Fcww8wEZoJUUDVcGssCB9a14diP8wXEtqMKc02pq9qr7RUSC7t%2BQqCF6%2Bzcre5qsDUatA1hPMWSUtwFL2tE1bbstuP0vmke7gXEvGqtLX77EHXAaC2%2BsGRDTnUFzwzll6PGjHbjnIlTeqzn8GP18P4pCdf9Qn5UwUN0dnyVbX00LZyQujqKZsV1xcx%2BybaIhQbt3XAMarbr%2BDqGalgbBxX0SmwQToHrDZ1sMohVDgZs6AWM4MbM1AyBpIBMJAL144jIPLpzMLji%2FrEXqveghZyH%2F1skiun2l9m68O%2F4%2FKCkx3e87uA1oUIEPlgNkswbLi4UngydpOeUypaf6WDlYz%2B12G07L4vqY0L%2BOL9SiIFk%2BcqHC60ECy4xmb%2FT%2B95QWCZ1omp9V%2BVQrI%2F0pGLeTyHG8Z5LhnyH6KuO1LW3eSECyHbWNCuIEoZNmzOvqUbY1A8Jbd%2BPYSOYSDAXhv2UHS%2BIq3C6VlAOxAISU3uPAjk9SCoVRptypMPW%2BAkkEWNI6Dmxtvi0JFQS7BIpzdZ4J1WaPCBbVH20vOnYt36a2sJQRnEBXK3paz7ni35VnELAz4Uo7Se2BBAXhojnbrkLy7irmaCS2mVhRaaEh0eYJE2%2BNl3DjNOWOwdaHhc8UHfnzxZgC3lFa7EnSlJZsjHVad5wBlg1j1hG0tjbRDW8WWBRQRoIhe4MLyfitYGOpEBg6aRJQYPSopKB6lLbIDrsSuLGYvo%2FjooQ8CScjtKWqcjEXXkQWKEAvYp9ObCOVRRZZdYhRFGokxXhYdN4xeaP8xVZnklPHx9PO896sbrZLto1U%2Bo0JhoQkEqD%2B7ZcfeZJ%2F%2FKo17xTvEC5%2BRV0PXoWLe8L7MfdQM9Qs72NoJvRLm7tbs5Hq523jYi7H%2FwX5fERQ%3D%3D&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22retrocausal-echo-v1-e10a5f6a-ir.json%22%3B%20filename%2A%3DUTF-8%27%27retrocausal-echo-v1-e10a5f6a-ir.json&response-content-type=application%2Fjson&x-id=GetObject&X-Amz-Signature=76bd8f2fbe96facb2a3b992e2a0df65f0f1f86759feee4cf49dbb9e0c08a9e23",
+        "expires_at": "2026-10-04T17:56:53.762273752Z",
+        "content_type": "application/json",
+        "filename": "retrocausal-echo-v1-e10a5f6a-ir.json",
+        "size_bytes": 85863
+      },
+      {
+        "slot": "result",
+        "output_asset_id": "2fc57b67-8d12-477a-a507-e3fd7a0defb0",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/e10a5f6a-51fd-4ac6-87f4-64b66fc568e7/result?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA6G75DOFZ4ZELFQV3%2F20261004%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261004T174153Z&X-Amz-Expires=900&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAIaCXVzLWVhc3QtMSJGMEQCIFV37MGPoFOj8XH%2FMFRAAaecXOFe4Yj0b%2FZ%2FaU7wx3W5AiB0BA%2BOCYtGkfW9qglIDGZTJW%2Balu8Qzeyo6EGC0aQ7KSqlBQjL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDk3NzA5ODk5NDAzNSIM1i1hCIJdku%2F3SkSfKvkEnDnCsZxanZemCbCVD5Qv3DRfi9CTd7wpvCW%2FFVSIj5hgy4OThcU36VgGbAG8vDMbWFLeQdemgooJykilXE2aJ6cgubMF5hSaZp3sqICzG3eWr4wYRP7bocP6WQU7FwAy1RFG1ZVadiPkDjJmquyMnQ7lpk%2Fcww8wEZoJUUDVcGssCB9a14diP8wXEtqMKc02pq9qr7RUSC7t%2BQqCF6%2Bzcre5qsDUatA1hPMWSUtwFL2tE1bbstuP0vmke7gXEvGqtLX77EHXAaC2%2BsGRDTnUFzwzll6PGjHbjnIlTeqzn8GP18P4pCdf9Qn5UwUN0dnyVbX00LZyQujqKZsV1xcx%2BybaIhQbt3XAMarbr%2BDqGalgbBxX0SmwQToHrDZ1sMohVDgZs6AWM4MbM1AyBpIBMJAL144jIPLpzMLji%2FrEXqveghZyH%2F1skiun2l9m68O%2F4%2FKCkx3e87uA1oUIEPlgNkswbLi4UngydpOeUypaf6WDlYz%2B12G07L4vqY0L%2BOL9SiIFk%2BcqHC60ECy4xmb%2FT%2B95QWCZ1omp9V%2BVQrI%2F0pGLeTyHG8Z5LhnyH6KuO1LW3eSECyHbWNCuIEoZNmzOvqUbY1A8Jbd%2BPYSOYSDAXhv2UHS%2BIq3C6VlAOxAISU3uPAjk9SCoVRptypMPW%2BAkkEWNI6Dmxtvi0JFQS7BIpzdZ4J1WaPCBbVH20vOnYt36a2sJQRnEBXK3paz7ni35VnELAz4Uo7Se2BBAXhojnbrkLy7irmaCS2mVhRaaEh0eYJE2%2BNl3DjNOWOwdaHhc8UHfnzxZgC3lFa7EnSlJZsjHVad5wBlg1j1hG0tjbRDW8WWBRQRoIhe4MLyfitYGOpEBg6aRJQYPSopKB6lLbIDrsSuLGYvo%2FjooQ8CScjtKWqcjEXXkQWKEAvYp9ObCOVRRZZdYhRFGokxXhYdN4xeaP8xVZnklPHx9PO896sbrZLto1U%2Bo0JhoQkEqD%2B7ZcfeZJ%2F%2FKo17xTvEC5%2BRV0PXoWLe8L7MfdQM9Qs72NoJvRLm7tbs5Hq523jYi7H%2FwX5fERQ%3D%3D&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22retrocausal-echo-v1-e10a5f6a-result.wav%22%3B%20filename%2A%3DUTF-8%27%27retrocausal-echo-v1-e10a5f6a-result.wav&response-content-type=audio%2Fwav&x-id=GetObject&X-Amz-Signature=ea61e70f9b3a06b0e79ca8af563459b7e38feef4d0e90f7f02f2b1cb14750623",
+        "expires_at": "2026-10-04T17:56:53.762514705Z",
+        "content_type": "audio/wav",
+        "filename": "retrocausal-echo-v1-e10a5f6a-result.wav",
+        "size_bytes": 2598380
+      },
+      {
+        "slot": "taps",
+        "output_asset_id": "2a75298e-aa0d-422d-8165-6ae77116e24c",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/e10a5f6a-51fd-4ac6-87f4-64b66fc568e7/outputs/taps?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=ASIA6G75DOFZ4ZELFQV3%2F20261004%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20261004T174153Z&X-Amz-Expires=900&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEAIaCXVzLWVhc3QtMSJGMEQCIFV37MGPoFOj8XH%2FMFRAAaecXOFe4Yj0b%2FZ%2FaU7wx3W5AiB0BA%2BOCYtGkfW9qglIDGZTJW%2Balu8Qzeyo6EGC0aQ7KSqlBQjL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDk3NzA5ODk5NDAzNSIM1i1hCIJdku%2F3SkSfKvkEnDnCsZxanZemCbCVD5Qv3DRfi9CTd7wpvCW%2FFVSIj5hgy4OThcU36VgGbAG8vDMbWFLeQdemgooJykilXE2aJ6cgubMF5hSaZp3sqICzG3eWr4wYRP7bocP6WQU7FwAy1RFG1ZVadiPkDjJmquyMnQ7lpk%2Fcww8wEZoJUUDVcGssCB9a14diP8wXEtqMKc02pq9qr7RUSC7t%2BQqCF6%2Bzcre5qsDUatA1hPMWSUtwFL2tE1bbstuP0vmke7gXEvGqtLX77EHXAaC2%2BsGRDTnUFzwzll6PGjHbjnIlTeqzn8GP18P4pCdf9Qn5UwUN0dnyVbX00LZyQujqKZsV1xcx%2BybaIhQbt3XAMarbr%2BDqGalgbBxX0SmwQToHrDZ1sMohVDgZs6AWM4MbM1AyBpIBMJAL144jIPLpzMLji%2FrEXqveghZyH%2F1skiun2l9m68O%2F4%2FKCkx3e87uA1oUIEPlgNkswbLi4UngydpOeUypaf6WDlYz%2B12G07L4vqY0L%2BOL9SiIFk%2BcqHC60ECy4xmb%2FT%2B95QWCZ1omp9V%2BVQrI%2F0pGLeTyHG8Z5LhnyH6KuO1LW3eSECyHbWNCuIEoZNmzOvqUbY1A8Jbd%2BPYSOYSDAXhv2UHS%2BIq3C6VlAOxAISU3uPAjk9SCoVRptypMPW%2BAkkEWNI6Dmxtvi0JFQS7BIpzdZ4J1WaPCBbVH20vOnYt36a2sJQRnEBXK3paz7ni35VnELAz4Uo7Se2BBAXhojnbrkLy7irmaCS2mVhRaaEh0eYJE2%2BNl3DjNOWOwdaHhc8UHfnzxZgC3lFa7EnSlJZsjHVad5wBlg1j1hG0tjbRDW8WWBRQRoIhe4MLyfitYGOpEBg6aRJQYPSopKB6lLbIDrsSuLGYvo%2FjooQ8CScjtKWqcjEXXkQWKEAvYp9ObCOVRRZZdYhRFGokxXhYdN4xeaP8xVZnklPHx9PO896sbrZLto1U%2Bo0JhoQkEqD%2B7ZcfeZJ%2F%2FKo17xTvEC5%2BRV0PXoWLe8L7MfdQM9Qs72NoJvRLm7tbs5Hq523jYi7H%2FwX5fERQ%3D%3D&X-Amz-SignedHeaders=host&response-content-disposition=attachment%3B%20filename%3D%22retrocausal-echo-v1-e10a5f6a-taps.json%22%3B%20filename%2A%3DUTF-8%27%27retrocausal-echo-v1-e10a5f6a-taps.json&response-content-type=application%2Fjson&x-id=GetObject&X-Amz-Signature=08635b38b2c083943460240cce4cfd602a9756c2c2df50ce619924fa486ba7d5",
+        "expires_at": "2026-10-04T17:56:53.762653389Z",
+        "content_type": "application/json",
+        "filename": "retrocausal-echo-v1-e10a5f6a-taps.json",
+        "size_bytes": 46633
+      }
+    ]
+  }
+}

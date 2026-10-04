@@ -15,3 +15,6 @@ three/frames/
 three/meshes/*.obj
 *.egg-info/
 .pytest_cache/
+submission/
+web/.env.local
+web/.vercel/

@@ -4,3 +4,5 @@ dist/
 scripts/tessa_raw/
 scripts/*.log
 __pycache__/
+.vercel
+.env*

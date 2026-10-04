@@ -215,7 +215,11 @@ def retro_md():
     if ab:
         L += ["", f"A/B against the local render (`measurements/retro/ab.json`): waveform cross-correlation "
               f"{ab['waveform_xcorr_max']:.2f}, envelope correlation {ab['envelope_corr']:.2f}, "
-              f"log-spectral distance {ab['log_spectral_distance_db']:.1f} dB."]
+              f"log-spectral distance {ab['log_spectral_distance_db']:.1f} dB "
+              f"(engine output {ab['engine_seconds']:.2f} s vs local {ab['local_seconds']:.2f} s). Same spectrum "
+              "and envelope, but not sample-identical, so the engine's tap rendering differs in detail from "
+              "`core/dsp.py`. The engine output arrived after the track was mixed: the track's echo layer is "
+              "still the local render, as `out/piece/track_manifest.json` and the end card state."]
     else:
         L += ["", "No `retrocausal-echo-v1` output completed, so there is no A/B. The track's echo layer is the "
               "local render of the same documented tap mapping (`core/dsp.py`). `out/piece/track_manifest.json` "

@@ -14,7 +14,7 @@ Produces `measurements/` (data, figures, `MEASUREMENTS.md`), `out/piece/` (the v
 | 6 | `arrange.py` | `out/piece/scrambled_track.wav/.mp3`, `track_manifest.json` | classical mix of quantum-derived material |
 | 7 | `piece.py` | `out/piece/scrambled_piece_v3.mp4`, `out/piece/stills/*.png` | classical compositing of `blur-v1` / `telablur-v1` frames driven by the measured F |
 | 8 | `engines_census.py` | `core/ENGINES.md` | n/a |
-| bg | `retro_poll.py`, `retro_submit.py`, `ab_retro.py` | `measurements/retro/` | `retrocausal-echo-v1` (did not complete; see below) |
+| bg | `retro_poll.py`, `retro_submit.py`, `ab_retro.py` | `measurements/retro/` | `retrocausal-echo-v1` (one 8 s clip completed late; see below) |
 
 Run from the repo root with `.venv\Scripts\python core\<script>.py` and ffmpeg on PATH. Every engine call goes through `moth.run`, which caches each completed job in `cache/<engine>/`. With `MODE=replay`, everything re-renders from that cache without the API.
 
@@ -54,4 +54,4 @@ The mix was checked by measurement (spectrogram and short-term loudness, `render
 
 ## Retrocausal echo
 
-Four `retrocausal-echo-v1` jobs from earlier in the project were polled the whole session (`retro_poll.py`, log in `measurements/retro/status_log.jsonl`). They stayed in `processing` with unchanged progress ("Rendering 26.6s through 348 taps", "Building the tap map", "waiting on aer …"). Fresh, smaller attempts (`retro_submit.py`, an 8 s clip through the measured n = 12 scrambling IR) are recorded in `measurements/retro/fresh_attempt.json`. If one completes, `ab_retro.py` compares it with the local render of the same clip and IR (`measurements/retro/ab.json`). Otherwise the track ships with the local render, labelled as such in `track_manifest.json` and the end card.
+Four `retrocausal-echo-v1` jobs from earlier in the project were polled the whole session (`retro_poll.py`, log in `measurements/retro/status_log.jsonl`). They stayed in `processing` with unchanged progress ("Rendering 26.6s through 348 taps", "Building the tap map", "waiting on aer …"). Fresh, smaller attempts (`retro_submit.py`, an 8 s clip through the measured n = 12 scrambling IR) are recorded in `measurements/retro/fresh_attempt.json`. After five failed submissions, job `e10a5f6a` completed. `ab_retro.py` compares it with the local render of the same clip and IR (`measurements/retro/ab.json`): waveform cross-correlation 0.65, envelope correlation 0.83, log-spectral distance 1.1 dB. The two are close but not sample-identical. It arrived after the track was mixed, so the track ships with the local render, labelled as such in `track_manifest.json` and the end card.

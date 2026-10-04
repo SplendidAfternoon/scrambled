@@ -1,0 +1,10 @@
+{
+  "engine_file": "renders\\core\\retro\\e10a5f6a_result_retrocausal-echo-v1-e10a5f6a-result.wav",
+  "local_file": "renders/core/retro/ab_local.wav",
+  "engine_seconds": 13.533,
+  "local_seconds": 13.333333333333334,
+  "waveform_xcorr_max": 0.6493552718069756,
+  "best_lag_ms": -0.16666666666666666,
+  "envelope_corr": 0.8253736687724269,
+  "log_spectral_distance_db": 1.079748349017464
+}
