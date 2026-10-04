@@ -1,0 +1,1377 @@
+{
+ "fetched": "2026-10-04 03:58 +0800",
+ "schemas": {
+  "otoc-echo-v1": {
+   "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+   "engine_id": "otoc-echo-v1",
+   "name": "Quantum Echo",
+   "description": "Perturb a scrambled qubit chain, reverse it, and listen for what returns \u2014 a signed, complex multi-tap delay map.",
+   "version": "0.1.2",
+   "owner": "fccf0d75-76b1-4059-93ab-e1267885289e",
+   "owner_type": "user",
+   "created_by": "fccf0d75-76b1-4059-93ab-e1267885289e",
+   "visibility": "public",
+   "queue": "",
+   "input_type": "application/json",
+   "output_type": "application/json",
+   "is_multipart": false,
+   "is_async": false,
+   "execution_mode": "handler",
+   "run_policy": {
+    "timeout": 7200,
+    "max_retries": 1,
+    "heartbeat": 3600
+   },
+   "params_schema": {
+    "properties": {
+     "allow_high_shots": {
+      "default": false,
+      "description": "Permit shots above 8192 (QPU time scales linearly).",
+      "title": "Allow High Shots",
+      "type": "boolean"
+     },
+     "depth": {
+      "default": 8,
+      "description": "Echo depths t = 1..depth \u2014 the tap time slots. Each circuit has 2\u00b7depth layers.",
+      "maximum": 32,
+      "minimum": 1,
+      "title": "Depth",
+      "type": "integer"
+     },
+     "disorder": {
+      "default": 0,
+      "description": "Additive per-gate angle jitter, std in radians. 0 = clean Floquet. Localises the echo; the only lever that makes `seed` matter.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Disorder",
+      "type": "number"
+     },
+     "exact": {
+      "default": true,
+      "description": "aer only: exact (infinite-shot) expectation values instead of sampling.",
+      "title": "Exact",
+      "type": "boolean"
+     },
+     "fractional_gates": {
+      "default": true,
+      "description": "Use native rzz/rx on hardware where available. Halves the forward half's two-qubit count; disables gate twirling.",
+      "title": "Fractional Gates",
+      "type": "boolean"
+     },
+     "height": {
+      "anyOf": [
+       {
+        "maximum": 32,
+        "minimum": 2,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Square lattice height. Required for `square`.",
+      "title": "Height"
+     },
+     "include_taps": {
+      "default": true,
+      "description": "Also emit a flattened tap list (site, depth, F_re, F_im, level, polarity) in extras.",
+      "title": "Include Taps",
+      "type": "boolean"
+     },
+     "include_z": {
+      "default": false,
+      "description": "Also measure <Z_i>, completing each site's Bloch vector. Free on aer; a third measurement basis (1.5x shots) on hardware.",
+      "title": "Include Z",
+      "type": "boolean"
+     },
+     "kick": {
+      "default": "Z",
+      "description": "Perturbation Pauli applied to the kick site between U and U\u2020.",
+      "enum": [
+       "Z",
+       "Y",
+       "X"
+      ],
+      "title": "Kick",
+      "type": "string"
+     },
+     "kick_site": {
+      "anyOf": [
+       {
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Regeneration source: the site that receives the impulse. Default: centre.",
+      "title": "Kick Site"
+     },
+     "lattice": {
+      "default": "chain",
+      "description": "Topology of the delay line. `chain`: site \u2192 pan. `square` (Nighthawk-native): x \u2192 pan, y \u2192 diffusion.",
+      "enum": [
+       "chain",
+       "square"
+      ],
+      "title": "Lattice",
+      "type": "string"
+     },
+     "machine": {
+      "default": "aer",
+      "description": "Backend: 'aer' (local, noiseless) or an IBM backend name such as 'ibm_phoenix'.",
+      "title": "Machine",
+      "type": "string"
+     },
+     "min_tap_level": {
+      "default": 0.02,
+      "description": "|F| threshold for the emitted tap list.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Min Tap Level",
+      "type": "number"
+     },
+     "n_sites": {
+      "default": 8,
+      "description": "Chain length in qubits (= pan positions). Ignored for `square`.",
+      "maximum": 156,
+      "minimum": 2,
+      "title": "N Sites",
+      "type": "integer"
+     },
+     "qpu_instance": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "IBM Quantum instance CRN. As with the token: required for `via: direct`, optional BYOK for `via: mothbackend`.",
+      "format": "password",
+      "title": "Qpu Instance",
+      "writeOnly": true
+     },
+     "qpu_token": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "IBM Quantum API token. Required for `via: direct` on an IBM machine (or the QISKIT_IBM_TOKEN env var); optional BYOK for `via: mothbackend`, which otherwise uses Moth's own credentials.",
+      "format": "password",
+      "title": "Qpu Token",
+      "writeOnly": true
+     },
+     "ref_floor": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "|c_ref| below which F is null. Default: 4/sqrt(shots), ~0 for exact simulation.",
+      "title": "Ref Floor"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "RNG seed for the disorder realisation. Only audible when disorder > 0. Drawn as a 31-bit integer and returned in provenance if omitted. Capped at 2**53-1: above that, moth-api (Go) and any browser client re-spell the integer as a float64 and it stops matching the seed you sent.",
+      "title": "Seed"
+     },
+     "shots": {
+      "default": 4096,
+      "description": "Shots per circuit. Ignored when machine='aer' and exact=true. Above 8192 requires allow_high_shots.",
+      "minimum": 1,
+      "title": "Shots",
+      "type": "integer"
+     },
+     "theta_x": {
+      "default": 0.9424777960769379,
+      "description": "Transverse kick per layer (RX angle, rad). The 'how quantum' dial: low \u2192 loud regular taps; high \u2192 inverted, attenuated, erased.",
+      "maximum": 3.141592653589793,
+      "minimum": 0,
+      "title": "Theta X",
+      "type": "number"
+     },
+     "theta_z": {
+      "default": 0,
+      "description": "Phase layer (RZ angle, rad). 0 \u2192 real, two-signed F. >0 \u2192 complex F: taps acquire a phase.",
+      "maximum": 3.141592653589793,
+      "minimum": 0,
+      "title": "Theta Z",
+      "type": "number"
+     },
+     "theta_zz": {
+      "default": 1.0995574287564276,
+      "description": "Coupling per layer (RZZ, rad). Non-monotonic: \u22480.25\u03c0 is the sparse setting. \u03c0 is a Clifford (no scrambling). \u03b8 and \u03c0\u2212\u03b8 coincide only when theta_x = 0, not at the default drive, so the upper half of the range is its own territory. The sign is invisible unless theta_z > 0.",
+      "exclusiveMinimum": -3.141592653589793,
+      "maximum": 3.141592653589793,
+      "title": "Theta Zz",
+      "type": "number"
+     },
+     "twirls": {
+      "default": 1,
+      "description": "ZZ-commutant Pauli twirls per circuit, averaged. Randomises off-axis coherent rzz error (not angle miscalibration, which the reference run absorbs). Multiplies circuit count.",
+      "maximum": 32,
+      "minimum": 1,
+      "title": "Twirls",
+      "type": "integer"
+     },
+     "via": {
+      "default": "direct",
+      "description": "How to reach the machine. `direct`: this engine drives qiskit-ibm-runtime itself (analytic emulation, native fractional gates, one batched QPU session). `mothbackend`: route through Moth's execution service, which holds the credentials \u2014 sampled only, so no analytic mode, no fractional gates, and one submission per circuit.",
+      "enum": [
+       "direct",
+       "mothbackend"
+      ],
+      "title": "Via",
+      "type": "string"
+     },
+     "width": {
+      "anyOf": [
+       {
+        "maximum": 32,
+        "minimum": 2,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Square lattice width. Required for `square`.",
+      "title": "Width"
+     }
+    },
+    "title": "Params",
+    "type": "object"
+   },
+   "credits_per_run": 1,
+   "enabled": true,
+   "registered_at": "2026-09-15T01:31:51Z",
+   "updated_at": "2026-09-15T13:00:44Z",
+   "description_md": "otoc-echo-v1 \u2014 Quantum Echo. A **core** engine.\n\nThin wrapper over the `quantum-echo` library: this file owns the platform contract\n(params schema, validation, credits, estimate, the typed result envelope) and the\nlibrary owns the physics. Same relationship qdrive-api has with QDrive.\n\n    params -> EchoSpec -> quantum_echo.measure_ir -> EchoIR.to_trajectory()\n\nMedia engines (retrocausal-echo-v1 and friends) depend on the same library and either\ncall `measure_ir` in-process or rebuild an IR from this engine's result with\n`EchoIR.from_trajectory`. Neither path reimplements the measurement.",
+   "code_samples": [
+    {
+     "lang": "Python",
+     "source": "import time\nimport requests\n\nAPI = \"https://api.mothquantum.com\"\n# An explicit User-Agent is not optional: Cloudflare fronts this API and 403s\n# the stdlib `Python-urllib/*` prefix with a plain-text `error code: 1010`\n# body that looks exactly like an auth failure.\nH = {\"Authorization\": \"Bearer moth_YOUR_KEY\",\n     \"User-Agent\": \"otoc-echo-example/1.0\"}\n\ndef check(r):\n    if not r.ok:                     # surface the body, or a 1010 is invisible\n        raise RuntimeError(f\"HTTP {r.status_code}: {r.text[:800]}\")\n    return r.json()\n\n# 1. Submit. 202 and a job id -- params are validated in the worker's `build`\n#    step, not here, so bad params come back as a job that fails.\njob = check(requests.post(f\"{API}/api/v1/engines/otoc-echo-v1/process\", headers=H,\n                          json={\"params\": {\"n_sites\": 8, \"depth\": 8,\n                                           \"theta_x\": 0.9425, \"theta_zz\": 1.0996}}))[\"job_id\"]\n\n# 2. Poll.\nwhile True:\n    st = check(requests.get(f\"{API}/api/v1/jobs/{job}/status\", headers=H))\n    if st[\"status\"] in (\"completed\", \"failed\", \"cancelled\"):\n        break\n    time.sleep(1.5)\nif st[\"status\"] != \"completed\":\n    raise RuntimeError(f\"{st['status']}: {(st.get('error') or {}).get('message')} \"\n                       f\"steps={{s['name']: s['status'] for s in st.get('steps', [])}}\")\n\n# 3. Read. The record sits at result.output; accept the looser shapes too.\nbody = check(requests.get(f\"{API}/api/v1/jobs/{job}/result\", headers=H))\nenv = body.get(\"result\", body)\nenv = env.get(\"output\", env)\n\nprint(env[\"result_type\"])             # \"trajectory\"\nprint(env[\"extras\"][\"summary\"])       # {live, inverted, regular, erased, complex, ...}\ntaps = env[\"extras\"][\"taps\"]          # [{site, depth, F_re, F_im, level, polarity}, ...]\n"
+    },
+    {
+     "lang": "curl",
+     "source": "# Submit (202 + job_id), then poll /status, then read /result.\ncurl -X POST https://api.mothquantum.com/api/v1/engines/otoc-echo-v1/process \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: otoc-echo-example/1.0\" \\\n  -d '{\"params\": {\"lattice\": \"square\", \"width\": 6, \"height\": 5, \"depth\": 6}}'\n\ncurl -s https://api.mothquantum.com/api/v1/jobs/$JOB_ID/result \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" -H \"User-Agent: otoc-echo-example/1.0\" \\\n  | jq '.result.output.extras.summary'\n"
+    }
+   ],
+   "error_codes": [
+    {
+     "type": "invalid_params",
+     "description": "params fail Params' own field validation (type/range) or a cross-field check (square lattice without width/height, kick_site outside the line, shots over the cap without allow_high_shots)."
+    },
+    {
+     "type": "too_many_qubits",
+     "description": "the delay line needs more qubits than the machine allows \u2014 24 for aer, the device's own width for an IBM backend."
+    },
+    {
+     "type": "invalid_machine",
+     "description": "machine is neither 'aer' nor an IBM backend name the runtime knows."
+    },
+    {
+     "type": "backend_unavailable",
+     "description": "the requested execution route could not be reached \u2014 for `via: direct`, qiskit-ibm-runtime is missing or no credentials were supplied (qpu_token param / QISKIT_IBM_TOKEN); for `via: mothbackend`, the mothbackend package is absent or the service returned a transport error. Retryable."
+    },
+    {
+     "type": "execution_failed",
+     "description": "the estimator returned an error while running the echo circuits."
+    }
+   ],
+   "banner_image_id": null,
+   "card_image_id": null,
+   "banner_image_tag": null,
+   "card_image_tag": null,
+   "has_estimate": false,
+   "estimate": null,
+   "has_estimate_fn": false,
+   "estimate_needs_container": false,
+   "sidecar_endpoint": null,
+   "has_validate_fn": false
+  },
+  "blur-v1": {
+   "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+   "engine_id": "blur-v1",
+   "name": "Quantum Blur",
+   "description": "Apply a quantum blur algorithm to the image.",
+   "version": "1.1.9",
+   "owner": "81908c64-fe37-4fe5-a13b-6590b200348a",
+   "owner_type": "organization",
+   "created_by": "moth",
+   "visibility": "public",
+   "queue": "engine/blur-v1",
+   "input_type": "application/json",
+   "output_type": "application/octet-stream",
+   "input_files": [
+    {
+     "name": "image",
+     "mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": true,
+     "description": "The image of your choice. The blur effect is applied RGB pixel values only, not the alpha channel. It means that if you submitted a PNG with transparent background, the background from the output will also be transparent."
+    },
+    {
+     "name": "mask",
+     "mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": false,
+     "description": "Optional mask controlling where the effect is applied, on a per-pixel\nbasis. Must match the size of `image`. Each output pixel is a soft\nblend `C = m \u00b7 C_blurred + (1 - m) \u00b7 C_original`, where `m` is the\nnormalised mask intensity at that pixel: black keeps the original,\nwhite takes the fully blurred version, and grey values blend smoothly\nbetween the two. Single-channel masks are used directly; RGB masks are\nconverted to luminance.\n\n**Alpha-channel fallback**\n\nIf no mask is provided, the alpha channel of `image` is used instead\n(transparent pixels keep the original, opaque pixels are blurred). For\nRGB input with no alpha channel, the whole image is blurred.\n"
+    }
+   ],
+   "output_files": [
+    {
+     "name": "result",
+     "content_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": true,
+     "description": "The processed image."
+    }
+   ],
+   "is_multipart": true,
+   "is_async": false,
+   "execution_mode": "handler",
+   "run_policy": {
+    "timeout": 300,
+    "max_retries": 1,
+    "heartbeat": 300
+   },
+   "params_schema": {
+    "properties": {
+     "downscale": {
+      "default": true,
+      "description": "Strategy used when a mask region is larger than the maximum number of qubits allows:\n\n- `true` \u2014 the region is downscaled to fit, blurred, and upscaled back.\n- `false` \u2014 the region is split into adjacent tiles that are blurred independently.",
+      "title": "Downscale",
+      "type": "boolean"
+     },
+     "mask_bin_size": {
+      "anyOf": [
+       {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": 4,
+      "description": "Mask quantisation step as a percentage of 255 (0\u2013100). Pixel values below this threshold are treated as background, preventing near-zero JPEG/WebP compression artifacts from being detected as separate mask regions. Default 4 (~10/255).",
+      "title": "Mask Bin Size"
+     },
+     "mask_min_region": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": 16,
+      "description": "Minimum mask region size in pixels. Connected components smaller than this are discarded after quantisation, removing residual compression artifacts that survive the binning step. Default 16.",
+      "title": "Mask Min Region"
+     },
+     "reach": {
+      "default": 0,
+      "description": "Controls how far from its original position a pixel can be affected by the blur:\n\n- `0` \u2014 fully local: only nearby pixels are affected (default).\n- `1` \u2014 fully non-local: pixels anywhere on the canvas can be affected equally.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Reach",
+      "type": "number"
+     },
+     "size": {
+      "default": 1024,
+      "description": "Pixel budget per blur pass: a region up to `size \u00d7 size` pixels is blurred in a single pass. Internally converted to a qubit budget via `ceil(log2(size)) * 2`. Must be between 8 and 1024. Default 1024.",
+      "maximum": 1024,
+      "minimum": 8,
+      "title": "Size",
+      "type": "integer"
+     },
+     "strength": {
+      "default": 0.5,
+      "description": "Strength of the effect, which controls the rotation applied to each qubit:\n\n- `0` \u2014 the image is left unchanged.\n- `1` \u2014 maximum blur.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Strength",
+      "type": "number"
+     },
+     "style": {
+      "default": "rx",
+      "description": "Quantum gate used to apply the effect:\n\n- `rx` \u2014 rotation around the x-axis of the Bloch sphere.\n- `ry` \u2014 rotation around the y-axis of the Bloch sphere.",
+      "enum": [
+       "rx",
+       "ry"
+      ],
+      "title": "Style",
+      "type": "string"
+     }
+    },
+    "title": "Params",
+    "type": "object"
+   },
+   "credits_per_run": 1,
+   "enabled": true,
+   "registered_at": "2026-05-26T13:52:59Z",
+   "updated_at": "2026-09-10T13:55:08Z",
+   "description_md": "Blur an image with a quantum rotation and get back an image of the same size and format, optionally only inside a masked region.\n\nEach pixel's brightness is encoded into a quantum state, one rotation gate is\napplied per qubit, and the state is read back into pixels. Because a single gate\nmoves weight across many pixels at once, the blur spreads as interference echoes\nrather than a soft focus: shapes reappear faintly elsewhere on the canvas.\nColour images are processed one channel at a time; the alpha channel is untouched.\n\n### How it works\n\n1. Reads `image` and, if given, `mask`. Without a mask the alpha channel selects\n   the region; RGB input with no alpha is blurred everywhere.\n2. Splits the mask into connected regions and, for each, encodes the pixels into\n   a statevector, applies the `style` rotation at the given `strength`, and reads\n   the result back. Regions larger than `size` are downscaled or tiled per\n   `downscale`.\n3. Blends each blurred region with the original by mask intensity and writes the\n   image in the input's format and dimensions.\n\n### Output\n\nOne file in slot `result`: same format, dimensions and alpha channel as `image`.\n\n### Limits\n\n- Runs on a classical statevector simulator, not a QPU. Memory and time grow with\n  region size; a 1024 x 1024 region uses 20 qubits.\n- `strength` above 1 (with `reach` 0) starts to reverse the effect.\n- `ry` on smooth gradients can collapse to a mostly dark image; prefer `rx` there.\n\n### Further reading\n\n- [QuantumBlur library](https://github.com/qiskit-community/QuantumBlur): the\n  encoding and rotation this engine wraps.\n- [ILA, Recurse](https://infinite.mothquantum.com): the album produced with this\n  colour-channel technique.",
+   "code_samples": [
+    {
+     "lang": "Python",
+     "source": "import requests\n\nwith open(\"image.png\", \"rb\") as img:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/blur-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image\": img},\n        data={\"strength\": 0.5, \"style\": \"rx\", \"reach\": 0.0},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+     "lang": "Python (with mask)",
+     "source": "import requests\n\nwith open(\"image.png\", \"rb\") as img, open(\"mask.png\", \"rb\") as msk:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/blur-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image\": img, \"mask\": msk},\n        data={\"strength\": 0.7},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+     "lang": "curl",
+     "source": "curl -X POST https://api.mothquantum.com/v1/generation/blur-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -F \"image=@image.png\" \\\n  -F \"strength=0.5\" \\\n  -F \"style=rx\" \\\n  -F \"reach=0.0\"\n"
+    }
+   ],
+   "error_codes": [
+    {
+     "type": "mask_size_mismatch",
+     "description": "Mask dimensions do not match the image dimensions."
+    },
+    {
+     "type": "no_mask_region",
+     "description": "The provided mask has no non-zero pixels \u2014 nothing to blur."
+    },
+    {
+     "type": "invalid_params",
+     "description": "One or more params fields failed Pydantic validation."
+    },
+    {
+     "type": "invalid_image",
+     "description": "The image or mask file could not be decoded."
+    },
+    {
+     "type": "blur_failed",
+     "description": "The quantum blur circuit failed on a mask region."
+    },
+    {
+     "type": "region_extraction_failed",
+     "description": "A mask region could not be extracted from the image (e.g. an invalid bounding box)."
+    },
+    {
+     "type": "compose_failed",
+     "description": "A blurred region could not be blended back into the output image."
+    },
+    {
+     "type": "encoding_failed",
+     "description": "The output image could not be encoded in the input's format."
+    }
+   ],
+   "banner_image_id": "dff7600d-d75f-463e-8483-4ee93166bf5c",
+   "card_image_id": "61237020-b2c8-4dac-82bb-b8ff9e50be4a",
+   "banner_image_tag": "ghcr.io/moth-quantum/blur-api:engines-blur-v1-v1.0.19",
+   "card_image_tag": "ghcr.io/moth-quantum/blur-api:engines-blur-v1-v1.0.19",
+   "has_estimate": true,
+   "estimate": null,
+   "has_estimate_fn": true,
+   "estimate_needs_container": true,
+   "sidecar_endpoint": null,
+   "has_validate_fn": true
+  },
+  "telablur-v1": {
+   "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+   "engine_id": "telablur-v1",
+   "name": "Quantum Teleblur",
+   "description": "Morph one image into another through quantum rotation gates.",
+   "owner": "81908c64-fe37-4fe5-a13b-6590b200348a",
+   "owner_type": "organization",
+   "created_by": "moth",
+   "visibility": "public",
+   "queue": "engine/telablur-v1",
+   "input_type": "application/json",
+   "output_type": "application/octet-stream",
+   "input_files": [
+    {
+     "name": "image1",
+     "mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": true,
+     "description": "The source image. The teleblur effect morphs this image toward image2 through quantum rotation gates. Supported formats: PNG, JPEG, WebP, TIFF, BMP."
+    },
+    {
+     "name": "image2",
+     "mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": true,
+     "description": "The target image. The teleblur effect morphs image1 toward this image. If the dimensions differ from image1, image2 is resized to match before processing."
+    },
+    {
+     "name": "mask",
+     "mime_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": false,
+     "description": "Optional mask controlling where the effect is applied, on a per-pixel\nbasis. Must match the size of `image1`. Each output pixel is a soft\nblend `C = m \u00b7 C_teleblurred + (1 - m) \u00b7 C_image1`, where `m` is the\nnormalised mask intensity at that pixel: black keeps image1, white takes\nthe fully teleblurred result, and grey values blend smoothly between the\ntwo. Single-channel masks are used directly; RGB masks are converted to\nluminance.\n\n**Alpha-channel fallback**\n\nIf no mask is provided, the alpha channel of `image1` is used instead\n(transparent pixels keep image1, opaque pixels are teleblurred). For\nRGB input with no alpha channel, the whole image is teleblurred.\n"
+    }
+   ],
+   "output_files": [
+    {
+     "name": "result",
+     "content_types": [
+      "image/png",
+      "image/jpeg",
+      "image/webp",
+      "image/tiff",
+      "image/bmp"
+     ],
+     "required": true,
+     "description": "The processed image."
+    }
+   ],
+   "is_multipart": true,
+   "is_async": false,
+   "execution_mode": "handler",
+   "run_policy": {
+    "timeout": 18000,
+    "max_retries": 1,
+    "heartbeat": 18000
+   },
+   "params_schema": {
+    "properties": {
+     "direction": {
+      "default": "full",
+      "description": "Which qubits receive the blur rotation, controlling the spatial direction of the blur effect:\n\n- `full` \u2014 all pixel qubits are rotated, producing blur in both directions (default).\n- `vertical` \u2014 only the y-encoding qubits are rotated; the blur spreads vertically.\n- `horizontal` \u2014 only the x-encoding qubits are rotated; the blur spreads horizontally.",
+      "enum": [
+       "full",
+       "vertical",
+       "horizontal"
+      ],
+      "title": "Direction",
+      "type": "string"
+     },
+     "downscale": {
+      "default": true,
+      "description": "If True, oversized regions are downscaled before teleport and upscaled back. If False, oversized regions are tiled into adjacent sub-images.",
+      "title": "Downscale",
+      "type": "boolean"
+     },
+     "mask_bin_size": {
+      "anyOf": [
+       {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": 4,
+      "description": "Mask quantisation step as a percentage of 255 (0\u2013100). Pixel values below this threshold are treated as background, preventing near-zero JPEG/WebP compression artifacts from being detected as separate mask regions. Default 4 (~10/255).",
+      "title": "Mask Bin Size"
+     },
+     "mask_min_region": {
+      "anyOf": [
+       {
+        "minimum": 1,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": 16,
+      "description": "Minimum mask region size in pixels. Connected components smaller than this are discarded after quantisation, removing residual compression artifacts that survive the binning step. Default 16.",
+      "title": "Mask Min Region"
+     },
+     "size": {
+      "default": 1024,
+      "description": "Pixel budget per teleblur pass: a region up to `size \u00d7 size` pixels is teleported in a single pass. Must be between 8 and 1024. Default 1024.",
+      "maximum": 1024,
+      "minimum": 8,
+      "title": "Size",
+      "type": "integer"
+     },
+     "strength": {
+      "default": 0.5,
+      "description": "Strength of the teleportation effect, between 0.0 and 1.0",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Strength",
+      "type": "number"
+     }
+    },
+    "title": "Params",
+    "type": "object"
+   },
+   "credits_per_run": 1,
+   "enabled": true,
+   "registered_at": "2026-06-15T16:43:34Z",
+   "updated_at": "2026-09-09T21:42:30Z",
+   "description_md": "Quantum Teleblur \u2014 morphs one image into another through qubit rotations.\n\nBoth images are placed into a shared quantum state on n+1 qubits, where n\nencodes the image pixels and one extra selector qubit identifies each image.\nRotating the selector qubit interpolates between the two images at the\namplitude level.\n\n### Notes\n\n- An optional `mask` selects where the effect is applied. If omitted,\n  image1's alpha channel is used (RGBA) or the full image (RGB).\n- The two images must share the same dimensions; mismatched sizes are\n  rejected.\n- Disjoint mask regions are processed independently from their bounding\n  boxes.\n- The simulator caps each region at `2 ** max_qubits` pixels. When a region\n  exceeds that, `downscale=True` does downscale \u2192 teleport \u2192 upscale;\n  `downscale=False` tiles the region. Output always matches input dimensions.\n- The output is the composition (1-mask)\u00b7image1 + mask\u00b7teleblurred, where the\n  teleblurred alpha is alpha1\u00b7(1-strength) + alpha2\u00b7strength.",
+   "code_samples": [
+    {
+     "lang": "Python",
+     "source": "import requests\n\nwith open(\"image1.png\", \"rb\") as img1, open(\"image2.png\", \"rb\") as img2:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/telablur/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image1\": img1, \"image2\": img2},\n        data={\"strength\": 0.5},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+     "lang": "Python (with mask)",
+     "source": "import requests\n\nwith open(\"image1.png\", \"rb\") as img1, open(\"image2.png\", \"rb\") as img2, open(\"mask.png\", \"rb\") as msk:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/telablur/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image1\": img1, \"image2\": img2, \"mask\": msk},\n        data={\"strength\": 0.7},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+     "lang": "curl",
+     "source": "curl -X POST https://api.mothquantum.com/v1/generation/telablur/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -F \"image1=@image1.png\" \\\n  -F \"image2=@image2.png\" \\\n  -F \"strength=0.5\"\n"
+    }
+   ],
+   "error_codes": [
+    {
+     "type": "invalid_image1",
+     "description": "The first image file could not be decoded."
+    },
+    {
+     "type": "invalid_image2",
+     "description": "The second image file could not be decoded."
+    },
+    {
+     "type": "mask_size_mismatch",
+     "description": "Mask dimensions do not match image1 dimensions."
+    },
+    {
+     "type": "no_mask_region",
+     "description": "The provided mask has no non-zero pixels \u2014 nothing to teleblur."
+    },
+    {
+     "type": "invalid_params",
+     "description": "One or more params fields failed Pydantic validation."
+    },
+    {
+     "type": "processing_failed",
+     "description": "The quantum teleport circuit failed during processing."
+    }
+   ],
+   "banner_image_id": null,
+   "card_image_id": null,
+   "banner_image_tag": null,
+   "card_image_tag": null,
+   "has_estimate": true,
+   "estimate": null,
+   "has_estimate_fn": true,
+   "estimate_needs_container": true,
+   "sidecar_endpoint": null,
+   "has_validate_fn": true
+  },
+  "retrocausal-echo-v1": {
+   "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+   "engine_id": "retrocausal-echo-v1",
+   "name": "Retrocausal Echo",
+   "description": "A multi-tap delay whose tap map is measured on a quantum computer \u2014 negative returns invert, reverse or rotate the signal.",
+   "version": "0.1.2",
+   "owner": "fccf0d75-76b1-4059-93ab-e1267885289e",
+   "owner_type": "user",
+   "created_by": "fccf0d75-76b1-4059-93ab-e1267885289e",
+   "visibility": "public",
+   "queue": "",
+   "input_type": "multipart/form-data",
+   "output_type": "audio/wav",
+   "input_files": [
+    {
+     "name": "audio",
+     "mime_types": [
+      "audio/wav",
+      "audio/x-wav",
+      "audio/wave",
+      "audio/mpeg",
+      "audio/ogg",
+      "audio/flac"
+     ],
+     "required": false,
+     "description": "Mono or stereo audio to process \u2014 WAV, MP3, OGG or FLAC. Stereo is summed to mono first, since the taps place their own stereo image. The file's own sample rate wins over the `sr` param."
+    },
+    {
+     "name": "ir",
+     "mime_types": [
+      "application/json"
+     ],
+     "required": false,
+     "description": "A previously measured impulse response \u2014 an otoc-echo `trajectory` envelope. Supply it to re-render without paying for the measurement again, and every echo param is ignored. Pass the asset id of a previous retrocausal-echo job's own `ir` output (output assets carry `slot` and `job_id`, so they chain straight into `input_files`), or upload the JSON yourself. `job:<id>/ir` is the documented alias for the same thing but may not resolve \u2014 prefer the asset id."
+    }
+   ],
+   "output_files": [
+    {
+     "name": "result",
+     "content_types": [
+      "audio/wav",
+      "application/json"
+     ],
+     "required": true,
+     "description": "The primary output. With `emit: audio` (the default) this is the rendered stereo WAV. With `emit: map` no audio is rendered at all and this is the tap map as JSON \u2014 the same envelope the `taps` slot carries \u2014 so a sequencer or plugin can place the events itself without downloading audio."
+    },
+    {
+     "name": "ir",
+     "content_types": [
+      "application/json"
+     ],
+     "required": true,
+     "description": "The impulse response actually used, as an otoc-echo `trajectory` envelope. Its output asset chains straight into another job's `input_files.ir` \u2014 one measurement, many mixes."
+    },
+    {
+     "name": "taps",
+     "content_types": [
+      "application/json"
+     ],
+     "required": true,
+     "description": "The full `media` result envelope: provenance, the audio's shape, the echo summary, the spec, and the rendered tap map (time_ms, level, pan, F, polarity per tap). This is where a caller reads the numbers; a DAW or plugin can load it directly."
+    }
+   ],
+   "is_multipart": true,
+   "is_async": false,
+   "execution_mode": "handler",
+   "run_policy": {
+    "timeout": 7200,
+    "max_retries": 1,
+    "heartbeat": 3600
+   },
+   "params_schema": {
+    "properties": {
+     "allow_high_shots": {
+      "default": false,
+      "description": "Permit shots above 8192.",
+      "title": "Allow High Shots",
+      "type": "boolean"
+     },
+     "bpm": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 20,
+        "maximum": 400,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Tempo. When set, one depth step = `division` of a bar instead of master_ms/depth.",
+      "title": "Bpm"
+     },
+     "decay": {
+      "default": 0.9,
+      "description": "Extra level roll-off per depth step, on top of |F|. 1.0 = none.",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "title": "Decay",
+      "type": "number"
+     },
+     "depth": {
+      "default": 8,
+      "description": "Echo depths t = 1..depth \u2014 the tap time slots.",
+      "maximum": 32,
+      "minimum": 1,
+      "title": "Depth",
+      "type": "integer"
+     },
+     "diffusion_ms": {
+      "default": 0,
+      "description": "Square lattice only: y spreads taps by up to \u00b1diffusion_ms/2 inside their depth slot.",
+      "maximum": 500,
+      "minimum": 0,
+      "title": "Diffusion Ms",
+      "type": "number"
+     },
+     "disorder": {
+      "default": 0,
+      "description": "Additive per-gate angle jitter, std in radians. Localises the echo; the only lever that makes `seed` audible.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Disorder",
+      "type": "number"
+     },
+     "division": {
+      "default": 0.25,
+      "description": "Step as a fraction of a beat when bpm is set. 0.25 sixteenth \u00b7 0.5 eighth \u00b7 0.75 dotted eighth \u00b7 0.3333 eighth-triplet \u00b7 1.0 quarter.",
+      "exclusiveMinimum": 0,
+      "maximum": 4,
+      "title": "Division",
+      "type": "number"
+     },
+     "emit": {
+      "default": "audio",
+      "description": "`audio` renders a WAV \u2014 your input processed, or the effect's own impulse response when no audio is supplied. `map` skips rendering entirely and returns only the time-mapped tap list, which is what a sequencer or a DAW plugin wants: same tap map, no audio work, no WAV to download.",
+      "enum": [
+       "audio",
+       "map"
+      ],
+      "title": "Emit",
+      "type": "string"
+     },
+     "exact": {
+      "default": true,
+      "description": "aer only: exact expectation values instead of sampling.",
+      "title": "Exact",
+      "type": "boolean"
+     },
+     "feedback": {
+      "default": 0,
+      "description": "Regeneration loop gain. The bus of selected taps is normalised first, so this is the fraction of signal that comes back round \u2014 always convergent, and 0.6 sounds like 0.6 on a rack unit rather than diverging.",
+      "exclusiveMaximum": 1,
+      "minimum": 0,
+      "title": "Feedback",
+      "type": "number"
+     },
+     "feedback_source": {
+      "default": "kick",
+      "description": "Which taps regenerate. `kick`: only the kick site's column (the classic single regeneration tap). `all`: every tap.",
+      "enum": [
+       "kick",
+       "all"
+      ],
+      "title": "Feedback Source",
+      "type": "string"
+     },
+     "fractional_gates": {
+      "default": true,
+      "description": "Use native rzz/rx where available.",
+      "title": "Fractional Gates",
+      "type": "boolean"
+     },
+     "grain_ms": {
+      "default": 120,
+      "description": "Grain length for `reverse` mode. Short \u2192 stuttered; long \u2192 whole phrases backwards.",
+      "exclusiveMinimum": 1,
+      "maximum": 2000,
+      "title": "Grain Ms",
+      "type": "number"
+     },
+     "height": {
+      "anyOf": [
+       {
+        "maximum": 32,
+        "minimum": 2,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Square lattice height. Required for `square`.",
+      "title": "Height"
+     },
+     "include_tap_map": {
+      "default": true,
+      "description": "Also emit the rendered tap map inline in the result (it is always written to taps.json).",
+      "title": "Include Tap Map",
+      "type": "boolean"
+     },
+     "ir_seconds": {
+      "default": 3,
+      "description": "With no `audio` input, render the effect's own stereo impulse response for this long.",
+      "exclusiveMinimum": 0,
+      "maximum": 30,
+      "title": "Ir Seconds",
+      "type": "number"
+     },
+     "kick": {
+      "default": "Z",
+      "description": "Perturbation Pauli applied to the kick site between U and U\u2020.",
+      "enum": [
+       "Z",
+       "Y",
+       "X"
+      ],
+      "title": "Kick",
+      "type": "string"
+     },
+     "kick_site": {
+      "anyOf": [
+       {
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Regeneration source: the site that receives the impulse. Default: centre.",
+      "title": "Kick Site"
+     },
+     "lattice": {
+      "default": "chain",
+      "description": "Delay-line topology. `chain`: site \u2192 pan. `square` (Nighthawk-native): x \u2192 pan, y \u2192 diffusion.",
+      "enum": [
+       "chain",
+       "square"
+      ],
+      "title": "Lattice",
+      "type": "string"
+     },
+     "machine": {
+      "default": "aer",
+      "description": "Backend for the measurement: 'aer' (local, noiseless) or an IBM backend name such as 'ibm_phoenix'.",
+      "title": "Machine",
+      "type": "string"
+     },
+     "master_ms": {
+      "default": 640,
+      "description": "Length of the master delay line in ms. One depth step = master_ms / depth. Ignored when bpm is set.",
+      "exclusiveMinimum": 0,
+      "maximum": 8000,
+      "title": "Master Ms",
+      "type": "number"
+     },
+     "max_regen": {
+      "default": 24,
+      "description": "Cap on regeneration iterations.",
+      "maximum": 64,
+      "minimum": 1,
+      "title": "Max Regen",
+      "type": "integer"
+     },
+     "min_level": {
+      "default": 0.05,
+      "description": "|F| threshold below which a tap is dropped.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Min Level",
+      "type": "number"
+     },
+     "mix": {
+      "default": 0.6,
+      "description": "Dry/wet. 0 = dry, 1 = wet only.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Mix",
+      "type": "number"
+     },
+     "n_sites": {
+      "default": 8,
+      "description": "Chain length in qubits (= pan positions). Ignored for `square`.",
+      "maximum": 156,
+      "minimum": 2,
+      "title": "N Sites",
+      "type": "integer"
+     },
+     "negative_mode": {
+      "default": "invert",
+      "description": "What a negative F does. `invert`: flip polarity (phase-cancelling echo). `reverse`: play that tap's grains backwards. `phase`: rotate by arg(F) via a Hilbert transform \u2014 the only mode that uses F_im, so pair it with theta_z > 0.",
+      "enum": [
+       "invert",
+       "reverse",
+       "phase"
+      ],
+      "title": "Negative Mode",
+      "type": "string"
+     },
+     "output_format": {
+      "default": "pcm_16",
+      "description": "WAV sample format.",
+      "enum": [
+       "pcm_16",
+       "pcm_32",
+       "float_32"
+      ],
+      "title": "Output Format",
+      "type": "string"
+     },
+     "qpu_instance": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "IBM Quantum instance CRN. As with the token: required for `via: direct`, optional BYOK for `via: mothbackend`.",
+      "format": "password",
+      "title": "Qpu Instance",
+      "writeOnly": true
+     },
+     "qpu_token": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "IBM Quantum API token when machine is an IBM backend; falls back to QISKIT_IBM_TOKEN.",
+      "format": "password",
+      "title": "Qpu Token",
+      "writeOnly": true
+     },
+     "ref_floor": {
+      "anyOf": [
+       {
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "|c_ref| below which a tap is dropped as unnormalisable. Default: 4/sqrt(shots), ~0 for exact simulation. Raise it to prune taps the noise floor cannot support.",
+      "title": "Ref Floor"
+     },
+     "seed": {
+      "anyOf": [
+       {
+        "maximum": 9007199254740991,
+        "minimum": 0,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "RNG seed for the disorder realisation. Only audible when disorder > 0. Drawn as a 31-bit integer and returned in provenance if omitted. Capped at 2**53-1: above that, moth-api (Go) and any browser client re-spell the integer as a float64 and it stops matching the seed you sent.",
+      "title": "Seed"
+     },
+     "shots": {
+      "default": 4096,
+      "description": "Shots per circuit. Ignored when machine='aer' and exact=true. Above 8192 requires allow_high_shots.",
+      "minimum": 1,
+      "title": "Shots",
+      "type": "integer"
+     },
+     "sr": {
+      "default": 44100,
+      "description": "Sample rate. Ignored when an `audio` file is supplied \u2014 that file's own rate is used.",
+      "maximum": 192000,
+      "minimum": 8000,
+      "title": "Sr",
+      "type": "integer"
+     },
+     "stereo_width": {
+      "default": 1,
+      "description": "Scales the site \u2192 pan spread. 0 = mono.",
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Stereo Width",
+      "type": "number"
+     },
+     "tail_ms": {
+      "anyOf": [
+       {
+        "maximum": 30000,
+        "minimum": 0,
+        "type": "number"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Silence appended to the input so the last tap and its regenerations fit. Default: computed from the tap map.",
+      "title": "Tail Ms"
+     },
+     "theta_x": {
+      "default": 0.9424777960769379,
+      "description": "Transverse kick per layer (RX, rad) \u2014 the 'how quantum' dial. Low \u2192 loud regular taps; high \u2192 inverted, attenuated, erased.",
+      "maximum": 3.141592653589793,
+      "minimum": 0,
+      "title": "Theta X",
+      "type": "number"
+     },
+     "theta_z": {
+      "default": 0,
+      "description": "Phase layer (RZ, rad). 0 \u2192 real, two-signed taps. >0 \u2192 complex F, which `negative_mode: phase` renders as rotation.",
+      "maximum": 3.141592653589793,
+      "minimum": 0,
+      "title": "Theta Z",
+      "type": "number"
+     },
+     "theta_zz": {
+      "default": 1.0995574287564276,
+      "description": "Coupling per layer (RZZ, rad). Non-monotonic: \u22480.25\u03c0 is the sparse setting. \u03c0 is a Clifford (no scrambling). \u03b8 and \u03c0\u2212\u03b8 coincide only when theta_x = 0, not at the default drive, so the upper half of the range is its own territory. The sign is invisible unless theta_z > 0.",
+      "exclusiveMinimum": -3.141592653589793,
+      "maximum": 3.141592653589793,
+      "title": "Theta Zz",
+      "type": "number"
+     },
+     "twirls": {
+      "default": 1,
+      "description": "ZZ-commutant Pauli twirls per circuit, averaged. Only useful on hardware: it randomises off-axis coherent error in the couplings. Multiplies the circuit count, so it multiplies QPU time.",
+      "maximum": 32,
+      "minimum": 1,
+      "title": "Twirls",
+      "type": "integer"
+     },
+     "via": {
+      "default": "direct",
+      "description": "How to reach the machine. `direct`: this engine drives qiskit-ibm-runtime itself (analytic emulation, native fractional gates, one batched QPU session). `mothbackend`: route through Moth's execution service, which holds the credentials \u2014 sampled only, so no analytic mode, no fractional gates, and one submission per circuit.",
+      "enum": [
+       "direct",
+       "mothbackend"
+      ],
+      "title": "Via",
+      "type": "string"
+     },
+     "width": {
+      "anyOf": [
+       {
+        "maximum": 32,
+        "minimum": 2,
+        "type": "integer"
+       },
+       {
+        "type": "null"
+       }
+      ],
+      "default": null,
+      "description": "Square lattice width. Required for `square`.",
+      "title": "Width"
+     }
+    },
+    "title": "Params",
+    "type": "object"
+   },
+   "credits_per_run": 2,
+   "enabled": true,
+   "registered_at": "2026-09-15T01:31:59Z",
+   "updated_at": "2026-09-15T13:00:47Z",
+   "description_md": "retrocausal-echo-v1 \u2014 Retrocausal Echo. A **media** engine.\n\nThe other half of the split. `otoc-echo-v1` is the *core* engine: it measures a\nquantum impulse response and returns it as a typed `trajectory`. This engine is a\n*media* engine: it turns an impulse response into audio. Both depend on the same\n`quantum-echo` library, so the measurement exists in exactly one place.\n\n    core   : params -> EchoSpec -> measure_ir -> EchoIR.to_trajectory()\n    media  : (EchoIR from a library call | a prior job's ir.json) -> MultiTapDelay -> WAV\n\nTwo ways in, one renderer:\n\n  * no `ir` file  -> this engine calls `quantum_echo.measure_ir` in-process. One\n    job, one price, audio out. The QPU work is identical to the core engine's.\n  * an `ir` file  -> `EchoIR.from_trajectory`. Re-render a measured response with\n    different audio, tempo, polarity behaviour or feedback without paying for the\n    measurement again. The slot is `by_reference: true`, so it takes either an\n    upload or `job:<id>/ir` off a previous retrocausal-echo job.\n\nNothing here builds a circuit and nothing in `render.py` knows what a qubit is.",
+   "code_samples": [
+    {
+     "lang": "Python",
+     "source": "import json\nimport os\nimport time\nimport requests\n\nAPI = \"https://api.mothquantum.com\"\n# Cloudflare 403s the stdlib `Python-urllib/*` User-Agent with a plain-text\n# `error code: 1010`, which reads exactly like an auth failure. Always identify\n# your client, and always print the response body on error.\nH = {\"Authorization\": \"Bearer moth_YOUR_KEY\",\n     \"User-Agent\": \"retrocausal-echo-example/1.0\"}\n\ndef check(r):\n    if not r.ok:\n        raise RuntimeError(f\"HTTP {r.status_code}: {r.text[:800]}\")\n    return r.json()\n\ndef upload(path, content_type):\n    \"\"\"File inputs are assets, not multipart fields: create, PUT, complete.\n    The presigned URL signs in the size and content type, so they must match.\"\"\"\n    size = os.path.getsize(path)\n    a = check(requests.post(f\"{API}/api/v1/assets\", headers=H,\n                            json={\"filename\": os.path.basename(path),\n                                  \"content_type\": content_type, \"size_bytes\": size}))\n    up = a[\"upload\"]\n    with open(path, \"rb\") as fh:\n        r = requests.put(up[\"url\"], data=fh, headers=up[\"headers\"])\n        if not r.ok:\n            raise RuntimeError(f\"upload HTTP {r.status_code}: {r.text[:400]}\")\n    check(requests.post(f\"{API}/api/v1/assets/{a['asset_id']}/complete\", headers=H))\n    return a[\"asset_id\"]\n\ndef run(params, input_files=None):\n    job = check(requests.post(f\"{API}/api/v1/engines/retrocausal-echo-v1/process\", headers=H,\n                              json={\"params\": params,\n                                    \"input_files\": input_files or {}}))[\"job_id\"]\n    while True:\n        st = check(requests.get(f\"{API}/api/v1/jobs/{job}/status\", headers=H))\n        if st[\"status\"] in (\"completed\", \"failed\", \"cancelled\"):\n            break\n        time.sleep(2)\n    if st[\"status\"] != \"completed\":\n        raise RuntimeError(f\"{st['status']}: {(st.get('error') or {}).get('message')}\")\n    return job, check(requests.get(f\"{API}/api/v1/jobs/{job}/result\", headers=H))\n\n# 1. Measure and render in one job. No audio input -> you get the effect's own\n#    stereo impulse response, ready for a convolver.\njob, body = run({\"n_sites\": 10, \"depth\": 8, \"theta_x\": 1.2,\n                 \"negative_mode\": \"reverse\", \"ir_seconds\": 4})\n\n# Outputs come back as presigned URLs in `outputs`, on a separate S3 host.\n# `result` is the WAV itself (the binary primary); `taps` carries the envelope.\nout = {o[\"slot\"]: o for o in (body.get(\"outputs\") or [])}\nopen(\"retrocausal_ir.wav\", \"wb\").write(requests.get(out[\"result\"][\"url\"]).content)\ntaps = requests.get(out[\"taps\"][\"url\"]).json()\nprint(taps[\"extras\"][\"tap_map\"][\"taps\"][:3])\n\n# 2. Re-render the same measured response over your own audio -- no quantum\n#    work, 1 credit. The `ir` output asset chains straight into `input_files`.\njob2, body2 = run(\n    {\"bpm\": 128, \"division\": 0.75, \"feedback\": 0.55, \"mix\": 0.7},\n    {\"audio\": upload(\"guitar.wav\", \"audio/wav\"), \"ir\": out[\"ir\"][\"asset_id\"]},\n)\nout2 = {o[\"slot\"]: o for o in (body2.get(\"outputs\") or [])}\nopen(\"guitar_retrocausal.wav\", \"wb\").write(requests.get(out2[\"result\"][\"url\"]).content)\n"
+    },
+    {
+     "lang": "curl",
+     "source": "# A WAV input is an asset, not a multipart field. Three calls to stage it:\n#   POST /api/v1/assets  {filename, content_type, size_bytes}  -> presigned upload\n#   PUT  <upload.url>    (with the exact headers it returns)\n#   POST /api/v1/assets/{asset_id}/complete\n# then pass the asset id in input_files:\ncurl -X POST https://api.mothquantum.com/api/v1/engines/retrocausal-echo-v1/process \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: retrocausal-echo-example/1.0\" \\\n  -d '{\"params\": {\"lattice\":\"square\",\"width\":5,\"height\":4,\"depth\":6,\n                  \"diffusion_ms\":40,\"negative_mode\":\"phase\",\"theta_z\":0.6,\"mix\":0.75},\n       \"input_files\": {\"audio\": \"<asset-uuid>\"}}'\n\n# Outputs are presigned URLs under `.outputs[]`, keyed by slot.\ncurl -s https://api.mothquantum.com/api/v1/jobs/$JOB_ID/result \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" -H \"User-Agent: retrocausal-echo-example/1.0\" \\\n  | jq '.outputs[] | {slot, url}'\n"
+    }
+   ],
+   "error_codes": [
+    {
+     "type": "invalid_params",
+     "description": "params fail Params' own field validation (type/range) or a cross-field check (square lattice without width/height, kick_site outside the line, shots over the cap without allow_high_shots)."
+    },
+    {
+     "type": "invalid_ir",
+     "description": "the `ir` input is not UTF-8 JSON, or not an otoc-echo `trajectory` envelope. A bare envelope, a handler return wrapped in `output`, and a whole job result wrapped in `result` are all accepted."
+    },
+    {
+     "type": "invalid_audio",
+     "description": "the `audio` input could not be decoded as a PCM or float WAV, is over the size cap, or decoded to zero samples."
+    },
+    {
+     "type": "audio_too_long",
+     "description": "the input, or the input plus its computed tail, exceeds the render length cap. Set tail_ms explicitly or send a shorter file."
+    },
+    {
+     "type": "no_taps",
+     "description": "no tap survived min_level \u2014 the echo was fully erased at this theta_x, or min_level is too high. The echo summary is in the message."
+    },
+    {
+     "type": "too_many_taps",
+     "description": "the tap map is larger than the render cap. Raise min_level or lower depth."
+    },
+    {
+     "type": "too_many_qubits",
+     "description": "the delay line needs more qubits than the machine allows \u2014 24 for aer, the device's own width for an IBM backend. Supplying a measured `ir` sidesteps this entirely."
+    },
+    {
+     "type": "invalid_machine",
+     "description": "machine is neither 'aer' nor an IBM backend name the runtime knows."
+    },
+    {
+     "type": "backend_unavailable",
+     "description": "the requested execution route could not be reached \u2014 for `via: direct`, qiskit-ibm-runtime is missing or no credentials were supplied (qpu_token param / QISKIT_IBM_TOKEN); for `via: mothbackend`, the mothbackend package is absent or the service returned a transport error. Retryable."
+    },
+    {
+     "type": "execution_failed",
+     "description": "the estimator returned an error while running the echo circuits."
+    }
+   ],
+   "banner_image_id": null,
+   "card_image_id": null,
+   "banner_image_tag": null,
+   "card_image_tag": null,
+   "has_estimate": false,
+   "estimate": null,
+   "has_estimate_fn": false,
+   "estimate_needs_container": false,
+   "sidecar_endpoint": null,
+   "has_validate_fn": false
+  },
+  "tomography-api-v2": {
+   "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+   "engine_id": "tomography-api-v2",
+   "name": "Tomography Api",
+   "description": "Simple core engine to compute relevant quantities of a quantum circuit",
+   "version": "0.2.0",
+   "owner": "825c73f9-123a-46e0-a558-851ee85dba90",
+   "owner_type": "user",
+   "created_by": "825c73f9-123a-46e0-a558-851ee85dba90",
+   "visibility": "public",
+   "queue": "",
+   "input_type": "application/json",
+   "output_type": "application/json",
+   "is_multipart": false,
+   "is_async": false,
+   "execution_mode": "handler",
+   "run_policy": {
+    "timeout": 10800,
+    "max_retries": 3,
+    "heartbeat": 10800
+   },
+   "params_schema": {
+    "properties": {
+     "backend_name": {
+      "default": "automatic",
+      "description": "mothprovider backend/method within provider_name",
+      "title": "Backend Name",
+      "type": "string"
+     },
+     "circuit_qasm": {
+      "description": "OpenQASM 2 source of the circuit to analyze",
+      "title": "Circuit Qasm",
+      "type": "string"
+     },
+     "classical_mutual_information": {
+      "default": true,
+      "description": "Whether to compute classical (Shannon) mutual information between each pair's measurement outcomes, separately for the X, Y, and Z basis",
+      "title": "Classical Mutual Information",
+      "type": "boolean"
+     },
+     "double_tomography": {
+      "default": true,
+      "description": "Whether to perform double tomography",
+      "title": "Double Tomography",
+      "type": "boolean"
+     },
+     "mutual_information": {
+      "default": true,
+      "description": "Whether to compute quantum mutual information (von Neumann entropies)",
+      "title": "Mutual Information",
+      "type": "boolean"
+     },
+     "provider_name": {
+      "default": "aer",
+      "description": "mothprovider provider used to execute the circuits",
+      "title": "Provider Name",
+      "type": "string"
+     },
+     "qubit_list": {
+      "description": "List of qubits to measure",
+      "items": {
+       "type": "integer"
+      },
+      "title": "Qubit List",
+      "type": "array"
+     },
+     "qubit_pair_list": {
+      "description": "List of qubit pairs to measure",
+      "items": {
+       "maxItems": 2,
+       "minItems": 2,
+       "prefixItems": [
+        {
+         "type": "integer"
+        },
+        {
+         "type": "integer"
+        }
+       ],
+       "type": "array"
+      },
+      "title": "Qubit Pair List",
+      "type": "array"
+     },
+     "shots": {
+      "default": 4096,
+      "description": "Shots per executed measurement circuit",
+      "title": "Shots",
+      "type": "integer"
+     },
+     "single_tomography": {
+      "default": true,
+      "description": "Whether to perform single tomography",
+      "title": "Single Tomography",
+      "type": "boolean"
+     }
+    },
+    "required": [
+     "circuit_qasm"
+    ],
+    "title": "Params",
+    "type": "object"
+   },
+   "credits_per_run": 1,
+   "enabled": true,
+   "registered_at": "2026-09-23T10:54:08Z",
+   "updated_at": "2026-09-23T10:54:08Z",
+   "banner_image_id": null,
+   "card_image_id": null,
+   "banner_image_tag": null,
+   "card_image_tag": null,
+   "has_estimate": false,
+   "estimate": null,
+   "has_estimate_fn": false,
+   "estimate_needs_container": false,
+   "sidecar_endpoint": null,
+   "has_validate_fn": false
+  }
+ }
+}

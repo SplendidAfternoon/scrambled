@@ -1,0 +1,20 @@
+[
+ {
+  "when": "2026-10-04 03:28 +0800",
+  "outcome": "still running after the 240 s local timeout (kept in cache/pending; resumed on the next atlas run)",
+  "job_id": "721c5d5d-6400-431d-b21c-4b5f84d1c7bc",
+  "seconds": 259.9
+ },
+ {
+  "when": "2026-10-04 03:58 +0800",
+  "outcome": "still running after the 240 s local timeout (kept in cache/pending; resumed on the next atlas run)",
+  "job_id": "721c5d5d-6400-431d-b21c-4b5f84d1c7bc",
+  "seconds": 254.0
+ },
+ {
+  "when": "2026-10-04 04:26 +0800",
+  "job_id": "721c5d5d-6400-431d-b21c-4b5f84d1c7bc",
+  "outcome": "still processing about 70 min after submission (server status: waiting on aer); left pending in cache/pending, resumed by the next atlas run",
+  "seconds": 3009
+ }
+]

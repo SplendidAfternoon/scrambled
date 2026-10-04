@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Quantum Egg</title>
+<link rel="icon" href="data:,">
+<style>
+  html, body { margin: 0; width: 1080px; height: 1080px; overflow: hidden; background: #05060a; }
+  #stage { position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 42%, #1b2233 0%, #0b0e17 55%, #040509 100%); }
+  canvas#gl { position: absolute; inset: 0; width: 1080px; height: 1080px; }
+  .layer { position: absolute; inset: 0; pointer-events: none; color: #e9ecf4;
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+  #title { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 64px; }
+  #title h1 { margin: 0; font-weight: 200; font-size: 112px; letter-spacing: 0.32em; padding-left: 0.32em; text-shadow: 0 4px 30px #000; }
+  #title h2 { margin: 690px 0 0; font-weight: 300; font-size: 30px; letter-spacing: 0.32em; padding-left: 0.32em; color: #d4dbec; }
+  #title p { margin: 14px 0 0; font-weight: 300; font-size: 21px; letter-spacing: 0.06em; color: #8f9ab4; }
+  #caption { position: absolute; left: 0; right: 0; bottom: 64px; text-align: center; font-weight: 300;
+    font-size: 27px; letter-spacing: 0.02em; line-height: 1.4; text-shadow: 0 2px 12px #000; }
+  #caption small { display: block; font-size: 19px; color: #9aa6c2; margin-top: 6px; }
+  #hud { position: absolute; left: 54px; top: 50px; font-size: 18px; color: #aeb8d0; letter-spacing: 0.06em; }
+  #hud .big { font-size: 40px; font-weight: 200; color: #f1f3f8; letter-spacing: 0.04em; }
+  #hud canvas { display: block; margin-top: 12px; border: 1px solid #2c3550; }
+  #hud .axis { font-size: 13px; color: #7d88a3; margin-top: 4px; display: flex; justify-content: space-between; width: 258px; }
+  #tag { position: absolute; right: 54px; top: 54px; text-align: right; font-size: 16px; color: #7d88a3; line-height: 1.6; letter-spacing: 0.05em; }
+  #end { display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(4,5,9,0.0); }
+  #end h1 { margin: 0; font-weight: 200; font-size: 84px; letter-spacing: 0.3em; padding-left: 0.3em; }
+  #end .rows { margin-top: 40px; font-size: 21px; line-height: 1.75; color: #b9c3dc; text-align: center; font-weight: 300; }
+  #end .fine { margin-top: 36px; font-size: 16px; color: #7d88a3; text-align: center; line-height: 1.6; }
+</style>
+<script type="importmap">{ "imports": { "three": "/node_modules/three/build/three.module.js" } }</script>
+<script src="scene_data.js"></script>
+</head>
+<body>
+<div id="stage"></div>
+<canvas id="gl" width="1080" height="1080"></canvas>
+<div class="layer" id="hudlayer">
+  <div id="hud"><div>OTOC ECHO STEP</div><div class="big" id="tval">t = 0 / 32</div>
+    <canvas id="heat" width="256" height="96"></canvas>
+    <div class="axis"><span>t = 1</span><span>|F(site, t)|, 12 sites</span><span>32</span></div></div>
+  <div id="tag">Moth Atlas · otoc-echo-v1<br>entanglement-shader-v1<br>blur-core-v1<br>emulator (aer)</div>
+</div>
+<div class="layer" id="title"><h1>SCRAMBLED</h1>
+  <h2>THE QUANTUM EGG</h2><p>A 12-qubit butterfly effect, measured, cracking an egg</p></div>
+<div class="layer"><div id="caption"></div></div>
+<div class="layer" id="end"><h1>SCRAMBLED</h1>
+  <div class="rows" id="endrows"></div>
+  <div class="fine" id="endfine"></div></div>
+<script type="module" src="main.js"></script>
+</body>
+</html>

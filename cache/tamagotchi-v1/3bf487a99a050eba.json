@@ -1,0 +1,61 @@
+{
+  "engine_id": "tamagotchi-v1",
+  "params": {
+    "code": "steane",
+    "n_logical": 1,
+    "actions": [
+      [
+        "I",
+        0
+      ],
+      [
+        "SE",
+        0
+      ]
+    ],
+    "shots": 4096,
+    "seed": 7,
+    "noise": {
+      "p_idle": 0.4613,
+      "p_1q": 0,
+      "p_gate": 0,
+      "p_meas": 0
+    }
+  },
+  "input_files": {},
+  "job_id": "41e9800d-61e5-4578-8f9b-76cacc37eedb",
+  "seconds": 8.5,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "result": {
+      "output": {
+        "code": "steane",
+        "corrections_applied": 7178,
+        "logical_error_count": 1977,
+        "n_logical": 1,
+        "noise": {
+          "p_1q": 0,
+          "p_gate": 0,
+          "p_idle": 0.4613,
+          "p_meas": 0
+        },
+        "per_logical": [
+          {
+            "expected": 0,
+            "logical_error_rate": 0.482666015625,
+            "logical_qubit": 0,
+            "success_rate": 0.517333984375
+          }
+        ],
+        "shots": 4096,
+        "simulator": {
+          "method": "stabilizer",
+          "transpiled": false
+        },
+        "success_rate": 0.517333984375,
+        "successful_shots": 2119,
+        "syndromes_detected": 7178
+      }
+    }
+  }
+}

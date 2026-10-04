@@ -1,0 +1,206 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "qpixl-v1",
+  "name": "Qpixl",
+  "description": "An array encoded as qubit angles, decoded in a single measurement.",
+  "owner": "81908c64-fe37-4fe5-a13b-6590b200348a",
+  "owner_type": "organization",
+  "created_by": "moth",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "application/json",
+  "output_type": "application/json",
+  "is_multipart": false,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 18000,
+    "max_retries": 1,
+    "heartbeat": 6000
+  },
+  "params_schema": {
+    "properties": {
+      "allow_high_shots": {
+        "default": false,
+        "description": "Permit `shots` above 8192. Real hardware time scales linearly with shots, and emulated runs multiply shots by the number of data-qubit groups, so raising this can be expensive. Off by default.",
+        "title": "Allow High Shots",
+        "type": "boolean"
+      },
+      "backend_name": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "IBM device to target when mode='qpu', e.g. 'ibm_fez'. Required in that mode -- there is no least-busy auto-select. Ignored when mode='emu'.",
+        "title": "Backend Name"
+      },
+      "discretize": {
+        "default": 0,
+        "description": "Number of discrete levels to quantize `values` to. 0 encodes them continuously.",
+        "minimum": 0,
+        "title": "Discretize",
+        "type": "integer"
+      },
+      "dynamic_range": {
+        "default": "none",
+        "description": "Rescale the reconstruction to match a summary statistic of the original `values`, to counteract shot noise/decoherence shrinking its spread toward the middle of the range. 'none' leaves the reconstruction unchanged. 'min_max' rescales so its min and max match the input's. 'percentile' does the same using the 2nd/98th percentiles instead, less sensitive to outliers. 'mean_std' matches mean and standard deviation. 'abs_max' rescales by the single largest absolute value. 'min_avg_max' matches min, mean, and max all three at once.",
+        "enum": [
+          "none",
+          "min_max",
+          "percentile",
+          "mean_std",
+          "abs_max",
+          "min_avg_max"
+        ],
+        "title": "Dynamic Range",
+        "type": "string"
+      },
+      "machine": {
+        "default": "aer",
+        "description": "Which emulator to use when mode='emu' (ignored when mode='qpu'). 'aer' is noiseless. 'fake_<chip>' options (e.g. 'fake_fez', 'fake_sherbrooke', 'fake_torino') are each calibrated to a real current IBM chip's noise.",
+        "enum": [
+          "aer",
+          "fake_fez",
+          "fake_marrakesh",
+          "fake_torino",
+          "fake_brisbane",
+          "fake_kyiv",
+          "fake_sherbrooke",
+          "fake_kyoto",
+          "fake_osaka",
+          "fake_quebec",
+          "fake_cusco",
+          "fake_strasbourg",
+          "fake_brussels"
+        ],
+        "title": "Machine",
+        "type": "string"
+      },
+      "mode": {
+        "default": "emu",
+        "description": "'emu' simulates the circuit (see `machine` for noiseless vs. noisy); 'qpu' submits to real IBM hardware (see `backend_name`). Both run server-side on mothbackend.",
+        "enum": [
+          "emu",
+          "qpu"
+        ],
+        "title": "Mode",
+        "type": "string"
+      },
+      "shots": {
+        "default": 4096,
+        "description": "Number of measurement shots to sample. Capped at 8192 unless `allow_high_shots` is set; the hard ceiling is 32768. Note this is shots PER data-qubit group when mode='emu', not per run.",
+        "exclusiveMinimum": 0,
+        "maximum": 32768,
+        "title": "Shots",
+        "type": "integer"
+      },
+      "values": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          }
+        ],
+        "default": [
+          0.05,
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          0.95
+        ],
+        "description": "Array of floating-point values to encode. Either a flat list, a nested list of groups (one sublist per data-qubit group, in the exact order `list_groups(values, machine)` returns them), or that same shape written as a single string wrapped in [..] or (..), e.g. \"[0.1,0.2,0.3]\" for a flat list or \"[[0.1,0.2],[0.3,0.4]]\" / \"([0.1,0.2],[0.3,0.4])\" for groups. A group with more values than its capacity is rejected; a group with fewer is padded with zeros.",
+        "minLength": 1,
+        "title": "Values"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-08-19T12:24:36Z",
+  "updated_at": "2026-09-09T21:42:30Z",
+  "description_md": "Encode an array of floats onto a quantum device using Interwoven QPIXL.\n\nExecution is delegated to mothbackend (`mothbackend.client`): the engine builds\ncircuits locally, decomposes them to a QASM2-safe basis, and submits QASM.\nmothbackend takes a single backend name and derives its own mode from it\n(\"aer\" -> sim, \"fake_<chip>\" -> emu, anything else -> qpu), so the public\n`mode`/`machine`/`backend_name` triple is collapsed into that one name by\n`topology.resolve_backend()` before anything is submitted.\n\n* ``mode=\"emu\"``, ``machine=\"aer\"`` -- mothbackend's noiseless simulator. The\n  encoding graph is still an auto-sized checkerboard lattice built engine-side\n  (`topology.py`) -- a bare simulator imposes no topology of its own.\n  Reconstructed one data-qubit group at a time via `_run_by_groups`, same as\n  the ``fake_*`` machines below -- there's no joint statevector limit to worry\n  about since each group runs as its own tiny circuit.\n* ``mode=\"qpu\"``, ``backend_name=\"ibm_fez\"`` -- real IBM hardware via\n  mothbackend's qpu mode. Runs the whole circuit as one joint measurement via\n  `_run_joint` -- submitting one job per data-qubit group to real hardware\n  would be far slower and more expensive than a single combined job. `machine`\n  is ignored in this mode. `backend_name` is required here: mothbackend\n  exposes no `least_busy` selector, so there's no auto-select to fall back on.\n\nCredentials are never handled engine-side. mothbackend resolves IBM\ncredentials itself from its own secret store; the engine holds no token, is\npassed none, and returns none. There is deliberately no BYOK parameter on\n`Params` -- adding one would put a user-supplied secret in the job payload,\nthe job record, and any error text quoting it.\n* ``mode=\"emu\"``, ``machine=\"fake_<chip>\"`` (e.g. ``\"fake_fez\"``,\n  ``\"fake_sherbrooke\"``, ``\"fake_torino\"`` -- see `topology.FAKE_MACHINES` for\n  the full list) -- that real IBM chip's noisy stand-in, simulated server-side\n  by mothbackend's emu mode. A full chip-scale statevector can't be simulated\n  jointly, so\n  `_run_by_groups` reconstructs one data-qubit group at a time: each group's\n  tiny sub-circuit is submitted with `initial_layout` pinning it onto its own\n  real physical qubits -- cheap regardless of how many qubits the chip actually\n  has, because different data-qubit groups' encoding gates commute (address\n  qubits are only ever controls, never targets), so each group's own marginal\n  statistics don't depend on any other group.\n\nBitstring convention: mothbackend reports counts qubit-0-LEFTMOST\n(`bit_order: \"qubit0_left\"`), while `iqpixl.decode_counts` consumes Qiskit's\nnative qubit-0-rightmost bitstrings -- `_run_counts` reverses each key exactly\nonce at the boundary. Nothing else in the pipeline reverses anything.\n\n`Params.shots` defaults to 4096 and must be positive -- there's no exact/\nnoiseless mode for a sampled run.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\n\nr = requests.post(\n    \"https://api.mothquantum.com/api/v1/engines/qpixl-v1/process\",\n    headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n    json={\"params\": {\"values\": \"0.05,0.2,0.4,0.6,0.8,0.95\", \"machine\": \"aer\", \"shots\": 4096}},\n)\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "curl",
+      "source": "curl -X POST https://api.mothquantum.com/api/v1/engines/qpixl-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"params\": {\"values\": \"0.05,0.2,0.4,0.6,0.8,0.95\", \"machine\": \"aer\", \"shots\": 4096}}'\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "unparseable_values",
+      "description": "a string values input isn't a valid comma-separated (optionally [..]/(..) grouped) number list."
+    },
+    {
+      "type": "too_few_values",
+      "description": "values must contain at least 2 numbers."
+    },
+    {
+      "type": "non_finite_values",
+      "description": "values must contain only finite numbers (no NaN/Infinity)."
+    },
+    {
+      "type": "too_many_values",
+      "description": "values exceeds the largest supported simulated lattice (64x64)."
+    },
+    {
+      "type": "insufficient_qubits",
+      "description": "values exceeds the selected machine's data-qubit capacity."
+    },
+    {
+      "type": "group_count_mismatch",
+      "description": "a nested (grouped) values input has a different number of groups than the machine's lattice."
+    },
+    {
+      "type": "group_overflow",
+      "description": "one group in a nested (grouped) values input has more values than that group's data qubit can hold."
+    },
+    {
+      "type": "unsupported_machine",
+      "description": "the requested machine name isn't recognized."
+    },
+    {
+      "type": "ibm_connection_failed",
+      "description": "Could not authenticate/connect to IBM Quantum with the given token/instance."
+    },
+    {
+      "type": "submission_failed",
+      "description": "The transpiled circuit was rejected or the sampling job failed to submit."
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

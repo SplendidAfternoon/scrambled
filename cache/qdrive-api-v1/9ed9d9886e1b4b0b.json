@@ -1,0 +1,127 @@
+{
+  "engine_id": "qdrive-api-v1",
+  "params": {
+    "n_qubits": 12,
+    "targets": [
+      {
+        "qubits": [
+          0
+        ],
+        "expvals": {
+          "Z": -0.076
+        }
+      },
+      {
+        "qubits": [
+          1
+        ],
+        "expvals": {
+          "Z": -0.103
+        }
+      },
+      {
+        "qubits": [
+          2
+        ],
+        "expvals": {
+          "Z": -0.226
+        }
+      },
+      {
+        "qubits": [
+          3
+        ],
+        "expvals": {
+          "Z": -0.224
+        }
+      },
+      {
+        "qubits": [
+          4
+        ],
+        "expvals": {
+          "Z": -0.402
+        }
+      },
+      {
+        "qubits": [
+          5
+        ],
+        "expvals": {
+          "Z": -0.263
+        }
+      },
+      {
+        "qubits": [
+          6
+        ],
+        "expvals": {
+          "Z": -0.43
+        }
+      },
+      {
+        "qubits": [
+          7
+        ],
+        "expvals": {
+          "Z": -0.253
+        }
+      },
+      {
+        "qubits": [
+          8
+        ],
+        "expvals": {
+          "Z": -0.441
+        }
+      },
+      {
+        "qubits": [
+          9
+        ],
+        "expvals": {
+          "Z": -0.206
+        }
+      },
+      {
+        "qubits": [
+          10
+        ],
+        "expvals": {
+          "Z": -0.168
+        }
+      },
+      {
+        "qubits": [
+          11
+        ],
+        "expvals": {
+          "Z": 0.345
+        }
+      }
+    ],
+    "tomography": 1,
+    "shots": 4096,
+    "seed": 12,
+    "update_method": "spectral",
+    "machine": "aer",
+    "sample": false
+  },
+  "input_files": {},
+  "job_id": "002c7928-ad78-4cd7-ae5c-d02c5f55cba2",
+  "seconds": 9.2,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "circuit",
+        "output_asset_id": "1d18c151-f771-431f-81bb-70127e9530c4",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/002c7928-ad78-4cd7-ae5c-d02c5f55cba2/outputs/circuit?<signature-removed>",
+        "expires_at": "2026-10-03T21:49:25.400276483Z",
+        "content_type": "text/plain",
+        "filename": "qdrive-api-v1-002c7928.brf",
+        "size_bytes": 1136
+      }
+    ]
+  }
+}

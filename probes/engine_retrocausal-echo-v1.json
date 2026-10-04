@@ -1,0 +1,541 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "retrocausal-echo-v1",
+  "name": "Retrocausal Echo",
+  "description": "A multi-tap delay whose tap map is measured on a quantum computer \u2014 negative returns invert, reverse or rotate the signal.",
+  "version": "0.1.2",
+  "owner": "fccf0d75-76b1-4059-93ab-e1267885289e",
+  "owner_type": "user",
+  "created_by": "fccf0d75-76b1-4059-93ab-e1267885289e",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "multipart/form-data",
+  "output_type": "audio/wav",
+  "input_files": [
+    {
+      "name": "audio",
+      "mime_types": [
+        "audio/wav",
+        "audio/x-wav",
+        "audio/wave",
+        "audio/mpeg",
+        "audio/ogg",
+        "audio/flac"
+      ],
+      "required": false,
+      "description": "Mono or stereo audio to process \u2014 WAV, MP3, OGG or FLAC. Stereo is summed to mono first, since the taps place their own stereo image. The file's own sample rate wins over the `sr` param."
+    },
+    {
+      "name": "ir",
+      "mime_types": [
+        "application/json"
+      ],
+      "required": false,
+      "description": "A previously measured impulse response \u2014 an otoc-echo `trajectory` envelope. Supply it to re-render without paying for the measurement again, and every echo param is ignored. Pass the asset id of a previous retrocausal-echo job's own `ir` output (output assets carry `slot` and `job_id`, so they chain straight into `input_files`), or upload the JSON yourself. `job:<id>/ir` is the documented alias for the same thing but may not resolve \u2014 prefer the asset id."
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "audio/wav",
+        "application/json"
+      ],
+      "required": true,
+      "description": "The primary output. With `emit: audio` (the default) this is the rendered stereo WAV. With `emit: map` no audio is rendered at all and this is the tap map as JSON \u2014 the same envelope the `taps` slot carries \u2014 so a sequencer or plugin can place the events itself without downloading audio."
+    },
+    {
+      "name": "ir",
+      "content_types": [
+        "application/json"
+      ],
+      "required": true,
+      "description": "The impulse response actually used, as an otoc-echo `trajectory` envelope. Its output asset chains straight into another job's `input_files.ir` \u2014 one measurement, many mixes."
+    },
+    {
+      "name": "taps",
+      "content_types": [
+        "application/json"
+      ],
+      "required": true,
+      "description": "The full `media` result envelope: provenance, the audio's shape, the echo summary, the spec, and the rendered tap map (time_ms, level, pan, F, polarity per tap). This is where a caller reads the numbers; a DAW or plugin can load it directly."
+    }
+  ],
+  "is_multipart": true,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 7200,
+    "max_retries": 1,
+    "heartbeat": 3600
+  },
+  "params_schema": {
+    "properties": {
+      "allow_high_shots": {
+        "default": false,
+        "description": "Permit shots above 8192.",
+        "title": "Allow High Shots",
+        "type": "boolean"
+      },
+      "bpm": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 20,
+            "maximum": 400,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Tempo. When set, one depth step = `division` of a bar instead of master_ms/depth.",
+        "title": "Bpm"
+      },
+      "decay": {
+        "default": 0.9,
+        "description": "Extra level roll-off per depth step, on top of |F|. 1.0 = none.",
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "title": "Decay",
+        "type": "number"
+      },
+      "depth": {
+        "default": 8,
+        "description": "Echo depths t = 1..depth \u2014 the tap time slots.",
+        "maximum": 32,
+        "minimum": 1,
+        "title": "Depth",
+        "type": "integer"
+      },
+      "diffusion_ms": {
+        "default": 0,
+        "description": "Square lattice only: y spreads taps by up to \u00b1diffusion_ms/2 inside their depth slot.",
+        "maximum": 500,
+        "minimum": 0,
+        "title": "Diffusion Ms",
+        "type": "number"
+      },
+      "disorder": {
+        "default": 0,
+        "description": "Additive per-gate angle jitter, std in radians. Localises the echo; the only lever that makes `seed` audible.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Disorder",
+        "type": "number"
+      },
+      "division": {
+        "default": 0.25,
+        "description": "Step as a fraction of a beat when bpm is set. 0.25 sixteenth \u00b7 0.5 eighth \u00b7 0.75 dotted eighth \u00b7 0.3333 eighth-triplet \u00b7 1.0 quarter.",
+        "exclusiveMinimum": 0,
+        "maximum": 4,
+        "title": "Division",
+        "type": "number"
+      },
+      "emit": {
+        "default": "audio",
+        "description": "`audio` renders a WAV \u2014 your input processed, or the effect's own impulse response when no audio is supplied. `map` skips rendering entirely and returns only the time-mapped tap list, which is what a sequencer or a DAW plugin wants: same tap map, no audio work, no WAV to download.",
+        "enum": [
+          "audio",
+          "map"
+        ],
+        "title": "Emit",
+        "type": "string"
+      },
+      "exact": {
+        "default": true,
+        "description": "aer only: exact expectation values instead of sampling.",
+        "title": "Exact",
+        "type": "boolean"
+      },
+      "feedback": {
+        "default": 0,
+        "description": "Regeneration loop gain. The bus of selected taps is normalised first, so this is the fraction of signal that comes back round \u2014 always convergent, and 0.6 sounds like 0.6 on a rack unit rather than diverging.",
+        "exclusiveMaximum": 1,
+        "minimum": 0,
+        "title": "Feedback",
+        "type": "number"
+      },
+      "feedback_source": {
+        "default": "kick",
+        "description": "Which taps regenerate. `kick`: only the kick site's column (the classic single regeneration tap). `all`: every tap.",
+        "enum": [
+          "kick",
+          "all"
+        ],
+        "title": "Feedback Source",
+        "type": "string"
+      },
+      "fractional_gates": {
+        "default": true,
+        "description": "Use native rzz/rx where available.",
+        "title": "Fractional Gates",
+        "type": "boolean"
+      },
+      "grain_ms": {
+        "default": 120,
+        "description": "Grain length for `reverse` mode. Short \u2192 stuttered; long \u2192 whole phrases backwards.",
+        "exclusiveMinimum": 1,
+        "maximum": 2000,
+        "title": "Grain Ms",
+        "type": "number"
+      },
+      "height": {
+        "anyOf": [
+          {
+            "maximum": 32,
+            "minimum": 2,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Square lattice height. Required for `square`.",
+        "title": "Height"
+      },
+      "include_tap_map": {
+        "default": true,
+        "description": "Also emit the rendered tap map inline in the result (it is always written to taps.json).",
+        "title": "Include Tap Map",
+        "type": "boolean"
+      },
+      "ir_seconds": {
+        "default": 3,
+        "description": "With no `audio` input, render the effect's own stereo impulse response for this long.",
+        "exclusiveMinimum": 0,
+        "maximum": 30,
+        "title": "Ir Seconds",
+        "type": "number"
+      },
+      "kick": {
+        "default": "Z",
+        "description": "Perturbation Pauli applied to the kick site between U and U\u2020.",
+        "enum": [
+          "Z",
+          "Y",
+          "X"
+        ],
+        "title": "Kick",
+        "type": "string"
+      },
+      "kick_site": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Regeneration source: the site that receives the impulse. Default: centre.",
+        "title": "Kick Site"
+      },
+      "lattice": {
+        "default": "chain",
+        "description": "Delay-line topology. `chain`: site \u2192 pan. `square` (Nighthawk-native): x \u2192 pan, y \u2192 diffusion.",
+        "enum": [
+          "chain",
+          "square"
+        ],
+        "title": "Lattice",
+        "type": "string"
+      },
+      "machine": {
+        "default": "aer",
+        "description": "Backend for the measurement: 'aer' (local, noiseless) or an IBM backend name such as 'ibm_phoenix'.",
+        "title": "Machine",
+        "type": "string"
+      },
+      "master_ms": {
+        "default": 640,
+        "description": "Length of the master delay line in ms. One depth step = master_ms / depth. Ignored when bpm is set.",
+        "exclusiveMinimum": 0,
+        "maximum": 8000,
+        "title": "Master Ms",
+        "type": "number"
+      },
+      "max_regen": {
+        "default": 24,
+        "description": "Cap on regeneration iterations.",
+        "maximum": 64,
+        "minimum": 1,
+        "title": "Max Regen",
+        "type": "integer"
+      },
+      "min_level": {
+        "default": 0.05,
+        "description": "|F| threshold below which a tap is dropped.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Min Level",
+        "type": "number"
+      },
+      "mix": {
+        "default": 0.6,
+        "description": "Dry/wet. 0 = dry, 1 = wet only.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Mix",
+        "type": "number"
+      },
+      "n_sites": {
+        "default": 8,
+        "description": "Chain length in qubits (= pan positions). Ignored for `square`.",
+        "maximum": 156,
+        "minimum": 2,
+        "title": "N Sites",
+        "type": "integer"
+      },
+      "negative_mode": {
+        "default": "invert",
+        "description": "What a negative F does. `invert`: flip polarity (phase-cancelling echo). `reverse`: play that tap's grains backwards. `phase`: rotate by arg(F) via a Hilbert transform \u2014 the only mode that uses F_im, so pair it with theta_z > 0.",
+        "enum": [
+          "invert",
+          "reverse",
+          "phase"
+        ],
+        "title": "Negative Mode",
+        "type": "string"
+      },
+      "output_format": {
+        "default": "pcm_16",
+        "description": "WAV sample format.",
+        "enum": [
+          "pcm_16",
+          "pcm_32",
+          "float_32"
+        ],
+        "title": "Output Format",
+        "type": "string"
+      },
+      "qpu_instance": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "IBM Quantum instance CRN. As with the token: required for `via: direct`, optional BYOK for `via: mothbackend`.",
+        "format": "password",
+        "title": "Qpu Instance",
+        "writeOnly": true
+      },
+      "qpu_token": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "IBM Quantum API token when machine is an IBM backend; falls back to QISKIT_IBM_TOKEN.",
+        "format": "password",
+        "title": "Qpu Token",
+        "writeOnly": true
+      },
+      "ref_floor": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "|c_ref| below which a tap is dropped as unnormalisable. Default: 4/sqrt(shots), ~0 for exact simulation. Raise it to prune taps the noise floor cannot support.",
+        "title": "Ref Floor"
+      },
+      "seed": {
+        "anyOf": [
+          {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "RNG seed for the disorder realisation. Only audible when disorder > 0. Drawn as a 31-bit integer and returned in provenance if omitted. Capped at 2**53-1: above that, moth-api (Go) and any browser client re-spell the integer as a float64 and it stops matching the seed you sent.",
+        "title": "Seed"
+      },
+      "shots": {
+        "default": 4096,
+        "description": "Shots per circuit. Ignored when machine='aer' and exact=true. Above 8192 requires allow_high_shots.",
+        "minimum": 1,
+        "title": "Shots",
+        "type": "integer"
+      },
+      "sr": {
+        "default": 44100,
+        "description": "Sample rate. Ignored when an `audio` file is supplied \u2014 that file's own rate is used.",
+        "maximum": 192000,
+        "minimum": 8000,
+        "title": "Sr",
+        "type": "integer"
+      },
+      "stereo_width": {
+        "default": 1,
+        "description": "Scales the site \u2192 pan spread. 0 = mono.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Stereo Width",
+        "type": "number"
+      },
+      "tail_ms": {
+        "anyOf": [
+          {
+            "maximum": 30000,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Silence appended to the input so the last tap and its regenerations fit. Default: computed from the tap map.",
+        "title": "Tail Ms"
+      },
+      "theta_x": {
+        "default": 0.9424777960769379,
+        "description": "Transverse kick per layer (RX, rad) \u2014 the 'how quantum' dial. Low \u2192 loud regular taps; high \u2192 inverted, attenuated, erased.",
+        "maximum": 3.141592653589793,
+        "minimum": 0,
+        "title": "Theta X",
+        "type": "number"
+      },
+      "theta_z": {
+        "default": 0,
+        "description": "Phase layer (RZ, rad). 0 \u2192 real, two-signed taps. >0 \u2192 complex F, which `negative_mode: phase` renders as rotation.",
+        "maximum": 3.141592653589793,
+        "minimum": 0,
+        "title": "Theta Z",
+        "type": "number"
+      },
+      "theta_zz": {
+        "default": 1.0995574287564276,
+        "description": "Coupling per layer (RZZ, rad). Non-monotonic: \u22480.25\u03c0 is the sparse setting. \u03c0 is a Clifford (no scrambling). \u03b8 and \u03c0\u2212\u03b8 coincide only when theta_x = 0, not at the default drive, so the upper half of the range is its own territory. The sign is invisible unless theta_z > 0.",
+        "exclusiveMinimum": -3.141592653589793,
+        "maximum": 3.141592653589793,
+        "title": "Theta Zz",
+        "type": "number"
+      },
+      "twirls": {
+        "default": 1,
+        "description": "ZZ-commutant Pauli twirls per circuit, averaged. Only useful on hardware: it randomises off-axis coherent error in the couplings. Multiplies the circuit count, so it multiplies QPU time.",
+        "maximum": 32,
+        "minimum": 1,
+        "title": "Twirls",
+        "type": "integer"
+      },
+      "via": {
+        "default": "direct",
+        "description": "How to reach the machine. `direct`: this engine drives qiskit-ibm-runtime itself (analytic emulation, native fractional gates, one batched QPU session). `mothbackend`: route through Moth's execution service, which holds the credentials \u2014 sampled only, so no analytic mode, no fractional gates, and one submission per circuit.",
+        "enum": [
+          "direct",
+          "mothbackend"
+        ],
+        "title": "Via",
+        "type": "string"
+      },
+      "width": {
+        "anyOf": [
+          {
+            "maximum": 32,
+            "minimum": 2,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Square lattice width. Required for `square`.",
+        "title": "Width"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 2,
+  "enabled": true,
+  "registered_at": "2026-09-15T01:31:59Z",
+  "updated_at": "2026-09-15T13:00:47Z",
+  "description_md": "retrocausal-echo-v1 \u2014 Retrocausal Echo. A **media** engine.\n\nThe other half of the split. `otoc-echo-v1` is the *core* engine: it measures a\nquantum impulse response and returns it as a typed `trajectory`. This engine is a\n*media* engine: it turns an impulse response into audio. Both depend on the same\n`quantum-echo` library, so the measurement exists in exactly one place.\n\n    core   : params -> EchoSpec -> measure_ir -> EchoIR.to_trajectory()\n    media  : (EchoIR from a library call | a prior job's ir.json) -> MultiTapDelay -> WAV\n\nTwo ways in, one renderer:\n\n  * no `ir` file  -> this engine calls `quantum_echo.measure_ir` in-process. One\n    job, one price, audio out. The QPU work is identical to the core engine's.\n  * an `ir` file  -> `EchoIR.from_trajectory`. Re-render a measured response with\n    different audio, tempo, polarity behaviour or feedback without paying for the\n    measurement again. The slot is `by_reference: true`, so it takes either an\n    upload or `job:<id>/ir` off a previous retrocausal-echo job.\n\nNothing here builds a circuit and nothing in `render.py` knows what a qubit is.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import json\nimport os\nimport time\nimport requests\n\nAPI = \"https://api.mothquantum.com\"\n# Cloudflare 403s the stdlib `Python-urllib/*` User-Agent with a plain-text\n# `error code: 1010`, which reads exactly like an auth failure. Always identify\n# your client, and always print the response body on error.\nH = {\"Authorization\": \"Bearer moth_YOUR_KEY\",\n     \"User-Agent\": \"retrocausal-echo-example/1.0\"}\n\ndef check(r):\n    if not r.ok:\n        raise RuntimeError(f\"HTTP {r.status_code}: {r.text[:800]}\")\n    return r.json()\n\ndef upload(path, content_type):\n    \"\"\"File inputs are assets, not multipart fields: create, PUT, complete.\n    The presigned URL signs in the size and content type, so they must match.\"\"\"\n    size = os.path.getsize(path)\n    a = check(requests.post(f\"{API}/api/v1/assets\", headers=H,\n                            json={\"filename\": os.path.basename(path),\n                                  \"content_type\": content_type, \"size_bytes\": size}))\n    up = a[\"upload\"]\n    with open(path, \"rb\") as fh:\n        r = requests.put(up[\"url\"], data=fh, headers=up[\"headers\"])\n        if not r.ok:\n            raise RuntimeError(f\"upload HTTP {r.status_code}: {r.text[:400]}\")\n    check(requests.post(f\"{API}/api/v1/assets/{a['asset_id']}/complete\", headers=H))\n    return a[\"asset_id\"]\n\ndef run(params, input_files=None):\n    job = check(requests.post(f\"{API}/api/v1/engines/retrocausal-echo-v1/process\", headers=H,\n                              json={\"params\": params,\n                                    \"input_files\": input_files or {}}))[\"job_id\"]\n    while True:\n        st = check(requests.get(f\"{API}/api/v1/jobs/{job}/status\", headers=H))\n        if st[\"status\"] in (\"completed\", \"failed\", \"cancelled\"):\n            break\n        time.sleep(2)\n    if st[\"status\"] != \"completed\":\n        raise RuntimeError(f\"{st['status']}: {(st.get('error') or {}).get('message')}\")\n    return job, check(requests.get(f\"{API}/api/v1/jobs/{job}/result\", headers=H))\n\n# 1. Measure and render in one job. No audio input -> you get the effect's own\n#    stereo impulse response, ready for a convolver.\njob, body = run({\"n_sites\": 10, \"depth\": 8, \"theta_x\": 1.2,\n                 \"negative_mode\": \"reverse\", \"ir_seconds\": 4})\n\n# Outputs come back as presigned URLs in `outputs`, on a separate S3 host.\n# `result` is the WAV itself (the binary primary); `taps` carries the envelope.\nout = {o[\"slot\"]: o for o in (body.get(\"outputs\") or [])}\nopen(\"retrocausal_ir.wav\", \"wb\").write(requests.get(out[\"result\"][\"url\"]).content)\ntaps = requests.get(out[\"taps\"][\"url\"]).json()\nprint(taps[\"extras\"][\"tap_map\"][\"taps\"][:3])\n\n# 2. Re-render the same measured response over your own audio -- no quantum\n#    work, 1 credit. The `ir` output asset chains straight into `input_files`.\njob2, body2 = run(\n    {\"bpm\": 128, \"division\": 0.75, \"feedback\": 0.55, \"mix\": 0.7},\n    {\"audio\": upload(\"guitar.wav\", \"audio/wav\"), \"ir\": out[\"ir\"][\"asset_id\"]},\n)\nout2 = {o[\"slot\"]: o for o in (body2.get(\"outputs\") or [])}\nopen(\"guitar_retrocausal.wav\", \"wb\").write(requests.get(out2[\"result\"][\"url\"]).content)\n"
+    },
+    {
+      "lang": "curl",
+      "source": "# A WAV input is an asset, not a multipart field. Three calls to stage it:\n#   POST /api/v1/assets  {filename, content_type, size_bytes}  -> presigned upload\n#   PUT  <upload.url>    (with the exact headers it returns)\n#   POST /api/v1/assets/{asset_id}/complete\n# then pass the asset id in input_files:\ncurl -X POST https://api.mothquantum.com/api/v1/engines/retrocausal-echo-v1/process \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: retrocausal-echo-example/1.0\" \\\n  -d '{\"params\": {\"lattice\":\"square\",\"width\":5,\"height\":4,\"depth\":6,\n                  \"diffusion_ms\":40,\"negative_mode\":\"phase\",\"theta_z\":0.6,\"mix\":0.75},\n       \"input_files\": {\"audio\": \"<asset-uuid>\"}}'\n\n# Outputs are presigned URLs under `.outputs[]`, keyed by slot.\ncurl -s https://api.mothquantum.com/api/v1/jobs/$JOB_ID/result \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" -H \"User-Agent: retrocausal-echo-example/1.0\" \\\n  | jq '.outputs[] | {slot, url}'\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "invalid_params",
+      "description": "params fail Params' own field validation (type/range) or a cross-field check (square lattice without width/height, kick_site outside the line, shots over the cap without allow_high_shots)."
+    },
+    {
+      "type": "invalid_ir",
+      "description": "the `ir` input is not UTF-8 JSON, or not an otoc-echo `trajectory` envelope. A bare envelope, a handler return wrapped in `output`, and a whole job result wrapped in `result` are all accepted."
+    },
+    {
+      "type": "invalid_audio",
+      "description": "the `audio` input could not be decoded as a PCM or float WAV, is over the size cap, or decoded to zero samples."
+    },
+    {
+      "type": "audio_too_long",
+      "description": "the input, or the input plus its computed tail, exceeds the render length cap. Set tail_ms explicitly or send a shorter file."
+    },
+    {
+      "type": "no_taps",
+      "description": "no tap survived min_level \u2014 the echo was fully erased at this theta_x, or min_level is too high. The echo summary is in the message."
+    },
+    {
+      "type": "too_many_taps",
+      "description": "the tap map is larger than the render cap. Raise min_level or lower depth."
+    },
+    {
+      "type": "too_many_qubits",
+      "description": "the delay line needs more qubits than the machine allows \u2014 24 for aer, the device's own width for an IBM backend. Supplying a measured `ir` sidesteps this entirely."
+    },
+    {
+      "type": "invalid_machine",
+      "description": "machine is neither 'aer' nor an IBM backend name the runtime knows."
+    },
+    {
+      "type": "backend_unavailable",
+      "description": "the requested execution route could not be reached \u2014 for `via: direct`, qiskit-ibm-runtime is missing or no credentials were supplied (qpu_token param / QISKIT_IBM_TOKEN); for `via: mothbackend`, the mothbackend package is absent or the service returned a transport error. Retryable."
+    },
+    {
+      "type": "execution_failed",
+      "description": "the estimator returned an error while running the echo circuits."
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

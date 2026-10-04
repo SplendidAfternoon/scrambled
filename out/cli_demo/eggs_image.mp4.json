@@ -1,0 +1,122 @@
+{
+  "tool": "scrambled 0.1.0",
+  "command": "image",
+  "mode": "atlas",
+  "created": "2026-10-04T02:54:20+0800",
+  "otoc": {
+    "source": "atlas",
+    "label": "measured on Moth Atlas, otoc-echo-v1 (aer emulator)",
+    "job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c",
+    "shape": [
+      12,
+      32
+    ],
+    "kick_site": 6,
+    "light_cone_arrival_t": [
+      6,
+      5,
+      4,
+      3,
+      2,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "late_mean_absF_offkick": 0.253,
+    "params": {
+      "allow_high_shots": false,
+      "depth": 32,
+      "disorder": 0,
+      "exact": true,
+      "fractional_gates": true,
+      "height": null,
+      "include_taps": true,
+      "include_z": false,
+      "initial_layout": null,
+      "kick": "Z",
+      "kick_site": null,
+      "lattice": "chain",
+      "machine": "aer",
+      "min_tap_level": 0,
+      "n_sites": 12,
+      "ref_floor": null,
+      "seed": null,
+      "shots": 4096,
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "twirls": 1,
+      "via": "direct",
+      "width": null
+    }
+  },
+  "input": "media\\prep\\A_sq.jpg",
+  "pair": "media\\prep\\B_sq.jpg",
+  "label": "Atlas otoc-echo-v1 (emulator) + blur-v1/telablur-v1",
+  "ladder_jobs": [
+    [
+      "blur-v1",
+      {
+        "strength": 0.1,
+        "reach": 0.1
+      },
+      "37894b70-a013-42a0-98e1-b74d927c702b"
+    ],
+    [
+      "blur-v1",
+      {
+        "strength": 0.2,
+        "reach": 0.2
+      },
+      "e3b9ba8e-f945-427f-b8c5-5a1388bd2f2c"
+    ],
+    [
+      "blur-v1",
+      {
+        "strength": 0.3,
+        "reach": 0.3
+      },
+      "df5be01b-637e-40a6-b1c1-b708cda247e4"
+    ],
+    [
+      "blur-v1",
+      {
+        "strength": 0.4,
+        "reach": 0.4
+      },
+      "94b48e49-2780-477c-ba9b-df574d8e88f1"
+    ],
+    [
+      "telablur-v1",
+      {
+        "strength": 0.02
+      },
+      "0cc32be5-cfbc-45d9-b274-6bd668ebaf74"
+    ],
+    [
+      "telablur-v1",
+      {
+        "strength": 0.5
+      },
+      "d5fe1183-82ad-449b-9ffb-c36b9d913d24"
+    ],
+    [
+      "telablur-v1",
+      {
+        "strength": 0.9
+      },
+      "e705a08b-a7eb-47ce-9286-2b8b2597eaf8"
+    ],
+    [
+      "telablur-v1",
+      {
+        "strength": 0.98
+      },
+      "a58d98ba-de24-48b0-a1ba-d3d58192387c"
+    ]
+  ]
+}

@@ -1,0 +1,221 @@
+{
+  "tool": "scrambled 0.1.0",
+  "command": "video",
+  "mode": "atlas",
+  "created": "2026-10-04T03:08:55+0800",
+  "otoc": {
+    "source": "atlas",
+    "label": "measured on Moth Atlas, otoc-echo-v1 (aer emulator)",
+    "job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c",
+    "shape": [
+      12,
+      32
+    ],
+    "kick_site": 6,
+    "light_cone_arrival_t": [
+      6,
+      5,
+      4,
+      3,
+      2,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "late_mean_absF_offkick": 0.253,
+    "params": {
+      "allow_high_shots": false,
+      "depth": 32,
+      "disorder": 0,
+      "exact": true,
+      "fractional_gates": true,
+      "height": null,
+      "include_taps": true,
+      "include_z": false,
+      "initial_layout": null,
+      "kick": "Z",
+      "kick_site": null,
+      "lattice": "chain",
+      "machine": "aer",
+      "min_tap_level": 0,
+      "n_sites": 12,
+      "ref_floor": null,
+      "seed": null,
+      "shots": 4096,
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "twirls": 1,
+      "via": "direct",
+      "width": null
+    }
+  },
+  "input": "out\\cli_demo\\sample_life.mp4",
+  "label": "Atlas otoc-echo-v1 (emulator) + blur-v1",
+  "render": {
+    "size": [
+      640,
+      360
+    ],
+    "fps": 24.0,
+    "start": 0.0,
+    "duration": 12.0,
+    "keyframes": [
+      2.0,
+      6.0,
+      10.0
+    ],
+    "jobs": [
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "8a88c5ee-5470-4933-b9ef-0682fe41595d"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "310eb448-5cc0-487d-8b11-b3e6ef4ba330"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "f75a2b00-49b1-455b-8576-d6f9ef023006"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.6,
+          "reach": 0.6
+        },
+        "job_id": "b795c235-8193-4b49-919e-d595d6a6188a"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.8,
+          "reach": 0.8
+        },
+        "job_id": "1ad2868f-ffb9-4cca-8dfd-482d2562a438"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 1.0,
+          "reach": 1.0
+        },
+        "job_id": "9833c9fe-f175-42a3-8fde-846b3e66da06"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "fc77471e-61b9-40cd-bc25-4296624ced18"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "bca5dc1f-f98f-4d39-8430-04e6de8f59f7"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "1eff5b05-d98e-4af3-b5cd-70fb4ed4db58"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.6,
+          "reach": 0.6
+        },
+        "job_id": "cd371d0c-adc5-4fb2-887e-c84a204b711b"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.8,
+          "reach": 0.8
+        },
+        "job_id": "be9076d9-310b-4b26-8979-8996987a2d61"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 1.0,
+          "reach": 1.0
+        },
+        "job_id": "1aec16cf-912e-49cf-aa90-603af79c9923"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "2edfdc20-b1ae-4e64-a1bd-a051d9a02b06"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "972198e5-f71b-476f-a096-33c7e2515966"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "d2b92e14-ffca-4835-8e17-0958fd7ed0e7"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.6,
+          "reach": 0.6
+        },
+        "job_id": "3d7dd20d-0880-4598-99e9-9e7755908793"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.8,
+          "reach": 0.8
+        },
+        "job_id": "05b453db-cb19-4f90-beaa-2ef1606a774e"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 1.0,
+          "reach": 1.0
+        },
+        "job_id": "fccefdbf-8b7f-4d7a-afc5-25135b7d87a2"
+      }
+    ],
+    "audio": "local numpy tap render of the OTOC map (classical DSP)",
+    "frames": 288
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "job_id": "e3e80d2b-9d0f-4aed-a40e-e35bb37485e1",
+  "status": "processing",
+  "progress": {
+    "detail": "Building the tap map",
+    "step": "render"
+  },
+  "created_at": "2026-10-03T19:30:33Z",
+  "checked": "2026-10-03T20:42:26+00:00"
+}

@@ -1,0 +1,118 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "tomography-api-v2",
+  "name": "Tomography Api",
+  "description": "Simple core engine to compute relevant quantities of a quantum circuit",
+  "version": "0.2.0",
+  "owner": "825c73f9-123a-46e0-a558-851ee85dba90",
+  "owner_type": "user",
+  "created_by": "825c73f9-123a-46e0-a558-851ee85dba90",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "application/json",
+  "output_type": "application/json",
+  "is_multipart": false,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 10800,
+    "max_retries": 3,
+    "heartbeat": 10800
+  },
+  "params_schema": {
+    "properties": {
+      "backend_name": {
+        "default": "automatic",
+        "description": "mothprovider backend/method within provider_name",
+        "title": "Backend Name",
+        "type": "string"
+      },
+      "circuit_qasm": {
+        "description": "OpenQASM 2 source of the circuit to analyze",
+        "title": "Circuit Qasm",
+        "type": "string"
+      },
+      "classical_mutual_information": {
+        "default": true,
+        "description": "Whether to compute classical (Shannon) mutual information between each pair's measurement outcomes, separately for the X, Y, and Z basis",
+        "title": "Classical Mutual Information",
+        "type": "boolean"
+      },
+      "double_tomography": {
+        "default": true,
+        "description": "Whether to perform double tomography",
+        "title": "Double Tomography",
+        "type": "boolean"
+      },
+      "mutual_information": {
+        "default": true,
+        "description": "Whether to compute quantum mutual information (von Neumann entropies)",
+        "title": "Mutual Information",
+        "type": "boolean"
+      },
+      "provider_name": {
+        "default": "aer",
+        "description": "mothprovider provider used to execute the circuits",
+        "title": "Provider Name",
+        "type": "string"
+      },
+      "qubit_list": {
+        "description": "List of qubits to measure",
+        "items": {
+          "type": "integer"
+        },
+        "title": "Qubit List",
+        "type": "array"
+      },
+      "qubit_pair_list": {
+        "description": "List of qubit pairs to measure",
+        "items": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "type": "array"
+        },
+        "title": "Qubit Pair List",
+        "type": "array"
+      },
+      "shots": {
+        "default": 4096,
+        "description": "Shots per executed measurement circuit",
+        "title": "Shots",
+        "type": "integer"
+      },
+      "single_tomography": {
+        "default": true,
+        "description": "Whether to perform single tomography",
+        "title": "Single Tomography",
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "circuit_qasm"
+    ],
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-09-23T10:54:08Z",
+  "updated_at": "2026-09-23T10:54:08Z",
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

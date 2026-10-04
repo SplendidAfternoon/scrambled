@@ -1,0 +1,7 @@
+node_modules/
+out/frames/
+out/debug/
+out/stills_log.txt
+out/render_log.txt
+audio/bed_premaster.wav
+audio/stem_taps_*.wav

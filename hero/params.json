@@ -1,0 +1,44 @@
+{
+  "challenge": "01 One image, one engine",
+  "engine_id": "blur-v1",
+  "engine_version": "1.1.9",
+  "job_id": "4c6ae43e-afef-4d62-a54e-8b87076c1fad",
+  "job_seconds": 22.5,
+  "credits": 1,
+  "input_file": "hero/input_A_sq.png",
+  "input_asset_id": "d39859e0-ff3f-4a86-acfc-119464796a1a",
+  "input_sha256": "8da7c65965878bf5944ea1d168a7a29757f81a2660a0c463fa6d5335c49ff9ea",
+  "output_file": "hero/hero.png",
+  "output_size": [
+    1024,
+    1024
+  ],
+  "output_note": "hero.png is the engine's result file byte-for-byte (PNG in, PNG out; 1024 is blur-v1's max size).",
+  "params_sent": {
+    "strength": 0.75,
+    "reach": 0.25,
+    "style": "rx"
+  },
+  "params_full": {
+    "downscale": true,
+    "mask_bin_size": 4,
+    "mask_min_region": 16,
+    "reach": 0.25,
+    "size": 1024,
+    "strength": 0.75,
+    "style": "rx"
+  },
+  "params_defaulted": [
+    "downscale",
+    "mask_bin_size",
+    "mask_min_region",
+    "size"
+  ],
+  "parameter_rationale": {
+    "strength": "1 - late-time mean |F| = 1 - 0.251 (n=12 OTOC, otoc-echo-v1 job 8df5cfa2, t>=16) -> 0.75",
+    "reach": "0.25: picked from the ladder; the highest reach at which the eggs still read (0.35+ is unreadable)",
+    "style": "rx: every ry rung at strength 0.75 came back black",
+    "size": "default 1024 = input size = engine max, one pass over the whole frame"
+  },
+  "ladder": "hero/ladder/index.json, hero/ladder_contact.jpg"
+}

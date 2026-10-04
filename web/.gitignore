@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.vercel/
+scripts/tessa_raw/
+scripts/*.log
+__pycache__/

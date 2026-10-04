@@ -1,0 +1,6 @@
+ziglang==0.16.0
+pedalboard==0.9.25
+numpy
+soundfile
+matplotlib
+pillow

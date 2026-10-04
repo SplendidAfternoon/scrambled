@@ -1,0 +1,402 @@
+{
+ "crack_threshold_s": 0.0923076923076923,
+ "lift_threshold_s": 0.6,
+ "scrambling_events": [
+  {
+   "type": "crack",
+   "site": 5,
+   "t": 8.144
+  },
+  {
+   "type": "crack",
+   "site": 7,
+   "t": 8.144
+  },
+  {
+   "type": "crack",
+   "site": 6,
+   "t": 8.225
+  },
+  {
+   "type": "lift",
+   "site": 5,
+   "t": 8.439
+  },
+  {
+   "type": "lift",
+   "site": 7,
+   "t": 8.439
+  },
+  {
+   "type": "crack",
+   "site": 4,
+   "t": 8.949
+  },
+  {
+   "type": "crack",
+   "site": 8,
+   "t": 8.949
+  },
+  {
+   "type": "settle",
+   "site": 5,
+   "t": 9.335
+  },
+  {
+   "type": "settle",
+   "site": 7,
+   "t": 9.335
+  },
+  {
+   "type": "crack",
+   "site": 3,
+   "t": 9.789
+  },
+  {
+   "type": "crack",
+   "site": 9,
+   "t": 9.789
+  },
+  {
+   "type": "lift",
+   "site": 4,
+   "t": 9.922
+  },
+  {
+   "type": "lift",
+   "site": 8,
+   "t": 9.922
+  },
+  {
+   "type": "lift",
+   "site": 3,
+   "t": 10.678
+  },
+  {
+   "type": "lift",
+   "site": 9,
+   "t": 10.678
+  },
+  {
+   "type": "crack",
+   "site": 2,
+   "t": 10.692
+  },
+  {
+   "type": "crack",
+   "site": 10,
+   "t": 10.692
+  },
+  {
+   "type": "lift",
+   "site": 5,
+   "t": 10.822
+  },
+  {
+   "type": "lift",
+   "site": 7,
+   "t": 10.822
+  },
+  {
+   "type": "lift",
+   "site": 2,
+   "t": 11.409
+  },
+  {
+   "type": "lift",
+   "site": 10,
+   "t": 11.409
+  },
+  {
+   "type": "crack",
+   "site": 11,
+   "t": 11.821
+  },
+  {
+   "type": "crack",
+   "site": 1,
+   "t": 11.823
+  },
+  {
+   "type": "lift",
+   "site": 6,
+   "t": 12.101
+  },
+  {
+   "type": "lift",
+   "site": 11,
+   "t": 12.286
+  },
+  {
+   "type": "lift",
+   "site": 1,
+   "t": 12.303
+  },
+  {
+   "type": "crack",
+   "site": 0,
+   "t": 12.657
+  },
+  {
+   "type": "lift",
+   "site": 0,
+   "t": 13.473
+  },
+  {
+   "type": "settle",
+   "site": 8,
+   "t": 13.726
+  },
+  {
+   "type": "settle",
+   "site": 6,
+   "t": 13.734
+  },
+  {
+   "type": "settle",
+   "site": 4,
+   "t": 13.942
+  },
+  {
+   "type": "lift",
+   "site": 4,
+   "t": 14.047
+  },
+  {
+   "type": "lift",
+   "site": 6,
+   "t": 14.223
+  },
+  {
+   "type": "lift",
+   "site": 8,
+   "t": 14.262
+  },
+  {
+   "type": "settle",
+   "site": 3,
+   "t": 14.641
+  },
+  {
+   "type": "lift",
+   "site": 3,
+   "t": 14.917
+  },
+  {
+   "type": "settle",
+   "site": 11,
+   "t": 15.695
+  },
+  {
+   "type": "settle",
+   "site": 9,
+   "t": 15.982
+  },
+  {
+   "type": "settle",
+   "site": 8,
+   "t": 16.689
+  },
+  {
+   "type": "settle",
+   "site": 10,
+   "t": 16.766
+  },
+  {
+   "type": "lift",
+   "site": 9,
+   "t": 16.788
+  },
+  {
+   "type": "settle",
+   "site": 0,
+   "t": 16.811
+  },
+  {
+   "type": "settle",
+   "site": 2,
+   "t": 16.828
+  },
+  {
+   "type": "settle",
+   "site": 9,
+   "t": 17.146
+  },
+  {
+   "type": "settle",
+   "site": 7,
+   "t": 17.474
+  },
+  {
+   "type": "lift",
+   "site": 11,
+   "t": 17.474
+  },
+  {
+   "type": "settle",
+   "site": 3,
+   "t": 17.486
+  },
+  {
+   "type": "lift",
+   "site": 0,
+   "t": 18.067
+  },
+  {
+   "type": "settle",
+   "site": 11,
+   "t": 18.097
+  },
+  {
+   "type": "settle",
+   "site": 6,
+   "t": 18.273
+  },
+  {
+   "type": "settle",
+   "site": 5,
+   "t": 18.286
+  },
+  {
+   "type": "settle",
+   "site": 4,
+   "t": 18.339
+  },
+  {
+   "type": "lift",
+   "site": 5,
+   "t": 18.684
+  },
+  {
+   "type": "settle",
+   "site": 1,
+   "t": 18.759
+  },
+  {
+   "type": "lift",
+   "site": 4,
+   "t": 18.907
+  },
+  {
+   "type": "lift",
+   "site": 6,
+   "t": 19.331
+  },
+  {
+   "type": "settle",
+   "site": 0,
+   "t": 19.946
+  },
+  {
+   "type": "lift",
+   "site": 3,
+   "t": 20.244
+  },
+  {
+   "type": "lift",
+   "site": 7,
+   "t": 20.3
+  },
+  {
+   "type": "lift",
+   "site": 1,
+   "t": 20.516
+  },
+  {
+   "type": "lift",
+   "site": 11,
+   "t": 20.525
+  },
+  {
+   "type": "settle",
+   "site": 1,
+   "t": 20.896
+  },
+  {
+   "type": "settle",
+   "site": 11,
+   "t": 21.052
+  },
+  {
+   "type": "lift",
+   "site": 0,
+   "t": 21.228
+  },
+  {
+   "type": "lift",
+   "site": 2,
+   "t": 21.701
+  },
+  {
+   "type": "lift",
+   "site": 8,
+   "t": 21.763
+  },
+  {
+   "type": "lift",
+   "site": 1,
+   "t": 22.578
+  },
+  {
+   "type": "lift",
+   "site": 9,
+   "t": 22.683
+  },
+  {
+   "type": "lift",
+   "site": 11,
+   "t": 23.188
+  },
+  {
+   "type": "lift",
+   "site": 10,
+   "t": 23.366
+  },
+  {
+   "type": "settle",
+   "site": 4,
+   "t": 25.214
+  },
+  {
+   "type": "lift",
+   "site": 4,
+   "t": 25.289
+  },
+  {
+   "type": "settle",
+   "site": 2,
+   "t": 28.692
+  },
+  {
+   "type": "settle",
+   "site": 6,
+   "t": 29.36
+  },
+  {
+   "type": "settle",
+   "site": 9,
+   "t": 29.829
+  },
+  {
+   "type": "settle",
+   "site": 3,
+   "t": 29.84
+  },
+  {
+   "type": "lift",
+   "site": 6,
+   "t": 29.999
+  },
+  {
+   "type": "settle",
+   "site": 8,
+   "t": 30.011
+  },
+  {
+   "type": "lift",
+   "site": 8,
+   "t": 31.288
+  }
+ ],
+ "clifford_control_events": []
+}

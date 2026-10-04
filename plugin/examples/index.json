@@ -1,0 +1,41 @@
+{
+  "plugin": "plugin/dist/ScrambledEcho.vst3 (loaded via pedalboard 0.9.25)",
+  "sample_rate": 48000,
+  "examples": [
+    {
+      "name": "01_cooking_scramble_sweep",
+      "dry": "01_cooking_scramble_sweep_dry.wav",
+      "wet": "01_cooking_scramble_sweep_wet.wav",
+      "source": "media/stem_full.wav (first 30 s, recorded cooking audio) + 4 s tail",
+      "settings": "Map=Scrambling, Time=1600 ms, Mix=45 %, Feedback=35 %, Width=100 %, Scramble automated 0 -> 100 % (2-14 s), held, then 100 -> 0 % (17-27 s)"
+    },
+    {
+      "name": "02_drums_kick_left_C_sync",
+      "dry": "02_drums_kick_left_C_sync_dry.wav",
+      "wet": "02_drums_kick_left_C_sync_wet.wav",
+      "source": "synthesised 4-bar drum loop at 120 BPM (numpy) + 4 s tail",
+      "settings": "Map=Kick left (site 2), View=C, Sync on, Division=1 bar (2.0 s: the plugin runs at 120 BPM under pedalboard, checked in tests/test_vst3.py), Mix=40 %, Feedback=30 %, Scramble=100 %"
+    },
+    {
+      "name": "03_synth_edge_sparse_C",
+      "dry": "03_synth_edge_sparse_C_dry.wav",
+      "wet": "03_synth_edge_sparse_C_wet.wav",
+      "source": "synthesised plucked-saw arpeggio, 120 BPM eighths (numpy) + 5 s tail",
+      "settings": "Map=Edge kick, sparse (site 0), View=C, Time=2000 ms, Mix=50 %, Feedback=45 %, Scramble=100 %"
+    },
+    {
+      "name": "04_clap_control_vs_scrambling",
+      "dry": "04_clap_control_vs_scrambling_dry.wav",
+      "wet": "04_clap_control_vs_scrambling_wet.wav",
+      "source": "two synthetic claps, 4 s apart",
+      "settings": "Time=1200 ms, Mix=100 % (wet only), Feedback=0. First clap: Scramble=0 % (Control / Clifford map: every tap |F|=1). Second clap: Scramble=100 % (measured scrambling map)."
+    },
+    {
+      "name": "05_clap_light_cone_C",
+      "dry": "05_clap_light_cone_C_dry.wav",
+      "wet": "05_clap_light_cone_C_wet.wav",
+      "source": "one synthetic clap",
+      "settings": "Map=Edge kick, sparse (site 0), View=C, Time=3000 ms, Mix=100 % (wet only), Feedback=0"
+    }
+  ]
+}

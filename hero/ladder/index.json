@@ -1,0 +1,104 @@
+{
+  "late_mean_absF": 0.251,
+  "strength_from_F": 0.75,
+  "input": "hero/input_A_sq.png",
+  "input_asset": "d39859e0-ff3f-4a86-acfc-119464796a1a",
+  "rungs": [
+    {
+      "strength": 0.75,
+      "reach": 0.15,
+      "style": "rx",
+      "job_id": "c574395e-3e68-43ca-934d-39e245b37d7d",
+      "seconds": 14.0,
+      "file": "hero/ladder/c574395e_result_blur-v1-c574395e.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.25,
+      "style": "rx",
+      "job_id": "4c6ae43e-afef-4d62-a54e-8b87076c1fad",
+      "seconds": 22.5,
+      "file": "hero/ladder/4c6ae43e_result_blur-v1-4c6ae43e.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.35,
+      "style": "rx",
+      "job_id": "5e695932-c72b-4b45-bc9c-b069d3db3d55",
+      "seconds": 14.5,
+      "file": "hero/ladder/5e695932_result_blur-v1-5e695932.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.5,
+      "style": "rx",
+      "job_id": "d2a4bfe1-85a5-4b45-ae36-ff1f0525e998",
+      "seconds": 21.4,
+      "file": "hero/ladder/d2a4bfe1_result_blur-v1-d2a4bfe1.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.8,
+      "style": "rx",
+      "job_id": "e2046ad5-7e80-4a1b-b5e9-6906c0c68ec7",
+      "seconds": 14.3,
+      "file": "hero/ladder/e2046ad5_result_blur-v1-e2046ad5.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 1.0,
+      "style": "rx",
+      "job_id": "a1b30ea5-db20-483c-91d6-0b179f26bec0",
+      "seconds": 15.1,
+      "file": "hero/ladder/a1b30ea5_result_blur-v1-a1b30ea5.png"
+    },
+    {
+      "strength": 0.6,
+      "reach": 0.8,
+      "style": "rx",
+      "job_id": "8e0c4b50-cbf4-42bb-a2ad-fa187793c97b",
+      "seconds": 13.9,
+      "file": "hero/ladder/8e0c4b50_result_blur-v1-8e0c4b50.png"
+    },
+    {
+      "strength": 0.9,
+      "reach": 0.8,
+      "style": "rx",
+      "job_id": "f8c29395-467e-4532-b441-669dc268b33a",
+      "seconds": 14.0,
+      "file": "hero/ladder/f8c29395_result_blur-v1-f8c29395.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.25,
+      "style": "ry",
+      "job_id": "0449ba35-d9b8-468e-91a8-68bf00f4c13e",
+      "seconds": 9.3,
+      "file": "hero/ladder/0449ba35_result_blur-v1-0449ba35.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.5,
+      "style": "ry",
+      "job_id": "d8d10053-8b4c-43cf-ab64-42bf59648d7b",
+      "seconds": 9.8,
+      "file": "hero/ladder/d8d10053_result_blur-v1-d8d10053.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 0.8,
+      "style": "ry",
+      "job_id": "9e1cf520-2974-435e-8dee-5217b19bad9a",
+      "seconds": 9.0,
+      "file": "hero/ladder/9e1cf520_result_blur-v1-9e1cf520.png"
+    },
+    {
+      "strength": 0.75,
+      "reach": 1.0,
+      "style": "ry",
+      "job_id": "13effd33-1d60-4746-a17e-50dab762c34e",
+      "seconds": 14.7,
+      "file": "hero/ladder/13effd33_result_blur-v1-13effd33.png"
+    }
+  ]
+}

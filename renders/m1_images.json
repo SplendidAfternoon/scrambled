@@ -1,0 +1,93 @@
+{
+  "blur:0.8": {
+    "job_id": "201f3530-e8e2-4f65-8043-7e9e05113a69",
+    "seconds": 15.9,
+    "files": {
+      "result": "renders\\blur\\201f3530_result_blur-v1-201f3530.jfif"
+    }
+  },
+  "blur:0.6": {
+    "job_id": "adb6c08c-773c-4504-9c58-4e374df974c8",
+    "seconds": 10.2,
+    "files": {
+      "result": "renders\\blur\\adb6c08c_result_blur-v1-adb6c08c.jfif"
+    }
+  },
+  "blur:1.0": {
+    "job_id": "f8796b82-4608-451c-93a3-fef895f4a159",
+    "seconds": 9.4,
+    "files": {
+      "result": "renders\\blur\\f8796b82_result_blur-v1-f8796b82.jfif"
+    }
+  },
+  "blur:0.4": {
+    "job_id": "8f353393-1bbd-4554-bba4-24cecea2b52c",
+    "seconds": 15.2,
+    "files": {
+      "result": "renders\\blur\\8f353393_result_blur-v1-8f353393.jfif"
+    }
+  },
+  "blur:0.2": {
+    "job_id": "5006a347-354e-46c2-9095-0ff79bb7bc32",
+    "seconds": 16.1,
+    "files": {
+      "result": "renders\\blur\\5006a347_result_blur-v1-5006a347.jfif"
+    }
+  },
+  "telablur:0.125": {
+    "job_id": "727bc10b-c9c4-49b8-a08e-7e4f087798d0",
+    "seconds": 13.9,
+    "files": {
+      "result": "renders\\telablur\\727bc10b_result_telablur-v1-727bc10b.jfif"
+    }
+  },
+  "telablur:0.5": {
+    "job_id": "54dfdb51-3a31-497d-9623-856bf6340f2b",
+    "seconds": 9.9,
+    "files": {
+      "result": "renders\\telablur\\54dfdb51_result_telablur-v1-54dfdb51.jfif"
+    }
+  },
+  "telablur:0.375": {
+    "job_id": "22038833-17fe-40bc-8e43-2d48353a7946",
+    "seconds": 14.5,
+    "files": {
+      "result": "renders\\telablur\\22038833_result_telablur-v1-22038833.jfif"
+    }
+  },
+  "telablur:0.25": {
+    "job_id": "a81bddd6-8a38-4bcb-8355-88cd4a94de05",
+    "seconds": 13.9,
+    "files": {
+      "result": "renders\\telablur\\a81bddd6_result_telablur-v1-a81bddd6.jfif"
+    }
+  },
+  "telablur:0.625": {
+    "job_id": "4e923f53-a68d-4736-8df2-369dfe804eec",
+    "seconds": 13.8,
+    "files": {
+      "result": "renders\\telablur\\4e923f53_result_telablur-v1-4e923f53.jfif"
+    }
+  },
+  "telablur:0.75": {
+    "job_id": "09cada58-cae4-4b5c-a2c8-dc75a33a8644",
+    "seconds": 13.9,
+    "files": {
+      "result": "renders\\telablur\\09cada58_result_telablur-v1-09cada58.jfif"
+    }
+  },
+  "telablur:0.875": {
+    "job_id": "2ba2fb7a-8633-46bb-97c1-95d8183bd827",
+    "seconds": 14.2,
+    "files": {
+      "result": "renders\\telablur\\2ba2fb7a_result_telablur-v1-2ba2fb7a.jfif"
+    }
+  },
+  "telablur:1.0": {
+    "job_id": "4fe22bbb-ed25-4563-b192-f6159981ff51",
+    "seconds": 13.7,
+    "files": {
+      "result": "renders\\telablur\\4fe22bbb_result_telablur-v1-4fe22bbb.jfif"
+    }
+  }
+}

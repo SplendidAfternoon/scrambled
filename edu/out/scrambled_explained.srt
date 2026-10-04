@@ -1,0 +1,131 @@
+1
+00:00:00,500 --> 00:00:02,437
+Crack an egg into a pan and stir.
+
+2
+00:00:02,437 --> 00:00:05,493
+Nothing is lost: every bit of yolk is still in there.
+
+3
+00:00:05,493 --> 00:00:07,113
+But you will never stir it back.
+
+4
+00:00:07,113 --> 00:00:11,374
+The information about where the yolk was hasn't vanished. It has spread out.
+
+5
+00:00:12,500 --> 00:00:20,013
+Qubits do something similar. We simulated twelve on Moth's Atlas platform, with an emulator, not a real quantum chip.
+
+6
+00:00:20,013 --> 00:00:21,877
+We give the middle one a tiny nudge.
+
+7
+00:00:22,977 --> 00:00:25,936
+To see where the nudge goes, we run an echo test.
+
+8
+00:00:25,936 --> 00:00:31,216
+Run the qubits forward a few steps, nudge the middle one, then run the same steps backwards.
+
+9
+00:00:31,216 --> 00:00:37,449
+With no nudge, every qubit would come home exactly. So we score each qubit with a number, F.
+
+10
+00:00:37,449 --> 00:00:44,957
+One means the nudge never reached it. Near zero: its trace is smeared across many qubits. Negative: flipped.
+
+11
+00:00:44,957 --> 00:00:49,049
+Physicists call this an out-of-time-order correlator, or OTOC.
+
+12
+00:00:50,149 --> 00:00:51,725
+Now watch the nudge spread.
+
+13
+00:00:51,725 --> 00:00:55,211
+Each step, it can reach at most one more neighbour on each side.
+
+14
+00:00:55,211 --> 00:01:00,938
+That makes a cone shape, called a light cone. After six steps it reaches both ends of the row.
+
+15
+00:01:02,038 --> 00:01:03,755
+First, a control.
+
+16
+00:01:03,755 --> 00:01:09,122
+We turn one dial so the two-qubit gate becomes a Clifford gate: a special, predictable kind.
+
+17
+00:01:09,122 --> 00:01:11,070
+Now the nudge never spreads at all.
+
+18
+00:01:11,070 --> 00:01:16,632
+Every other qubit comes back perfectly; the middle one just flips. Nothing is scrambled.
+
+19
+00:01:17,732 --> 00:01:19,326
+Now the scrambling setting.
+
+20
+00:01:19,326 --> 00:01:23,508
+Inside the cone, the echoes fade toward zero, and many turn negative.
+
+21
+00:01:23,508 --> 00:01:27,507
+The information isn't destroyed; every step can still be run backwards.
+
+22
+00:01:27,507 --> 00:01:32,028
+But it's hidden in patterns shared by many qubits, so no single qubit can show it.
+
+23
+00:01:32,028 --> 00:01:36,922
+That is scrambling, nicknamed the quantum butterfly effect. Only a metaphor.
+
+24
+00:01:38,022 --> 00:01:41,734
+Around step thirteen to sixteen, part of the echo comes back.
+
+25
+00:01:41,734 --> 00:01:46,518
+This simple chain is exactly solvable: signals bounce off the ends and partly return.
+
+26
+00:01:46,518 --> 00:01:54,617
+Add one more field, also computed on Atlas, and the chain is no longer solvable. The echo fades and settles, with no revival.
+
+27
+00:01:55,717 --> 00:01:56,561
+Why care?
+
+28
+00:01:56,561 --> 00:02:02,160
+Black holes are thought to be nature's fastest scramblers, and echo tests help physicists study that idea.
+
+29
+00:02:02,160 --> 00:02:07,184
+The same measurement helps tell chaotic quantum systems from solvable ones, as you just saw.
+
+30
+00:02:07,184 --> 00:02:11,483
+And it helps check that a quantum computer is doing genuinely complex quantum work.
+
+31
+00:02:12,583 --> 00:02:18,974
+These maps are real results from Moth Quantum's Atlas platform: the otoc-echo engine, on a noiseless emulator.
+
+32
+00:02:18,974 --> 00:02:24,247
+Same recipe, two settings: in one the nudge stays put, in the other it scrambles.
+
+33
+00:02:24,247 --> 00:02:26,322
+That's why you can't unscramble an egg.

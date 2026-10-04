@@ -1,0 +1,172 @@
+{
+ "engine": "blur-v1",
+ "params": {
+  "strength": 0.35,
+  "reach": 0.35
+ },
+ "job_id": "a9b666a2-e30b-46dd-9931-d53814ae8bb5",
+ "asset_id": "c53fe8b2-bead-48ad-84c8-91f80d515510",
+ "log": [
+  {
+   "t": 0.84,
+   "call": "GET /api/v1/engines/blur-v1",
+   "status": 200,
+   "response": {
+    "engine_id": "blur-v1",
+    "credits_per_run": 1,
+    "run_policy": {
+     "timeout": 300,
+     "max_retries": 1,
+     "heartbeat": 300
+    }
+   }
+  },
+  {
+   "t": 2.06,
+   "call": "POST /api/v1/assets",
+   "status": 201,
+   "response": {
+    "$schema": "https://api.mothquantum.com/schemas/CreateAssetOutputBody.json",
+    "asset_id": "c53fe8b2-bead-48ad-84c8-91f80d515510",
+    "owner": "<redacted>",
+    "kind": "upload",
+    "filename": "raw_demo_input.png",
+    "content_type": "image/png",
+    "size_bytes": 24999,
+    "status": "pending",
+    "metadata": {},
+    "created_at": "2026-10-03T19:27:46Z",
+    "updated_at": "2026-10-03T19:27:46Z",
+    "upload": {
+     "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/<object path redacted>?<presigned query redacted>",
+     "method": "PUT",
+     "headers": {
+      "Content-Length": "24999",
+      "Content-Type": "image/png"
+     },
+     "expires_at": "2026-10-03T19:42:46.865492076Z"
+    }
+   }
+  },
+  {
+   "t": 3.06,
+   "call": "PUT <presigned upload URL>",
+   "status": 200,
+   "response": "24999 bytes"
+  },
+  {
+   "t": 4.34,
+   "call": "POST /api/v1/assets/c53fe8b2-bead-48ad-84c8-91f80d515510/complete",
+   "status": 200,
+   "response": {
+    "$schema": "https://api.mothquantum.com/schemas/Asset.json",
+    "asset_id": "c53fe8b2-bead-48ad-84c8-91f80d515510",
+    "owner": "<redacted>",
+    "kind": "upload",
+    "filename": "raw_demo_input.png",
+    "content_type": "image/png",
+    "size_bytes": 24999,
+    "status": "uploaded",
+    "metadata": {
+     "height": 128,
+     "labels": [
+      {
+       "confidence": 99.32467651367188,
+       "name": "Egg"
+      },
+      {
+       "confidence": 99.32467651367188,
+       "name": "Food"
+      },
+      {
+       "confidence": 85.48612976074219,
+       "name": "Easter Egg"
+      }
+     ],
+     "resized": false,
+     "width": 128
+    },
+    "created_at": "2026-10-03T19:27:46Z",
+    "updated_at": "2026-10-03T19:27:49Z"
+   }
+  },
+  {
+   "t": 6.15,
+   "call": "POST /api/v1/engines/blur-v1/process",
+   "status": 202,
+   "response": {
+    "$schema": "https://api.mothquantum.com/schemas/SubmitJobOutputBody.json",
+    "job_id": "a9b666a2-e30b-46dd-9931-d53814ae8bb5",
+    "status": "queued",
+    "submitted_at": "2026-10-03T19:27:50Z"
+   }
+  },
+  {
+   "t": 7.24,
+   "call": "GET /api/v1/jobs/a9b666a2-e30b-46dd-9931-d53814ae8bb5/status",
+   "status": 200,
+   "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobStatusOutputBody.json",
+    "job_id": "a9b666a2-e30b-46dd-9931-d53814ae8bb5",
+    "engine_id": "blur-v1",
+    "status": "queued",
+    "progress": {},
+    "warnings": [],
+    "submitted_at": "2026-10-03T19:27:50Z",
+    "updated_at": "2026-10-03T19:27:50Z"
+   }
+  },
+  {
+   "t": 12.25,
+   "call": "GET /api/v1/jobs/a9b666a2-e30b-46dd-9931-d53814ae8bb5/status",
+   "status": 200,
+   "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobStatusOutputBody.json",
+    "job_id": "a9b666a2-e30b-46dd-9931-d53814ae8bb5",
+    "engine_id": "blur-v1",
+    "status": "completed",
+    "progress": {
+     "detail": "Encoding blurred image for output",
+     "step": "exporting"
+    },
+    "outputs": [
+     {
+      "slot": "result",
+      "output_asset_id": "a21024f6-b85b-45a3-b45f-a397e5b8a0ba",
+      "content_type": "image/png",
+      "filename": "blur-v1-a9b666a2.png",
+      "size_bytes": 28989
+     }
+    ],
+    "warnings": [],
+    "submitted_at": "2026-10-03T19:27:50Z",
+    "updated_at": "2026-10-03T19:27:50Z"
+   }
+  },
+  {
+   "t": 13.31,
+   "call": "GET /api/v1/jobs/a9b666a2-e30b-46dd-9931-d53814ae8bb5/result",
+   "status": 200,
+   "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+     {
+      "slot": "result",
+      "output_asset_id": "a21024f6-b85b-45a3-b45f-a397e5b8a0ba",
+      "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/<object path redacted>?<presigned query redacted>",
+      "expires_at": "2026-10-03T19:42:58.795525892Z",
+      "content_type": "image/png",
+      "filename": "blur-v1-a9b666a2.png",
+      "size_bytes": 28989
+     }
+    ]
+   }
+  },
+  {
+   "t": 14.17,
+   "call": "GET <presigned output URL>",
+   "status": 200,
+   "response": "28989 bytes, image/png"
+  }
+ ]
+}

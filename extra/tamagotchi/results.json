@@ -1,0 +1,375 @@
+{
+  "engine_id": "tamagotchi-v1",
+  "source": "probes/otoc_scrambling.json (otoc-echo-v1 8df5cfa2)",
+  "block_sites": [
+    3,
+    9
+  ],
+  "shots": 4096,
+  "seed": 7,
+  "actions": [
+    [
+      "I",
+      0
+    ],
+    [
+      "SE",
+      0
+    ]
+  ],
+  "sweep": [
+    {
+      "p_idle": 0.001,
+      "job_id": "9ac75925-add4-42e8-8a6d-6dd70dae926f",
+      "success_rate": 1,
+      "syndromes_detected": 67,
+      "corrections_applied": 67
+    },
+    {
+      "p_idle": 0.003,
+      "job_id": "a23995aa-1681-481a-a951-16b2e3c31790",
+      "success_rate": 1,
+      "syndromes_detected": 212,
+      "corrections_applied": 212
+    },
+    {
+      "p_idle": 0.01,
+      "job_id": "f73b767c-24e9-4afe-94bd-8efe14d6cfdc",
+      "success_rate": 0.99853515625,
+      "syndromes_detected": 554,
+      "corrections_applied": 554
+    },
+    {
+      "p_idle": 0.02,
+      "job_id": "9b04d228-6e96-4d17-816f-9a9b0ae0b87e",
+      "success_rate": 0.99072265625,
+      "syndromes_detected": 1098,
+      "corrections_applied": 1098
+    },
+    {
+      "p_idle": 0.05,
+      "job_id": "f07c489d-1185-41cc-a3fa-c15a476d8d48",
+      "success_rate": 0.96142578125,
+      "syndromes_detected": 2431,
+      "corrections_applied": 2431
+    },
+    {
+      "p_idle": 0.1,
+      "job_id": "31278c12-d5bf-4468-a2df-9de0e50392b5",
+      "success_rate": 0.88671875,
+      "syndromes_detected": 4090,
+      "corrections_applied": 4090
+    },
+    {
+      "p_idle": 0.2,
+      "job_id": "76cd002f-2382-431f-9441-f1f198950053",
+      "success_rate": 0.709228515625,
+      "syndromes_detected": 5989,
+      "corrections_applied": 5989
+    },
+    {
+      "p_idle": 0.3,
+      "job_id": "20748dbc-9a7c-4eb5-85f5-defafe4018b3",
+      "success_rate": 0.599853515625,
+      "syndromes_detected": 6755,
+      "corrections_applied": 6755
+    },
+    {
+      "p_idle": 0.5,
+      "job_id": "ec053744-bdc2-413d-8a21-874a9f90af66",
+      "success_rate": 0.51220703125,
+      "syndromes_detected": 7189,
+      "corrections_applied": 7189
+    }
+  ],
+  "echo": [
+    {
+      "p_idle": 0.2607,
+      "job_id": "9458bb60-14b7-4b79-b219-cb33c74b55e4",
+      "success_rate": 0.649169921875,
+      "syndromes_detected": 6553,
+      "corrections_applied": 6553,
+      "t": 0,
+      "disturbance": 0.2607
+    },
+    {
+      "p_idle": 0.4041,
+      "job_id": "b410925e-ebc8-41ff-b79a-8a295dffdceb",
+      "success_rate": 0.551513671875,
+      "syndromes_detected": 7085,
+      "corrections_applied": 7085,
+      "t": 1,
+      "disturbance": 0.4041
+    },
+    {
+      "p_idle": 0.5565,
+      "job_id": "2e58a40c-1490-4278-b4fa-cd844d78b480",
+      "success_rate": 0.508056640625,
+      "syndromes_detected": 7178,
+      "corrections_applied": 7178,
+      "t": 2,
+      "disturbance": 0.5565
+    },
+    {
+      "p_idle": 0.6596,
+      "job_id": "c1391bff-0344-4ab2-8e48-e21308a866fd",
+      "success_rate": 0.502685546875,
+      "syndromes_detected": 7125,
+      "corrections_applied": 7125,
+      "t": 3,
+      "disturbance": 0.6596
+    },
+    {
+      "p_idle": 0.6678,
+      "job_id": "9bce1afc-f508-4fe0-8a39-18d8ca8e47e5",
+      "success_rate": 0.499267578125,
+      "syndromes_detected": 7131,
+      "corrections_applied": 7131,
+      "t": 4,
+      "disturbance": 0.6678
+    },
+    {
+      "p_idle": 0.6791,
+      "job_id": "be6c4458-6c15-416c-b3d5-83ccff3ab78f",
+      "success_rate": 0.50048828125,
+      "syndromes_detected": 7119,
+      "corrections_applied": 7119,
+      "t": 5,
+      "disturbance": 0.6791
+    },
+    {
+      "p_idle": 0.6487,
+      "job_id": "ab06ffec-9a6d-44eb-bcb2-ca98f6385c37",
+      "success_rate": 0.49462890625,
+      "syndromes_detected": 7123,
+      "corrections_applied": 7123,
+      "t": 6,
+      "disturbance": 0.6487
+    },
+    {
+      "p_idle": 0.6584,
+      "job_id": "83787354-1e11-46bf-ab78-85fbe6061d0e",
+      "success_rate": 0.50244140625,
+      "syndromes_detected": 7126,
+      "corrections_applied": 7126,
+      "t": 7,
+      "disturbance": 0.6584
+    },
+    {
+      "p_idle": 0.6501,
+      "job_id": "eec40e67-e85c-47a5-83b2-a49bff27940d",
+      "success_rate": 0.494384765625,
+      "syndromes_detected": 7128,
+      "corrections_applied": 7128,
+      "t": 8,
+      "disturbance": 0.6501
+    },
+    {
+      "p_idle": 0.6175,
+      "job_id": "8e5eddfe-7bb2-4496-b8ab-48144383fac5",
+      "success_rate": 0.489501953125,
+      "syndromes_detected": 7131,
+      "corrections_applied": 7131,
+      "t": 9,
+      "disturbance": 0.6175
+    },
+    {
+      "p_idle": 0.5714,
+      "job_id": "1a1a29bd-c61d-46c2-a5f5-8fed7ccc715f",
+      "success_rate": 0.497802734375,
+      "syndromes_detected": 7187,
+      "corrections_applied": 7187,
+      "t": 10,
+      "disturbance": 0.5714
+    },
+    {
+      "p_idle": 0.4943,
+      "job_id": "577dcfda-22a8-42eb-b001-8d07b22df3fd",
+      "success_rate": 0.513427734375,
+      "syndromes_detected": 7183,
+      "corrections_applied": 7183,
+      "t": 11,
+      "disturbance": 0.4943
+    },
+    {
+      "p_idle": 0.3921,
+      "job_id": "a1ef8e1e-d10b-4c6e-9786-3ff788cbfcf0",
+      "success_rate": 0.541259765625,
+      "syndromes_detected": 7075,
+      "corrections_applied": 7075,
+      "t": 12,
+      "disturbance": 0.3921
+    },
+    {
+      "p_idle": 0.307,
+      "job_id": "99e3894d-758b-471e-b586-5b3e1b2ad503",
+      "success_rate": 0.5888671875,
+      "syndromes_detected": 6796,
+      "corrections_applied": 6796,
+      "t": 13,
+      "disturbance": 0.307
+    },
+    {
+      "p_idle": 0.2938,
+      "job_id": "fb33b018-181e-4089-b81a-08c5377dd9b8",
+      "success_rate": 0.608154296875,
+      "syndromes_detected": 6728,
+      "corrections_applied": 6728,
+      "t": 14,
+      "disturbance": 0.2938
+    },
+    {
+      "p_idle": 0.3025,
+      "job_id": "d1dc8d74-ec02-4f07-a07c-90c9887bd361",
+      "success_rate": 0.597412109375,
+      "syndromes_detected": 6765,
+      "corrections_applied": 6765,
+      "t": 15,
+      "disturbance": 0.3025
+    },
+    {
+      "p_idle": 0.4215,
+      "job_id": "f5e24f6f-9aad-4281-9e6a-e77c1befbb21",
+      "success_rate": 0.537109375,
+      "syndromes_detected": 7100,
+      "corrections_applied": 7100,
+      "t": 16,
+      "disturbance": 0.4215
+    },
+    {
+      "p_idle": 0.4441,
+      "job_id": "809f8d89-b1fd-4f34-a04c-44784140ac72",
+      "success_rate": 0.52001953125,
+      "syndromes_detected": 7125,
+      "corrections_applied": 7125,
+      "t": 17,
+      "disturbance": 0.4441
+    },
+    {
+      "p_idle": 0.5172,
+      "job_id": "66feffab-121a-496f-ba68-b03ff716e410",
+      "success_rate": 0.513427734375,
+      "syndromes_detected": 7198,
+      "corrections_applied": 7198,
+      "t": 18,
+      "disturbance": 0.5172
+    },
+    {
+      "p_idle": 0.56,
+      "job_id": "9e627450-77e7-44cd-b240-d5f08c4d084a",
+      "success_rate": 0.504150390625,
+      "syndromes_detected": 7177,
+      "corrections_applied": 7177,
+      "t": 19,
+      "disturbance": 0.56
+    },
+    {
+      "p_idle": 0.6169,
+      "job_id": "9d9c0ab8-bfa7-4d38-b443-a02c6681bafd",
+      "success_rate": 0.4892578125,
+      "syndromes_detected": 7129,
+      "corrections_applied": 7129,
+      "t": 20,
+      "disturbance": 0.6169
+    },
+    {
+      "p_idle": 0.6224,
+      "job_id": "6d049a45-ed39-4efb-a50c-d8798bd97fdb",
+      "success_rate": 0.488037109375,
+      "syndromes_detected": 7132,
+      "corrections_applied": 7132,
+      "t": 21,
+      "disturbance": 0.6224
+    },
+    {
+      "p_idle": 0.6494,
+      "job_id": "e899afd3-cb5e-4ac8-9158-fa9d166cfc20",
+      "success_rate": 0.494873046875,
+      "syndromes_detected": 7126,
+      "corrections_applied": 7126,
+      "t": 22,
+      "disturbance": 0.6494
+    },
+    {
+      "p_idle": 0.6198,
+      "job_id": "ed261ba6-04b9-4679-b35b-4b5ed3f4d310",
+      "success_rate": 0.4892578125,
+      "syndromes_detected": 7135,
+      "corrections_applied": 7135,
+      "t": 23,
+      "disturbance": 0.6198
+    },
+    {
+      "p_idle": 0.6107,
+      "job_id": "4cf06d62-f4bc-4d99-b512-16ec46b7fdd8",
+      "success_rate": 0.48876953125,
+      "syndromes_detected": 7147,
+      "corrections_applied": 7147,
+      "t": 24,
+      "disturbance": 0.6107
+    },
+    {
+      "p_idle": 0.5626,
+      "job_id": "256806b7-2740-4fa4-b268-a49f47e575a3",
+      "success_rate": 0.50244140625,
+      "syndromes_detected": 7186,
+      "corrections_applied": 7186,
+      "t": 25,
+      "disturbance": 0.5626
+    },
+    {
+      "p_idle": 0.4889,
+      "job_id": "a2064bf3-5dee-4f2f-8e74-467d6f60e869",
+      "success_rate": 0.509765625,
+      "syndromes_detected": 7159,
+      "corrections_applied": 7159,
+      "t": 26,
+      "disturbance": 0.4889
+    },
+    {
+      "p_idle": 0.4613,
+      "job_id": "41e9800d-61e5-4578-8f9b-76cacc37eedb",
+      "success_rate": 0.517333984375,
+      "syndromes_detected": 7178,
+      "corrections_applied": 7178,
+      "t": 27,
+      "disturbance": 0.4613
+    },
+    {
+      "p_idle": 0.4147,
+      "job_id": "76ccdffa-2122-44d4-a86e-0416e5a2ba71",
+      "success_rate": 0.54736328125,
+      "syndromes_detected": 7089,
+      "corrections_applied": 7089,
+      "t": 28,
+      "disturbance": 0.4147
+    },
+    {
+      "p_idle": 0.3828,
+      "job_id": "790aad1f-d6af-47be-bfb3-e5a3dacd930a",
+      "success_rate": 0.54443359375,
+      "syndromes_detected": 7059,
+      "corrections_applied": 7059,
+      "t": 29,
+      "disturbance": 0.3828
+    },
+    {
+      "p_idle": 0.3851,
+      "job_id": "4ce58752-67fe-4367-9566-6bebfde63c07",
+      "success_rate": 0.541259765625,
+      "syndromes_detected": 7059,
+      "corrections_applied": 7059,
+      "t": 30,
+      "disturbance": 0.3851
+    },
+    {
+      "p_idle": 0.4295,
+      "job_id": "255590fe-e4fc-4224-aee7-cc2c5b8e6345",
+      "success_rate": 0.52783203125,
+      "syndromes_detected": 7115,
+      "corrections_applied": 7115,
+      "t": 31,
+      "disturbance": 0.4295
+    }
+  ]
+}

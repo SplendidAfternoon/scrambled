@@ -1,0 +1,111 @@
+{
+ "size": 512,
+ "blur": [
+  {
+   "file": "img/ladder/A.jpg",
+   "engine_id": null,
+   "strength": 0,
+   "job_id": null
+  },
+  {
+   "file": "img/ladder/blur_0.1.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.1,
+   "job_id": "37894b70-a013-42a0-98e1-b74d927c702b"
+  },
+  {
+   "file": "img/ladder/blur_0.15.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.15,
+   "job_id": "5c0e77bd-cb85-41d6-84fc-b5bac9e681a8"
+  },
+  {
+   "file": "img/ladder/blur_0.2.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.2,
+   "job_id": "e3b9ba8e-f945-427f-b8c5-5a1388bd2f2c"
+  },
+  {
+   "file": "img/ladder/blur_0.25.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.25,
+   "job_id": "ade7424d-3960-4bc1-a429-adba3ded258e"
+  },
+  {
+   "file": "img/ladder/blur_0.3.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.3,
+   "job_id": "df5be01b-637e-40a6-b1c1-b708cda247e4"
+  },
+  {
+   "file": "img/ladder/blur_0.35.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.35,
+   "job_id": "a6de069a-aa7b-4a5d-9b94-6774a7335806"
+  },
+  {
+   "file": "img/ladder/blur_0.4.jpg",
+   "engine_id": "blur-v1",
+   "strength": 0.4,
+   "job_id": "94b48e49-2780-477c-ba9b-df574d8e88f1"
+  }
+ ],
+ "tela": [
+  {
+   "file": "img/ladder/tela_0.02.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.02,
+   "job_id": "0cc32be5-cfbc-45d9-b274-6bd668ebaf74"
+  },
+  {
+   "file": "img/ladder/tela_0.05.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.05,
+   "job_id": "e69b2000-b7b1-401c-8126-f352b318bb30"
+  },
+  {
+   "file": "img/ladder/tela_0.1.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.1,
+   "job_id": "789bb4a7-a22f-48f2-bdb4-f6a5b6454761"
+  },
+  {
+   "file": "img/ladder/tela_0.15.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.15,
+   "job_id": "082991be-66e0-4205-a5a7-8507aede526f"
+  },
+  {
+   "file": "img/ladder/tela_0.5.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.5,
+   "job_id": "d5fe1183-82ad-449b-9ffb-c36b9d913d24"
+  },
+  {
+   "file": "img/ladder/tela_0.85.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.85,
+   "job_id": "58b52d2c-f851-4cfc-9cb1-2adde539d792"
+  },
+  {
+   "file": "img/ladder/tela_0.9.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.9,
+   "job_id": "e705a08b-a7eb-47ce-9286-2b8b2597eaf8"
+  },
+  {
+   "file": "img/ladder/tela_0.95.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.95,
+   "job_id": "0d276d1f-81f6-44ff-86ca-0ed228d631d7"
+  },
+  {
+   "file": "img/ladder/tela_0.98.jpg",
+   "engine_id": "telablur-v1",
+   "strength": 0.98,
+   "job_id": "a58d98ba-de24-48b0-a1ba-d3d58192387c"
+  }
+ ],
+ "A": "img/ladder/A.jpg",
+ "B": "img/ladder/B.jpg"
+}

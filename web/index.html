@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SCRAMBLED: the quantum butterfly effect, measured on Moth Atlas</title>
+    <meta name="description" content="Quantum information scrambling (OTOCs) measured with Moth Quantum's otoc-echo-v1 engine, rendered with eggs. An explorer and a game." />
+    <link rel="icon" href="sprites/egg_fresh.png" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./">SCRAMB<span>L</span>ED</a>
+      <nav>
+        <a href="./explorer.html">Explorer</a>
+        <a href="./game.html">Game</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>You can't <em>unscramble</em> an egg.<br />Can a qubit chain?</h1>
+      <p class="lede">
+        Nudge one qubit in a chain, run the chain forward, then run it backwards. If nothing spread, the echo comes back clean.
+        If the dynamics scramble, the nudge smears across every qubit and the echo at each site fades. That fading is the
+        out-of-time-order correlator <span class="mono">F(site, t)</span>, the "quantum butterfly effect". Every number on this site
+        was measured with Moth Quantum's <span class="mono">otoc-echo-v1</span> engine on the Atlas platform (emulator backend).
+      </p>
+    </section>
+
+    <section class="cards">
+      <a class="panel card" href="./explorer.html">
+        <img src="img/ladder/tela_0.95.jpg" alt="Egg photo morphing into scrambled eggs (telablur-v1)" />
+        <div class="body">
+          <h2>SCRAMBLED Explorer</h2>
+          <p class="muted">Set the drive angles, measure a chain live on Atlas with your own key (or browse the measured runs), and watch the eggs scramble strip by strip as you scrub through time.</p>
+        </div>
+      </a>
+      <a class="panel card" href="./game.html">
+        <img src="img/ladder/blur_0.25.jpg" alt="Blurred eggs in a pan" />
+        <div class="body">
+          <h2>Don't Scramble the Egg</h2>
+          <p class="muted">A short arcade game. Pick the pan, watch the quantum light cone race toward your eggs, and serve at the moment the echo comes back whole. Five levels, each backed by a chain measured on Atlas.</p>
+        </div>
+      </a>
+    </section>
+
+    <section class="prose">
+      <div class="panel">
+        <h3>What is measured</h3>
+        <p class="muted small">
+          A kicked Ising chain (RX by θ<sub>x</sub>, RZZ by θ<sub>zz</sub> per layer) of qubits, 12 in the game's runs. The centre qubit gets a Z kick between
+          the forward and backward halves. <span class="mono">F(site, t)</span> is the echo measured at each site after t layers. It starts at ±1,
+          stays there outside the light cone, and decays once the perturbation has spread. In a finite chain it partly revives
+          (around t ≈ 13–16 for 12 sites) when the spreading front reflects off the ends.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>The control</h3>
+        <p class="muted small">
+          At θ<sub>zz</sub> = π every gate is a Clifford. Cliffords map Pauli operators to single Pauli strings, so the nudge never
+          spreads into a superposition of strings: F stays at ±1 forever. Only the kicked qubit flips sign. No scrambling, by
+          construction. The explorer's θ<sub>zz</sub> slider snaps to π so you can see it.
+        </p>
+      </div>
+      <div class="panel">
+        <h3>Honesty notes</h3>
+        <p class="muted small">
+          All runs use Atlas's <span class="mono">aer</span> emulator with exact expectation values. No quantum hardware was used. The blur and morph images come from
+          Atlas's <span class="mono">blur-v1</span> and <span class="mono">telablur-v1</span> engines. Cutting them into strips and crossfading in the browser is classical compositing.
+          Job ids for every run are listed in the app and in the project's <span class="mono">web/README.md</span>.
+        </p>
+      </div>
+    </section>
+  </body>
+</html>

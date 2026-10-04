@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<!--
+    EntanglementTexture — MaterialX 1.38 material (native node graph, no OSL)
+
+    Extract all files from the ZIP into the same directory.
+    R_lut.hdr and T_lut.hdr must live next to this .mtlx file.
+
+    flip_t controls the HDR t-axis direction:
+      1.0 = image-top convention  (Blender, Arnold, RenderMan) — default
+      0.0 = OpenGL-bottom convention
+-->
+<materialx version="1.39" colorspace="lin_rec709">
+
+  <!-- ── Node definition ─────────────────────────────────────────────────── -->
+  <nodedef name="ND_EntanglementTexture" node="EntanglementTexture" nodegroup="pbr"
+           doc="Quantum iridescent surface from angle/phase HDR lookup tables.">
+    <input name="R_texture" type="filename" value="R_lut.hdr"
+           doc="Float32 HDR reflectance LUT (phase × angle)."/>
+    <input name="T_texture" type="filename" value="T_lut.hdr"
+           doc="Float32 HDR transmittance LUT (phase × angle)."/>
+    <input name="thickness" type="float" value="500.0"
+           uimin="0.0" uimax="1000.0" uiname="Thickness (nm)"/>
+    <input name="flip_t"   type="float" value="1.0"
+           uimin="0.0" uimax="1.0" uiname="Flip T"
+           doc="1.0 = image-top (Blender/Arnold); 0.0 = OpenGL bottom."/>
+    <output name="reflectance"   type="color3"/>
+    <output name="transmittance" type="color3"/>
+  </nodedef>
+
+  <!-- ── Native node-graph implementation ────────────────────────────────── -->
+  <nodegraph name="NG_EntanglementTexture" nodedef="ND_EntanglementTexture">
+
+    <!-- Geometry -->
+    <normal        name="N" type="vector3" space="world"/>
+    <viewdirection name="V" type="vector3" space="world"/>
+
+    <!-- cosTheta = |dot(N, V)| -->
+    <dotproduct name="dot_NV" type="float">
+      <input name="in1" type="vector3" nodename="N"/>
+      <input name="in2" type="vector3" nodename="V"/>
+    </dotproduct>
+    <absval name="cosTheta" type="float">
+      <input name="in" type="float" nodename="dot_NV"/>
+    </absval>
+
+    <!-- theta = acos(cosTheta) -->
+    <acos name="theta" type="float">
+      <input name="in" type="float" nodename="cosTheta"/>
+    </acos>
+
+    <!-- D = -2 * 2π * thickness * cosTheta  →  -(4π * thickness * cosTheta) -->
+    <multiply name="D_tc" type="float">
+      <input name="in1" type="float" nodename="cosTheta"/>
+      <input name="in2" type="float" interfacename="thickness"/>
+    </multiply>
+    <multiply name="D_pos" type="float">
+      <input name="in1" type="float" nodename="D_tc"/>
+      <input name="in2" type="float" value="12.566370614359172"/>  <!-- 4π -->
+    </multiply>
+    <multiply name="D" type="float">
+      <input name="in1" type="float" nodename="D_pos"/>
+      <input name="in2" type="float" value="-1.0"/>
+    </multiply>
+
+    <!-- s_r = mod(D / 650, 2π) / 2π -->
+    <divide  name="D_wl_r"  type="float">
+      <input name="in1" type="float" nodename="D"/>
+      <input name="in2" type="float" value="650.0"/>
+    </divide>
+    <modulo  name="phase_r" type="float">
+      <input name="in1" type="float" nodename="D_wl_r"/>
+      <input name="in2" type="float" value="6.283185307179586"/>
+    </modulo>
+    <divide  name="s_r"     type="float">
+      <input name="in1" type="float" nodename="phase_r"/>
+      <input name="in2" type="float" value="6.283185307179586"/>
+    </divide>
+
+    <!-- s_g = mod(D / 530, 2π) / 2π -->
+    <divide  name="D_wl_g"  type="float">
+      <input name="in1" type="float" nodename="D"/>
+      <input name="in2" type="float" value="530.0"/>
+    </divide>
+    <modulo  name="phase_g" type="float">
+      <input name="in1" type="float" nodename="D_wl_g"/>
+      <input name="in2" type="float" value="6.283185307179586"/>
+    </modulo>
+    <divide  name="s_g"     type="float">
+      <input name="in1" type="float" nodename="phase_g"/>
+      <input name="in2" type="float" value="6.283185307179586"/>
+    </divide>
+
+    <!-- s_b = mod(D / 470, 2π) / 2π -->
+    <divide  name="D_wl_b"  type="float">
+      <input name="in1" type="float" nodename="D"/>
+      <input name="in2" type="float" value="470.0"/>
+    </divide>
+    <modulo  name="phase_b" type="float">
+      <input name="in1" type="float" nodename="D_wl_b"/>
+      <input name="in2" type="float" value="6.283185307179586"/>
+    </modulo>
+    <divide  name="s_b"     type="float">
+      <input name="in1" type="float" nodename="phase_b"/>
+      <input name="in2" type="float" value="6.283185307179586"/>
+    </divide>
+
+    <!-- t_lut: abs(flip_t - theta/PI_2)
+         flip_t=1.0 → 1-t  (image-top, Blender/Arnold default)
+         flip_t=0.0 → t    (OpenGL bottom) -->
+    <divide   name="t_norm"    type="float">
+      <input name="in1" type="float" nodename="theta"/>
+      <input name="in2" type="float" value="1.5707963267948966"/>  <!-- π/2 -->
+    </divide>
+    <subtract name="t_flip"    type="float">
+      <input name="in1" type="float" interfacename="flip_t"/>
+      <input name="in2" type="float" nodename="t_norm"/>
+    </subtract>
+    <absval   name="t_lut"     type="float">
+      <input name="in" type="float" nodename="t_flip"/>
+    </absval>
+
+    <!-- UV pairs per channel -->
+    <combine2 name="uv_r" type="vector2">
+      <input name="in1" type="float" nodename="s_r"/>
+      <input name="in2" type="float" nodename="t_lut"/>
+    </combine2>
+    <combine2 name="uv_g" type="vector2">
+      <input name="in1" type="float" nodename="s_g"/>
+      <input name="in2" type="float" nodename="t_lut"/>
+    </combine2>
+    <combine2 name="uv_b" type="vector2">
+      <input name="in1" type="float" nodename="s_b"/>
+      <input name="in2" type="float" nodename="t_lut"/>
+    </combine2>
+
+    <!-- Sample R_lut.hdr — phase wraps, angle clamps -->
+    <image name="R_r" type="float">
+      <input name="file"         type="filename" interfacename="R_texture"/>
+      <input name="texcoord"     type="vector2"  nodename="uv_r"/>
+      <input name="uaddressmode" type="string"   value="periodic"/>
+      <input name="vaddressmode" type="string"   value="clamp"/>
+    </image>
+    <image name="R_g" type="float">
+      <input name="file"         type="filename" interfacename="R_texture"/>
+      <input name="texcoord"     type="vector2"  nodename="uv_g"/>
+      <input name="uaddressmode" type="string"   value="periodic"/>
+      <input name="vaddressmode" type="string"   value="clamp"/>
+    </image>
+    <image name="R_b" type="float">
+      <input name="file"         type="filename" interfacename="R_texture"/>
+      <input name="texcoord"     type="vector2"  nodename="uv_b"/>
+      <input name="uaddressmode" type="string"   value="periodic"/>
+      <input name="vaddressmode" type="string"   value="clamp"/>
+    </image>
+
+    <!-- Sample T_lut.hdr -->
+    <image name="T_r" type="float">
+      <input name="file"         type="filename" interfacename="T_texture"/>
+      <input name="texcoord"     type="vector2"  nodename="uv_r"/>
+      <input name="uaddressmode" type="string"   value="periodic"/>
+      <input name="vaddressmode" type="string"   value="clamp"/>
+    </image>
+    <image name="T_g" type="float">
+      <input name="file"         type="filename" interfacename="T_texture"/>
+      <input name="texcoord"     type="vector2"  nodename="uv_g"/>
+      <input name="uaddressmode" type="string"   value="periodic"/>
+      <input name="vaddressmode" type="string"   value="clamp"/>
+    </image>
+    <image name="T_b" type="float">
+      <input name="file"         type="filename" interfacename="T_texture"/>
+      <input name="texcoord"     type="vector2"  nodename="uv_b"/>
+      <input name="uaddressmode" type="string"   value="periodic"/>
+      <input name="vaddressmode" type="string"   value="clamp"/>
+    </image>
+
+    <!-- Pack into color3 -->
+    <combine3 name="reflectance_rgb" type="color3">
+      <input name="in1" type="float" nodename="R_r"/>
+      <input name="in2" type="float" nodename="R_g"/>
+      <input name="in3" type="float" nodename="R_b"/>
+    </combine3>
+    <combine3 name="transmittance_rgb" type="color3">
+      <input name="in1" type="float" nodename="T_r"/>
+      <input name="in2" type="float" nodename="T_g"/>
+      <input name="in3" type="float" nodename="T_b"/>
+    </combine3>
+
+    <output name="reflectance"   type="color3" nodename="reflectance_rgb"/>
+    <output name="transmittance" type="color3" nodename="transmittance_rgb"/>
+  </nodegraph>
+
+  <!-- ── Material instance ───────────────────────────────────────────────── -->
+  <EntanglementTexture name="lut" type="multioutput" nodedef="ND_EntanglementTexture">
+    <input name="R_texture" type="filename" value="R_lut.hdr"/>
+    <input name="T_texture" type="filename" value="T_lut.hdr"/>
+    <input name="thickness" type="float"   value="500.0"/>
+    <input name="flip_t"    type="float"   value="1.0"/>
+  </EntanglementTexture>
+
+  <standard_surface name="EntanglementSurface" type="surfaceshader">
+    <input name="base"               type="float"  value="1.0"/>
+    <input name="base_color"         type="color3" nodename="lut" output="reflectance"/>
+    <input name="specular"           type="float"  value="1.0"/>
+    <input name="specular_color"     type="color3" nodename="lut" output="reflectance"/>
+    <input name="transmission"       type="float"  value="0.5"/>
+    <input name="transmission_color" type="color3" nodename="lut" output="transmittance"/>
+    <input name="metalness"          type="float"  value="0.0"/>
+    <input name="coat"               type="float"  value="0.0"/>
+  </standard_surface>
+
+  <surfacematerial name="EntanglementTexture" type="material">
+    <input name="surfaceshader" type="surfaceshader" nodename="EntanglementSurface"/>
+  </surfacematerial>
+
+</materialx>

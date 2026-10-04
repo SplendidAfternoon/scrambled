@@ -1,0 +1,26 @@
+{
+  "engine_id": "blur-v1",
+  "params": {
+    "strength": 0.8,
+    "reach": 0.8
+  },
+  "input_files": {
+    "image": "095e1908-638f-439a-847e-3ead82cb0e15"
+  },
+  "job_id": "201f3530-e8e2-4f65-8043-7e9e05113a69",
+  "seconds": 15.9,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "result",
+        "output_asset_id": "88e79845-6a9d-443b-995d-648d85fe814b",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/201f3530-e8e2-4f65-8043-7e9e05113a69/result?<signature-removed>",
+        "expires_at": "2026-10-03T18:10:40.858848465Z",
+        "content_type": "image/jpeg",
+        "filename": "blur-v1-201f3530.jfif",
+        "size_bytes": 95223
+      }
+    ]
+  }
+}

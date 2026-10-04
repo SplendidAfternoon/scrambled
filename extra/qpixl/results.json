@@ -1,0 +1,24 @@
+{
+  "engine_id": "qpixl-v1",
+  "shape": [
+    12,
+    32
+  ],
+  "source": "probes/otoc_scrambling.json |F|, row = site",
+  "runs": {
+    "aer": {
+      "job_id": "cc93f514-a4a4-49e9-b63c-d3313ac91427",
+      "seconds": 13.6,
+      "field": "output",
+      "rmse": 0.0178,
+      "corr": 0.9973
+    },
+    "fake_fez": {
+      "job_id": "f3c9fb29-3e09-4085-a5b0-cdda9bfea315",
+      "seconds": 210.6,
+      "field": "output",
+      "rmse": 0.1095,
+      "corr": 0.9162
+    }
+  }
+}

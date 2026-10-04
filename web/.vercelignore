@@ -1,0 +1,6 @@
+api/**/*.test.ts
+scripts/tessa_raw/
+scripts/*.log
+screenshots/
+node_modules/
+dist/

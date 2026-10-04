@@ -1,0 +1,317 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "otoc-echo-v1",
+  "name": "Quantum Echo",
+  "description": "Perturb a scrambled qubit chain, reverse it, and listen for what returns \u2014 a signed, complex multi-tap delay map.",
+  "version": "0.1.2",
+  "owner": "fccf0d75-76b1-4059-93ab-e1267885289e",
+  "owner_type": "user",
+  "created_by": "fccf0d75-76b1-4059-93ab-e1267885289e",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "application/json",
+  "output_type": "application/json",
+  "is_multipart": false,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 7200,
+    "max_retries": 1,
+    "heartbeat": 3600
+  },
+  "params_schema": {
+    "properties": {
+      "allow_high_shots": {
+        "default": false,
+        "description": "Permit shots above 8192 (QPU time scales linearly).",
+        "title": "Allow High Shots",
+        "type": "boolean"
+      },
+      "depth": {
+        "default": 8,
+        "description": "Echo depths t = 1..depth \u2014 the tap time slots. Each circuit has 2\u00b7depth layers.",
+        "maximum": 32,
+        "minimum": 1,
+        "title": "Depth",
+        "type": "integer"
+      },
+      "disorder": {
+        "default": 0,
+        "description": "Additive per-gate angle jitter, std in radians. 0 = clean Floquet. Localises the echo; the only lever that makes `seed` matter.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Disorder",
+        "type": "number"
+      },
+      "exact": {
+        "default": true,
+        "description": "aer only: exact (infinite-shot) expectation values instead of sampling.",
+        "title": "Exact",
+        "type": "boolean"
+      },
+      "fractional_gates": {
+        "default": true,
+        "description": "Use native rzz/rx on hardware where available. Halves the forward half's two-qubit count; disables gate twirling.",
+        "title": "Fractional Gates",
+        "type": "boolean"
+      },
+      "height": {
+        "anyOf": [
+          {
+            "maximum": 32,
+            "minimum": 2,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Square lattice height. Required for `square`.",
+        "title": "Height"
+      },
+      "include_taps": {
+        "default": true,
+        "description": "Also emit a flattened tap list (site, depth, F_re, F_im, level, polarity) in extras.",
+        "title": "Include Taps",
+        "type": "boolean"
+      },
+      "include_z": {
+        "default": false,
+        "description": "Also measure <Z_i>, completing each site's Bloch vector. Free on aer; a third measurement basis (1.5x shots) on hardware.",
+        "title": "Include Z",
+        "type": "boolean"
+      },
+      "kick": {
+        "default": "Z",
+        "description": "Perturbation Pauli applied to the kick site between U and U\u2020.",
+        "enum": [
+          "Z",
+          "Y",
+          "X"
+        ],
+        "title": "Kick",
+        "type": "string"
+      },
+      "kick_site": {
+        "anyOf": [
+          {
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Regeneration source: the site that receives the impulse. Default: centre.",
+        "title": "Kick Site"
+      },
+      "lattice": {
+        "default": "chain",
+        "description": "Topology of the delay line. `chain`: site \u2192 pan. `square` (Nighthawk-native): x \u2192 pan, y \u2192 diffusion.",
+        "enum": [
+          "chain",
+          "square"
+        ],
+        "title": "Lattice",
+        "type": "string"
+      },
+      "machine": {
+        "default": "aer",
+        "description": "Backend: 'aer' (local, noiseless) or an IBM backend name such as 'ibm_phoenix'.",
+        "title": "Machine",
+        "type": "string"
+      },
+      "min_tap_level": {
+        "default": 0.02,
+        "description": "|F| threshold for the emitted tap list.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Min Tap Level",
+        "type": "number"
+      },
+      "n_sites": {
+        "default": 8,
+        "description": "Chain length in qubits (= pan positions). Ignored for `square`.",
+        "maximum": 156,
+        "minimum": 2,
+        "title": "N Sites",
+        "type": "integer"
+      },
+      "qpu_instance": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "IBM Quantum instance CRN. As with the token: required for `via: direct`, optional BYOK for `via: mothbackend`.",
+        "format": "password",
+        "title": "Qpu Instance",
+        "writeOnly": true
+      },
+      "qpu_token": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "IBM Quantum API token. Required for `via: direct` on an IBM machine (or the QISKIT_IBM_TOKEN env var); optional BYOK for `via: mothbackend`, which otherwise uses Moth's own credentials.",
+        "format": "password",
+        "title": "Qpu Token",
+        "writeOnly": true
+      },
+      "ref_floor": {
+        "anyOf": [
+          {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "|c_ref| below which F is null. Default: 4/sqrt(shots), ~0 for exact simulation.",
+        "title": "Ref Floor"
+      },
+      "seed": {
+        "anyOf": [
+          {
+            "maximum": 9007199254740991,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "RNG seed for the disorder realisation. Only audible when disorder > 0. Drawn as a 31-bit integer and returned in provenance if omitted. Capped at 2**53-1: above that, moth-api (Go) and any browser client re-spell the integer as a float64 and it stops matching the seed you sent.",
+        "title": "Seed"
+      },
+      "shots": {
+        "default": 4096,
+        "description": "Shots per circuit. Ignored when machine='aer' and exact=true. Above 8192 requires allow_high_shots.",
+        "minimum": 1,
+        "title": "Shots",
+        "type": "integer"
+      },
+      "theta_x": {
+        "default": 0.9424777960769379,
+        "description": "Transverse kick per layer (RX angle, rad). The 'how quantum' dial: low \u2192 loud regular taps; high \u2192 inverted, attenuated, erased.",
+        "maximum": 3.141592653589793,
+        "minimum": 0,
+        "title": "Theta X",
+        "type": "number"
+      },
+      "theta_z": {
+        "default": 0,
+        "description": "Phase layer (RZ angle, rad). 0 \u2192 real, two-signed F. >0 \u2192 complex F: taps acquire a phase.",
+        "maximum": 3.141592653589793,
+        "minimum": 0,
+        "title": "Theta Z",
+        "type": "number"
+      },
+      "theta_zz": {
+        "default": 1.0995574287564276,
+        "description": "Coupling per layer (RZZ, rad). Non-monotonic: \u22480.25\u03c0 is the sparse setting. \u03c0 is a Clifford (no scrambling). \u03b8 and \u03c0\u2212\u03b8 coincide only when theta_x = 0, not at the default drive, so the upper half of the range is its own territory. The sign is invisible unless theta_z > 0.",
+        "exclusiveMinimum": -3.141592653589793,
+        "maximum": 3.141592653589793,
+        "title": "Theta Zz",
+        "type": "number"
+      },
+      "twirls": {
+        "default": 1,
+        "description": "ZZ-commutant Pauli twirls per circuit, averaged. Randomises off-axis coherent rzz error (not angle miscalibration, which the reference run absorbs). Multiplies circuit count.",
+        "maximum": 32,
+        "minimum": 1,
+        "title": "Twirls",
+        "type": "integer"
+      },
+      "via": {
+        "default": "direct",
+        "description": "How to reach the machine. `direct`: this engine drives qiskit-ibm-runtime itself (analytic emulation, native fractional gates, one batched QPU session). `mothbackend`: route through Moth's execution service, which holds the credentials \u2014 sampled only, so no analytic mode, no fractional gates, and one submission per circuit.",
+        "enum": [
+          "direct",
+          "mothbackend"
+        ],
+        "title": "Via",
+        "type": "string"
+      },
+      "width": {
+        "anyOf": [
+          {
+            "maximum": 32,
+            "minimum": 2,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Square lattice width. Required for `square`.",
+        "title": "Width"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-09-15T01:31:51Z",
+  "updated_at": "2026-09-15T13:00:44Z",
+  "description_md": "otoc-echo-v1 \u2014 Quantum Echo. A **core** engine.\n\nThin wrapper over the `quantum-echo` library: this file owns the platform contract\n(params schema, validation, credits, estimate, the typed result envelope) and the\nlibrary owns the physics. Same relationship qdrive-api has with QDrive.\n\n    params -> EchoSpec -> quantum_echo.measure_ir -> EchoIR.to_trajectory()\n\nMedia engines (retrocausal-echo-v1 and friends) depend on the same library and either\ncall `measure_ir` in-process or rebuild an IR from this engine's result with\n`EchoIR.from_trajectory`. Neither path reimplements the measurement.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import time\nimport requests\n\nAPI = \"https://api.mothquantum.com\"\n# An explicit User-Agent is not optional: Cloudflare fronts this API and 403s\n# the stdlib `Python-urllib/*` prefix with a plain-text `error code: 1010`\n# body that looks exactly like an auth failure.\nH = {\"Authorization\": \"Bearer moth_YOUR_KEY\",\n     \"User-Agent\": \"otoc-echo-example/1.0\"}\n\ndef check(r):\n    if not r.ok:                     # surface the body, or a 1010 is invisible\n        raise RuntimeError(f\"HTTP {r.status_code}: {r.text[:800]}\")\n    return r.json()\n\n# 1. Submit. 202 and a job id -- params are validated in the worker's `build`\n#    step, not here, so bad params come back as a job that fails.\njob = check(requests.post(f\"{API}/api/v1/engines/otoc-echo-v1/process\", headers=H,\n                          json={\"params\": {\"n_sites\": 8, \"depth\": 8,\n                                           \"theta_x\": 0.9425, \"theta_zz\": 1.0996}}))[\"job_id\"]\n\n# 2. Poll.\nwhile True:\n    st = check(requests.get(f\"{API}/api/v1/jobs/{job}/status\", headers=H))\n    if st[\"status\"] in (\"completed\", \"failed\", \"cancelled\"):\n        break\n    time.sleep(1.5)\nif st[\"status\"] != \"completed\":\n    raise RuntimeError(f\"{st['status']}: {(st.get('error') or {}).get('message')} \"\n                       f\"steps={{s['name']: s['status'] for s in st.get('steps', [])}}\")\n\n# 3. Read. The record sits at result.output; accept the looser shapes too.\nbody = check(requests.get(f\"{API}/api/v1/jobs/{job}/result\", headers=H))\nenv = body.get(\"result\", body)\nenv = env.get(\"output\", env)\n\nprint(env[\"result_type\"])             # \"trajectory\"\nprint(env[\"extras\"][\"summary\"])       # {live, inverted, regular, erased, complex, ...}\ntaps = env[\"extras\"][\"taps\"]          # [{site, depth, F_re, F_im, level, polarity}, ...]\n"
+    },
+    {
+      "lang": "curl",
+      "source": "# Submit (202 + job_id), then poll /status, then read /result.\ncurl -X POST https://api.mothquantum.com/api/v1/engines/otoc-echo-v1/process \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -H \"User-Agent: otoc-echo-example/1.0\" \\\n  -d '{\"params\": {\"lattice\": \"square\", \"width\": 6, \"height\": 5, \"depth\": 6}}'\n\ncurl -s https://api.mothquantum.com/api/v1/jobs/$JOB_ID/result \\\n  -H \"Authorization: Bearer moth_YOUR_KEY\" -H \"User-Agent: otoc-echo-example/1.0\" \\\n  | jq '.result.output.extras.summary'\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "invalid_params",
+      "description": "params fail Params' own field validation (type/range) or a cross-field check (square lattice without width/height, kick_site outside the line, shots over the cap without allow_high_shots)."
+    },
+    {
+      "type": "too_many_qubits",
+      "description": "the delay line needs more qubits than the machine allows \u2014 24 for aer, the device's own width for an IBM backend."
+    },
+    {
+      "type": "invalid_machine",
+      "description": "machine is neither 'aer' nor an IBM backend name the runtime knows."
+    },
+    {
+      "type": "backend_unavailable",
+      "description": "the requested execution route could not be reached \u2014 for `via: direct`, qiskit-ibm-runtime is missing or no credentials were supplied (qpu_token param / QISKIT_IBM_TOKEN); for `via: mothbackend`, the mothbackend package is absent or the service returned a transport error. Retryable."
+    },
+    {
+      "type": "execution_failed",
+      "description": "the estimator returned an error while running the echo circuits."
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

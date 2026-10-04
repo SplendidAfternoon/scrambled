@@ -1,0 +1,178 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "blur-midi-v1",
+  "name": "Blur Jazz",
+  "description": "Apply a quantum blur effect to a MIDI file.",
+  "owner": "51d7e7a6-480b-41bc-a3c1-7ea1f8886ea0",
+  "owner_type": "user",
+  "created_by": "51d7e7a6-480b-41bc-a3c1-7ea1f8886ea0",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "application/json",
+  "output_type": "audio/midi",
+  "input_files": [
+    {
+      "name": "midi",
+      "mime_types": [
+        "audio/midi",
+        "audio/mid"
+      ],
+      "required": true,
+      "description": "The MIDI file to process. Supported formats: MIDI 0, 1, and 2. Output is returned in the same format and tick resolution as the input."
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "audio/midi"
+      ],
+      "required": true,
+      "description": "The blurred MIDI file, in the same SMF type and tick resolution as the input."
+    }
+  ],
+  "is_multipart": true,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 18000,
+    "max_retries": 1,
+    "heartbeat": 18000
+  },
+  "params_schema": {
+    "properties": {
+      "margin": {
+        "anyOf": [
+          {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": 0.15,
+        "description": "Fraction of the active pitch span to pad above and below before blurring, giving the blur room to spread into adjacent pitches. `0` \u2014 no padding; blur is hard-clipped at the boundary notes. Default 0.15.",
+        "title": "Margin"
+      },
+      "mask": {
+        "anyOf": [
+          {
+            "items": {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "List of regions to blur, each as [track_index, start_seconds, end_seconds]. When omitted every note track is blurred in full. Tracks and time ranges not covered by the mask pass through unchanged. Example: [[1, 0.5, 2.0], [2, 1.0, 3.5]].",
+        "title": "Mask"
+      },
+      "qubits": {
+        "default": 20,
+        "description": "Qubit budget per blur pass (4\u201320). Determines the largest piano-roll tile the quantum simulator handles in one shot; larger values avoid tiling but require more simulation memory. Default 20.",
+        "maximum": 20,
+        "minimum": 4,
+        "title": "Qubits",
+        "type": "integer"
+      },
+      "reach": {
+        "default": 0,
+        "description": "Non-locality of the blur:\n\n- `0` \u2014 fully local: only neighbouring pitches/times mix.\n- `1` \u2014 fully non-local: any pitch can mix with any other.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Reach",
+        "type": "number"
+      },
+      "resolution": {
+        "default": 0,
+        "description": "Number of MIDI ticks per piano-roll step (integer \u2265 0). `0` (default) \u2014 auto: uses the 5th-percentile note duration, robust to sequencer-artefact grace notes. Any positive value sets the step size directly; larger values produce a coarser grid and faster blur.",
+        "minimum": 0,
+        "title": "Resolution",
+        "type": "integer"
+      },
+      "strength": {
+        "default": 0.5,
+        "description": "Blur strength (0 = unchanged, 1 = maximum).",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Strength",
+        "type": "number"
+      },
+      "threshold": {
+        "default": 0.1,
+        "description": "Relative noise gate: a velocity delta must exceed threshold \u00d7 max_velocity_in_roll to emit a note. Scales with the loudest note so it suppresses artefacts proportionally regardless of the overall dynamic level. Default 0.1.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Threshold",
+        "type": "number"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-08-28T07:44:24Z",
+  "updated_at": "2026-08-28T07:44:24Z",
+  "description_md": "A unitary, information-preserving blur applied to MIDI piano rolls.\n\nInstead of shifting notes by a fixed interval or time offset, Quantum Blur\nscatters every note across every other note at once. The result sounds like a\nquantum echo \u2014 pitches and rhythmic patterns from one moment and register\nreappear, rearranged and faintly, throughout the rest of the piece.\n\nThe effect works by representing each MIDI track as a list of multi-stack piano\nrolls (note \u00d7 time), blurring each stack as though it were a height map, then\nreconstructing MIDI note events from the blurred stacks.\n\n### How to use\n\nInvoke the engine with a JSON params payload and one MIDI file attached:\n\n- `midi` \u2014 required. Standard MIDI file (.mid/.midi), SMF type 0, 1, or 2.\n\nOptional params:\n\n- `strength` \u2014 blur strength (0 = unchanged, 1 = maximum). Default `0.5`.\n- `reach` \u2014 non-locality of the blur: `0` is fully local (only neighbouring\n  pitches/times mix); `1` is maximally non-local. Default `0.0`.\n- `qubits` \u2014 qubit budget per blur pass (4\u201320); determines the largest piano-roll\n  tile handled in one quantum simulation. Default `20`.\n- `threshold` \u2014 relative noise gate: a velocity delta must exceed\n  `threshold \u00d7 max_velocity_in_roll` to emit a note event. Suppresses\n  low-energy blur artefacts proportionally to the loudest note. Default `0.1`.\n- `resolution` \u2014 number of MIDI ticks per piano-roll step. `0` (default) =\n  auto-detect as the 5th-percentile note duration (robust to grace-note\n  artefacts). Any positive integer sets the step size directly, e.g. `120`\n  groups 120 ticks per step. Default `0`.\n- `margin` \u2014 fraction of the active pitch span to pad above and below before\n  blurring, giving the blur room to spread into adjacent pitches. Default `0.15`.\n- `mask` \u2014 list of `[track_index, start_seconds, end_seconds]` entries that\n  define which regions to blur. When omitted every note track is blurred in\n  full. Tracks and time ranges not in the mask pass through unchanged.\n\n### Output\n\nReturns the processed MIDI in the same SMF type and tick resolution as the\ninput (`audio/midi`). SMF types 0, 1, and 2 are all preserved.\nNote: only SMF (MIDI 1.0 file format) is supported \u2014 MIDI 2.0 is not.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\n\nwith open(\"piece.mid\", \"rb\") as f:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/blur-midi-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"midi\": f},\n        data={\"strength\": 0.5, \"reach\": 0.0},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "Python (mask \u2014 blur specific tracks/times only)",
+      "source": "import json, requests\n\n# Blur track 1 from 2 s to 8 s, and track 2 from 0 s to 4 s.\nmask = [[1, 2.0, 8.0], [2, 0.0, 4.0]]\n\nwith open(\"piece.mid\", \"rb\") as f:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/blur-midi-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"midi\": f},\n        data={\"strength\": 0.7, \"mask\": json.dumps(mask)},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "invalid_midi",
+      "description": "The MIDI file could not be parsed (corrupt, truncated, or not a valid SMF file)."
+    },
+    {
+      "type": "no_notes",
+      "description": "The MIDI file contains no note_on events \u2014 nothing to blur."
+    },
+    {
+      "type": "invalid_params",
+      "description": "One or more params fields failed Pydantic validation."
+    },
+    {
+      "type": "blur_failed",
+      "description": "The quantum blur circuit failed on a piano-roll tile."
+    },
+    {
+      "type": "encoding_failed",
+      "description": "The blurred piano roll could not be re-encoded as a MIDI file."
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

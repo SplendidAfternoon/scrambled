@@ -1,0 +1,76 @@
+{
+  "echo_renderer": "local tap-map convolution (core/dsp.py tap_ir), the documented retrocausal-echo-v1 mapping; retrocausal-echo-v1 itself did not complete (measurements/retro/)",
+  "sources": {
+    "control": {
+      "run": "control_clifford_n12",
+      "source": "otoc-echo-v1 on Moth Atlas (aer emulator)",
+      "job_id": "89c7f269-9a0c-473a-936d-a0ac2a08aa77"
+    },
+    "lowx": {
+      "run": "lowx_n12",
+      "source": "otoc-echo-v1 on Moth Atlas (aer emulator)",
+      "job_id": "6e5e76ef-0227-4f18-8b78-fadef0b48ae9"
+    },
+    "scrambling": {
+      "run": "scrambling_n12",
+      "source": "otoc-echo-v1 on Moth Atlas (aer emulator)",
+      "job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c"
+    }
+  },
+  "midi": {
+    "control": {
+      "file": "renders\\core\\midi\\control\\bf34d5ee_result_blur-midi-v1-bf34d5ee",
+      "job_id": "bf34d5ee-a022-44b2-a6e7-63241e80402c",
+      "params": {
+        "strength": 0.05,
+        "reach": 0.083,
+        "margin": 0.15,
+        "threshold": 0.1,
+        "qubits": 20,
+        "resolution": 0
+      },
+      "notes": 34,
+      "melody_window_s": 16.0,
+      "last_note_s": 15.6
+    },
+    "lowx": {
+      "file": "renders\\core\\midi\\lowx\\b3fd2a54_result_blur-midi-v1-b3fd2a54",
+      "job_id": "b3fd2a54-a811-4cfa-8b56-857b2937b2d8",
+      "params": {
+        "strength": 0.797,
+        "reach": 0.805,
+        "margin": 0.15,
+        "threshold": 0.1,
+        "qubits": 20,
+        "resolution": 0
+      },
+      "notes": 259,
+      "melody_window_s": 18.0,
+      "last_note_s": 17.83
+    },
+    "scrambling": {
+      "file": "renders\\core\\midi\\scrambling\\b151e90e_result_blur-midi-v1-b151e90e",
+      "job_id": "b151e90e-603f-4764-ad24-fd0b6730ba50",
+      "params": {
+        "strength": 0.747,
+        "reach": 0.932,
+        "margin": 0.15,
+        "threshold": 0.1,
+        "qubits": 20,
+        "resolution": 0
+      },
+      "notes": 294,
+      "melody_window_s": 26.0,
+      "last_note_s": 25.41
+    }
+  },
+  "gains": {
+    "echo": 0.3085566500489268,
+    "level_control": -1.16,
+    "level_lowx": 0.24,
+    "level_scrambling": 0.91
+  },
+  "loudness_lufs": -14.11,
+  "true_peak_dbtp": -1.05,
+  "duration_s": 88.0
+}

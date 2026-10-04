@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scrambled"
+version = "0.1.0"
+description = "Scramble any image, audio or video with a measured quantum OTOC (information scrambling) map from Moth Quantum's Atlas platform."
+readme = "docs/CLI.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.26",
+    "pillow>=10",
+    "requests>=2.31",
+    "soundfile>=0.12",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+core = ["scipy", "mido", "pyloudnorm", "matplotlib"]
+
+[project.scripts]
+scrambled = "scrambled.cli:main"
+
+[tool.setuptools]
+packages = ["scrambled"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

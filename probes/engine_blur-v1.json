@@ -1,0 +1,200 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "blur-v1",
+  "name": "Quantum Blur",
+  "description": "Apply a quantum blur algorithm to the image.",
+  "version": "1.1.9",
+  "owner": "81908c64-fe37-4fe5-a13b-6590b200348a",
+  "owner_type": "organization",
+  "created_by": "moth",
+  "visibility": "public",
+  "queue": "engine/blur-v1",
+  "input_type": "application/json",
+  "output_type": "application/octet-stream",
+  "input_files": [
+    {
+      "name": "image",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": true,
+      "description": "The image of your choice. The blur effect is applied RGB pixel values only, not the alpha channel. It means that if you submitted a PNG with transparent background, the background from the output will also be transparent."
+    },
+    {
+      "name": "mask",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": false,
+      "description": "Optional mask controlling where the effect is applied, on a per-pixel\nbasis. Must match the size of `image`. Each output pixel is a soft\nblend `C = m \u00b7 C_blurred + (1 - m) \u00b7 C_original`, where `m` is the\nnormalised mask intensity at that pixel: black keeps the original,\nwhite takes the fully blurred version, and grey values blend smoothly\nbetween the two. Single-channel masks are used directly; RGB masks are\nconverted to luminance.\n\n**Alpha-channel fallback**\n\nIf no mask is provided, the alpha channel of `image` is used instead\n(transparent pixels keep the original, opaque pixels are blurred). For\nRGB input with no alpha channel, the whole image is blurred.\n"
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": true,
+      "description": "The processed image."
+    }
+  ],
+  "is_multipart": true,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 300,
+    "max_retries": 1,
+    "heartbeat": 300
+  },
+  "params_schema": {
+    "properties": {
+      "downscale": {
+        "default": true,
+        "description": "Strategy used when a mask region is larger than the maximum number of qubits allows:\n\n- `true` \u2014 the region is downscaled to fit, blurred, and upscaled back.\n- `false` \u2014 the region is split into adjacent tiles that are blurred independently.",
+        "title": "Downscale",
+        "type": "boolean"
+      },
+      "mask_bin_size": {
+        "anyOf": [
+          {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": 4,
+        "description": "Mask quantisation step as a percentage of 255 (0\u2013100). Pixel values below this threshold are treated as background, preventing near-zero JPEG/WebP compression artifacts from being detected as separate mask regions. Default 4 (~10/255).",
+        "title": "Mask Bin Size"
+      },
+      "mask_min_region": {
+        "anyOf": [
+          {
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": 16,
+        "description": "Minimum mask region size in pixels. Connected components smaller than this are discarded after quantisation, removing residual compression artifacts that survive the binning step. Default 16.",
+        "title": "Mask Min Region"
+      },
+      "reach": {
+        "default": 0,
+        "description": "Controls how far from its original position a pixel can be affected by the blur:\n\n- `0` \u2014 fully local: only nearby pixels are affected (default).\n- `1` \u2014 fully non-local: pixels anywhere on the canvas can be affected equally.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Reach",
+        "type": "number"
+      },
+      "size": {
+        "default": 1024,
+        "description": "Pixel budget per blur pass: a region up to `size \u00d7 size` pixels is blurred in a single pass. Internally converted to a qubit budget via `ceil(log2(size)) * 2`. Must be between 8 and 1024. Default 1024.",
+        "maximum": 1024,
+        "minimum": 8,
+        "title": "Size",
+        "type": "integer"
+      },
+      "strength": {
+        "default": 0.5,
+        "description": "Strength of the effect, which controls the rotation applied to each qubit:\n\n- `0` \u2014 the image is left unchanged.\n- `1` \u2014 maximum blur.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Strength",
+        "type": "number"
+      },
+      "style": {
+        "default": "rx",
+        "description": "Quantum gate used to apply the effect:\n\n- `rx` \u2014 rotation around the x-axis of the Bloch sphere.\n- `ry` \u2014 rotation around the y-axis of the Bloch sphere.",
+        "enum": [
+          "rx",
+          "ry"
+        ],
+        "title": "Style",
+        "type": "string"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-05-26T13:52:59Z",
+  "updated_at": "2026-09-10T13:55:08Z",
+  "description_md": "Blur an image with a quantum rotation and get back an image of the same size and format, optionally only inside a masked region.\n\nEach pixel's brightness is encoded into a quantum state, one rotation gate is\napplied per qubit, and the state is read back into pixels. Because a single gate\nmoves weight across many pixels at once, the blur spreads as interference echoes\nrather than a soft focus: shapes reappear faintly elsewhere on the canvas.\nColour images are processed one channel at a time; the alpha channel is untouched.\n\n### How it works\n\n1. Reads `image` and, if given, `mask`. Without a mask the alpha channel selects\n   the region; RGB input with no alpha is blurred everywhere.\n2. Splits the mask into connected regions and, for each, encodes the pixels into\n   a statevector, applies the `style` rotation at the given `strength`, and reads\n   the result back. Regions larger than `size` are downscaled or tiled per\n   `downscale`.\n3. Blends each blurred region with the original by mask intensity and writes the\n   image in the input's format and dimensions.\n\n### Output\n\nOne file in slot `result`: same format, dimensions and alpha channel as `image`.\n\n### Limits\n\n- Runs on a classical statevector simulator, not a QPU. Memory and time grow with\n  region size; a 1024 x 1024 region uses 20 qubits.\n- `strength` above 1 (with `reach` 0) starts to reverse the effect.\n- `ry` on smooth gradients can collapse to a mostly dark image; prefer `rx` there.\n\n### Further reading\n\n- [QuantumBlur library](https://github.com/qiskit-community/QuantumBlur): the\n  encoding and rotation this engine wraps.\n- [ILA, Recurse](https://infinite.mothquantum.com): the album produced with this\n  colour-channel technique.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\n\nwith open(\"image.png\", \"rb\") as img:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/blur-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image\": img},\n        data={\"strength\": 0.5, \"style\": \"rx\", \"reach\": 0.0},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "Python (with mask)",
+      "source": "import requests\n\nwith open(\"image.png\", \"rb\") as img, open(\"mask.png\", \"rb\") as msk:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/blur-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image\": img, \"mask\": msk},\n        data={\"strength\": 0.7},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "curl",
+      "source": "curl -X POST https://api.mothquantum.com/v1/generation/blur-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -F \"image=@image.png\" \\\n  -F \"strength=0.5\" \\\n  -F \"style=rx\" \\\n  -F \"reach=0.0\"\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "mask_size_mismatch",
+      "description": "Mask dimensions do not match the image dimensions."
+    },
+    {
+      "type": "no_mask_region",
+      "description": "The provided mask has no non-zero pixels \u2014 nothing to blur."
+    },
+    {
+      "type": "invalid_params",
+      "description": "One or more params fields failed Pydantic validation."
+    },
+    {
+      "type": "invalid_image",
+      "description": "The image or mask file could not be decoded."
+    },
+    {
+      "type": "blur_failed",
+      "description": "The quantum blur circuit failed on a mask region."
+    },
+    {
+      "type": "region_extraction_failed",
+      "description": "A mask region could not be extracted from the image (e.g. an invalid bounding box)."
+    },
+    {
+      "type": "compose_failed",
+      "description": "A blurred region could not be blended back into the output image."
+    },
+    {
+      "type": "encoding_failed",
+      "description": "The output image could not be encoded in the input's format."
+    }
+  ],
+  "banner_image_id": "dff7600d-d75f-463e-8483-4ee93166bf5c",
+  "card_image_id": "61237020-b2c8-4dac-82bb-b8ff9e50be4a",
+  "banner_image_tag": "ghcr.io/moth-quantum/blur-api:engines-blur-v1-v1.0.19",
+  "card_image_tag": "ghcr.io/moth-quantum/blur-api:engines-blur-v1-v1.0.19",
+  "has_estimate": true,
+  "estimate": null,
+  "has_estimate_fn": true,
+  "estimate_needs_container": true,
+  "sidecar_endpoint": null,
+  "has_validate_fn": true
+}

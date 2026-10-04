@@ -1,0 +1,49 @@
+{
+  "engine_id": "qrc-midi-v1",
+  "params": {
+    "length": 128,
+    "bpm": 90,
+    "quality": "moderate",
+    "seed": 20261004,
+    "variation": 0.9,
+    "velocity": 96,
+    "loop": true
+  },
+  "input_files": {
+    "midi": "b2326d2c-4054-4cd2-9074-3cd273c01d47"
+  },
+  "job_id": "b399c1a0-7408-43c7-8b72-f963d960dc8c",
+  "seconds": 147.7,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "model",
+        "output_asset_id": "a6e85cb5-4011-4677-b8c5-4dab038402c7",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/b399c1a0-7408-43c7-8b72-f963d960dc8c/outputs/model?<signature-removed>",
+        "expires_at": "2026-10-03T19:10:24.978629131Z",
+        "content_type": "application/json",
+        "filename": "qrc-midi-v1-b399c1a0-model.json",
+        "size_bytes": 81502
+      },
+      {
+        "slot": "result",
+        "output_asset_id": "b93d9a46-4b29-4252-b499-d0f5644fa5a7",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/b399c1a0-7408-43c7-8b72-f963d960dc8c/result?<signature-removed>",
+        "expires_at": "2026-10-03T19:10:24.978732566Z",
+        "content_type": "audio/midi",
+        "filename": "qrc-midi-v1-b399c1a0-result",
+        "size_bytes": 1164
+      },
+      {
+        "slot": "state",
+        "output_asset_id": "89e5df88-8c45-4ac2-b46b-a11824f9f781",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/b399c1a0-7408-43c7-8b72-f963d960dc8c/outputs/state?<signature-removed>",
+        "expires_at": "2026-10-03T19:10:24.978818129Z",
+        "content_type": "application/json",
+        "filename": "qrc-midi-v1-b399c1a0-state.json",
+        "size_bytes": 84744
+      }
+    ]
+  }
+}

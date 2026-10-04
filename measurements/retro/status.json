@@ -1,0 +1,54 @@
+{
+  "5618ae22-4aad-4a82-97ea-c76e821bf436": {
+    "status": "failed",
+    "progress": {
+      "detail": "Rendering 26.6s through 359 taps",
+      "step": "render"
+    },
+    "error": {
+      "message": "<urlopen error [Errno 104] Connection reset by peer>",
+      "retryable": true,
+      "type": "internal_error"
+    },
+    "checked": "2026-10-03T20:00:15+00:00"
+  },
+  "aa558cac-7abd-4ddd-a43c-b7d87ae524e0": {
+    "status": "failed",
+    "progress": {
+      "detail": "Building the tap map",
+      "step": "render"
+    },
+    "error": {
+      "message": "HTTP Error 400: Bad Request",
+      "retryable": true,
+      "type": "internal_error"
+    },
+    "checked": "2026-10-03T20:00:16+00:00"
+  },
+  "bc6516c5-c5c5-430d-a66a-fa2785a8ceb4": {
+    "status": "failed",
+    "progress": {
+      "detail": "Rendering 26.6s through 348 taps",
+      "step": "render"
+    },
+    "error": {
+      "message": "The engine did not respond in time \u2014 retry the job",
+      "retryable": true,
+      "type": "engine_timeout"
+    },
+    "checked": "2026-10-03T19:25:37+00:00"
+  },
+  "c4eefe4b-402a-4da8-8f54-259114c39e3f": {
+    "status": "failed",
+    "progress": {
+      "detail": "Building the tap map",
+      "step": "render"
+    },
+    "error": {
+      "message": "The engine did not respond in time \u2014 retry the job",
+      "retryable": true,
+      "type": "engine_timeout"
+    },
+    "checked": "2026-10-03T19:25:38+00:00"
+  }
+}

@@ -1,0 +1,11 @@
+﻿== eggs_scrambled.mp4
+stream|codec_name=h264|codec_type=video|width=406|height=720|r_frame_rate=30/1|duration=57.933333
+stream|codec_name=aac|codec_type=audio|r_frame_rate=0/0|duration=57.920000
+== life_scrambled.mp4
+stream|codec_name=h264|codec_type=video|width=640|height=360|r_frame_rate=24/1|duration=12.000000
+stream|codec_name=aac|codec_type=audio|r_frame_rate=0/0|duration=11.989333
+== eggs_image.mp4
+stream|codec_name=h264|codec_type=video|width=1024|height=1024|r_frame_rate=24/1|duration=8.000000
+== replay/eggs_scrambled.mp4
+stream|codec_name=h264|codec_type=video|width=406|height=720|r_frame_rate=30/1|duration=57.933333
+stream|codec_name=aac|codec_type=audio|r_frame_rate=0/0|duration=57.920000

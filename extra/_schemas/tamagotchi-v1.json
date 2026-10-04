@@ -1,0 +1,146 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "tamagotchi-v1",
+  "name": "Tamagotchi",
+  "description": "Cute little thingy",
+  "owner": "51d7e7a6-480b-41bc-a3c1-7ea1f8886ea0",
+  "owner_type": "user",
+  "created_by": "51d7e7a6-480b-41bc-a3c1-7ea1f8886ea0",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "application/json",
+  "output_type": "application/json",
+  "is_multipart": false,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 30000,
+    "max_retries": 3,
+    "heartbeat": 60000
+  },
+  "params_schema": {
+    "$defs": {
+      "NoiseParams": {
+        "properties": {
+          "p_1q": {
+            "default": 0,
+            "description": "1-qubit gate depolarizing probability",
+            "title": "P 1Q",
+            "type": "number"
+          },
+          "p_gate": {
+            "default": 0,
+            "description": "2-qubit gate depolarizing probability",
+            "title": "P Gate",
+            "type": "number"
+          },
+          "p_idle": {
+            "default": 0,
+            "description": "idle depolarizing probability on data qubits",
+            "title": "P Idle",
+            "type": "number"
+          },
+          "p_meas": {
+            "default": 0,
+            "description": "measurement (readout) flip probability",
+            "title": "P Meas",
+            "type": "number"
+          }
+        },
+        "title": "NoiseParams",
+        "type": "object"
+      }
+    },
+    "properties": {
+      "actions": {
+        "description": "list of [gate, target] over logical qubits; gates: I,X,Z,H,S,CX,SE",
+        "items": {},
+        "title": "Actions",
+        "type": "array"
+      },
+      "code": {
+        "default": "steane",
+        "description": "CSS code key (see CODE_REGISTRY)",
+        "title": "Code",
+        "type": "string"
+      },
+      "expected": {
+        "anyOf": [
+          {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "optional expected per-logical outcome; auto-computed if omitted",
+        "title": "Expected"
+      },
+      "method": {
+        "default": "stabilizer",
+        "description": "Aer simulation method",
+        "title": "Method",
+        "type": "string"
+      },
+      "n_logical": {
+        "default": 1,
+        "description": "number of logical qubits",
+        "title": "N Logical",
+        "type": "integer"
+      },
+      "noise": {
+        "$ref": "#/$defs/NoiseParams"
+      },
+      "seed": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "simulator seed for reproducibility",
+        "title": "Seed"
+      },
+      "shots": {
+        "default": 1024,
+        "description": "number of measurement shots",
+        "title": "Shots",
+        "type": "integer"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 0,
+  "enabled": true,
+  "registered_at": "2026-08-27T16:00:16Z",
+  "updated_at": "2026-08-27T16:00:16Z",
+  "description_md": "Qiskit QEC engine.\n\nTurns a declarative list of *logical* actions into a physical qiskit circuit on a\nCSS quantum-error-correcting code, runs it under a noise model on the Aer\n``stabilizer`` simulator, and reports how often the logical qubits end up in the\nexpected computational-basis state.\n\nActions are ``(gate, target)`` tuples over *logical* qubit indices, e.g.::\n\n    [(\"X\", 0), (\"CX\", (0, 1)), (\"SE\", [0, 1])]\n\nSingle-qubit gates (``X``/``Z``/``H``/``S``) and ``CX`` are applied transversally.\n``SE`` is a syndrome-extraction round: ancillas measure the stabilizers and the\nerror is corrected *in-circuit* using classically-controlled gates (qiskit's\n``switch`` conditions on the full syndrome-register integer, so the nonlinear\nHamming lookup \u2014 which qubit to flip \u2014 is expressible directly).\n\nThe engine exposes the platform contract ``run(params) -> dict`` plus a separate\n``validate(params) -> None`` pre-flight check.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\nr = requests.post(\n    \"https://api.mothquantum.com/v1/generation/tamagotchi-v1/process\",\n    headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n    json={\n        \"code\": \"steane\",\n        \"n_logical\": 1,\n        \"shots\": 4000,\n        \"actions\": [[\"SE\", 0], [\"X\", 0], [\"SE\", 0]],\n        \"noise\": {\"p_gate\": 0.01, \"p_1q\": 0.005, \"p_meas\": 0.01, \"p_idle\": 0.002},\n    },\n)\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "curl",
+      "source": "curl -X POST https://api.mothquantum.com/v1/generation/tamagotchi-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"code\":\"steane\",\"n_logical\":1,\"shots\":4000,\"actions\":[[\"SE\",0],[\"X\",0],[\"SE\",0]],\"noise\":{\"p_gate\":0.01,\"p_1q\":0.005,\"p_meas\":0.01,\"p_idle\":0.002}}'\n"
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

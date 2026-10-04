@@ -1,0 +1,30 @@
+{
+  "engine_id": "blur-midi-v1",
+  "params": {
+    "strength": 0.747,
+    "reach": 0.932,
+    "margin": 0.15,
+    "threshold": 0.1,
+    "qubits": 20,
+    "resolution": 0
+  },
+  "input_files": {
+    "midi": "94d20580-096c-4c60-b794-ff9d6e581a22"
+  },
+  "job_id": "b151e90e-603f-4764-ad24-fd0b6730ba50",
+  "seconds": 10.4,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "result",
+        "output_asset_id": "1b5469b4-b086-40a8-b234-64ff1e9dfbcb",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/b151e90e-603f-4764-ad24-fd0b6730ba50/result?<signature-removed>",
+        "expires_at": "2026-10-03T19:11:18.811790077Z",
+        "content_type": "audio/midi",
+        "filename": "blur-midi-v1-b151e90e",
+        "size_bytes": 3991
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "engine_id": "deep-fryer-v1",
+  "input": "extra/deep_fryer/input_B_sq.png",
+  "input_asset": "584729b5-4398-45cc-827f-87b356df7e41",
+  "runs": {
+    "measured_gates": {
+      "params": {
+        "gates": [
+          [
+            "rx",
+            0.3
+          ],
+          [
+            "rz",
+            0.35
+          ]
+        ],
+        "tile_size": 4
+      },
+      "error": "job 3d15bd3e-baf1-4d96-94ea-a9e603b26963 timed out locally after 900s (state=queued)"
+    },
+    "engine_default": {
+      "params": {
+        "gates": [
+          [
+            "rx",
+            0.5
+          ]
+        ],
+        "tile_size": 4
+      },
+      "error": "job ee750888-addb-4502-b139-d3a3e3b0a55d timed out locally after 900s (state=queued)"
+    }
+  }
+}

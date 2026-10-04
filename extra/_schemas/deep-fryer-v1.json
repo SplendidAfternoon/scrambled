@@ -1,0 +1,169 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "deep-fryer-v1",
+  "name": "Deep Fryer",
+  "description": "Gives images a blown-out, deep-fried meme look by scrambling hue and lightness through a quantum kernel circuit, tile by tile.",
+  "owner": "81908c64-fe37-4fe5-a13b-6590b200348a",
+  "owner_type": "organization",
+  "created_by": "moth",
+  "visibility": "public",
+  "queue": "engine/deep-fryer-v1",
+  "input_type": "application/octet-stream",
+  "output_type": "application/octet-stream",
+  "input_files": [
+    {
+      "name": "image",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/bmp",
+        "image/tiff"
+      ],
+      "required": true,
+      "description": ""
+    },
+    {
+      "name": "mask",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/bmp",
+        "image/tiff"
+      ],
+      "required": false,
+      "description": "Optional mask controlling where the effect is applied, on a per-pixel basis. Resized (Lanczos) to match `image` if it isn't already the same size. Brighter mask pixels take more of the quantum-processed color, darker pixels keep more of the original. The mask is split into disjoint connected regions and each is processed independently, scoped to its own bounding box. If omitted, the alpha channel of `image` is used instead (transparent pixels stay original, opaque pixels are processed); for RGB input with no alpha channel, the whole image is processed."
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/bmp",
+        "image/tiff"
+      ],
+      "required": true,
+      "description": "The processed image."
+    }
+  ],
+  "is_multipart": true,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 30000,
+    "max_retries": 3,
+    "heartbeat": 60000
+  },
+  "params_schema": {
+    "properties": {
+      "gates": {
+        "default": [
+          [
+            "rx",
+            0.5
+          ]
+        ],
+        "description": "Sequence of (gate_name, intensity) pairs applied to each tile's qubit lattice, in order.",
+        "items": {
+          "maxItems": 2,
+          "minItems": 2,
+          "prefixItems": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "type": "array"
+        },
+        "title": "Gates",
+        "type": "array"
+      },
+      "mask_bin_size": {
+        "default": 4,
+        "description": "Mask quantisation step as a percentage of 255 (0-100). Pixel values below this threshold are treated as background, preventing near-zero JPEG/WebP compression artifacts from being detected as separate mask regions. Default 4 (~10/255).",
+        "maximum": 100,
+        "minimum": 0,
+        "title": "Mask Bin Size",
+        "type": "number"
+      },
+      "mask_min_region": {
+        "default": 16,
+        "description": "Minimum mask region size in pixels. Connected components smaller than this are discarded after quantisation, removing residual compression artifacts that survive the binning step. Default 16.",
+        "minimum": 1,
+        "title": "Mask Min Region",
+        "type": "integer"
+      },
+      "tile_size": {
+        "default": 4,
+        "description": "Side length of the square qubit lattice used as the per-tile processing kernel.",
+        "maximum": 4,
+        "minimum": 2,
+        "title": "Tile Size",
+        "type": "integer"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-07-10T10:46:01Z",
+  "updated_at": "2026-09-09T21:42:30Z",
+  "description_md": "Deep Fryer: a quantum kernel that gives images that blown-out, deep-fried meme look.\n\nA classic deep-fry filter gets there by cranking saturation, contrast, and\nsharpening. This engine reaches for the same chaotic, crunchy color result\nthrough genuine quantum interference instead, one tile at a time.\n\nEach tile becomes a square lattice of qubits, one per pixel. A pixel's hue and\nlightness place its qubit on the Bloch sphere (hue as the azimuthal phase,\nlightness as the polar angle, like a compass bearing and a latitude fixing a\npoint on a globe). Saturation stays out of the circuit and is reattached\nafterwards, so the amount of color in a pixel never changes, only which color\nand how bright. The requested gates are then applied across the tile: single-\nqubit gates touch every pixel, two-qubit gates couple neighbors on the\nlattice, so color genuinely mixes through interference and entanglement\nrather than an average. Reading each qubit's Bloch vector back out gives the\ntile its new, deep-fried hue and lightness.\n\n### How to use\n\nInvoke the engine through the platform with a JSON params payload and one or\ntwo image files attached:\n\n- `image` \u2014 required. The source image. Supported formats: PNG, JPEG, WebP,\n  BMP, TIFF.\n- `mask` \u2014 optional. A single-channel (or RGB) image the same size as `image`,\n  where brighter pixels receive more of the effect and darker pixels keep the\n  original color. If omitted, the alpha channel of `image` is used as the\n  mask; for RGB input with no alpha, the whole image is processed. The mask\n  is split into disjoint connected regions, each processed as its own tiled\n  sub-image scoped to that region's bounding box, so a few small scattered\n  selections on an otherwise-empty mask don't tile the entire canvas.\n\nOptionally, the params object may also include:\n\n- `gates` \u2014 a list of `[gate_name, intensity]` pairs, applied to the tile's\n  qubit lattice in order. `intensity` is normalized to `[0, 1]`: for\n  parametric gates (`rx`, `ry`, `rz`, `p`, `rxx`, `ryy`, `rzz`, `rzx`, `crx`,\n  `cry`, `crz`, `cp`) it scales the rotation angle up to `pi`; for\n  non-parametric gates (`h`, `x`, `y`, `z`, `s`, `sdg`, `t`, `tdg`, `sx`, `cx`,\n  `cy`, `cz`, `ch`, `swap`, `iswap`) it raises the gate to that fractional\n  power, so `0` is the identity and `1` is the full gate. Default\n  `[[\"rx\", 0.5]]`.\n- `tile_size` \u2014 side length of the square qubit lattice used as the\n  processing kernel. A tile near a mask region's edge is simulated at its\n  true, smaller size rather than padded. Must keep `tile_size ** 2` within\n  `MAX_QUBITS`, since the whole lattice is simulated as one statevector.\n  Default `4`.\n- `mask_bin_size` \u2014 mask quantisation step as a percentage of 255. Pixel\n  values below this threshold collapse into the background, suppressing\n  JPEG/WebP compression artifacts from being treated as separate mask\n  regions. Default `4.0`.\n- `mask_min_region` \u2014 minimum connected-component size in pixels after\n  quantisation. Smaller components are discarded. Default `16`.\n\n### Output\n\nReturns an image the same size and format as the input, deep-fried by having\nits hue and lightness reshaped by the circuit while saturation is preserved\nexactly. The original alpha channel, if any, is preserved unchanged.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\nr = requests.post(\n    \"https://api.mothquantum.com/v1/generation/deep-fryer-v1/process\",\n    headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n    json={\"param\": \"value\"},\n)\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "curl",
+      "source": "curl -X POST https://api.mothquantum.com/v1/generation/deep-fryer-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"param\": \"value\"}'\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "invalid_image",
+      "description": "The image or mask file could not be decoded."
+    },
+    {
+      "type": "no_mask_region",
+      "description": "The provided mask has no non-zero regions after quantisation \u2014 nothing to process."
+    },
+    {
+      "type": "invalid_params",
+      "description": "One or more params fields failed Pydantic validation."
+    },
+    {
+      "type": "tile_too_large",
+      "description": "tile_size ** 2 exceeds the MAX_QUBITS simulation budget."
+    },
+    {
+      "type": "unsupported_gate",
+      "description": "A gate name in `gates` is not in the supported gate registry."
+    },
+    {
+      "type": "kernel_failed",
+      "description": "The quantum color kernel failed on a tile."
+    },
+    {
+      "type": "encoding_failed",
+      "description": "The output image could not be encoded in the input's format."
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": true
+}

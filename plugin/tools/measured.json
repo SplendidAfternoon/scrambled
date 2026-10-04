@@ -1,0 +1,176 @@
+{
+  "scrambling": {
+    "path": "cache\\otoc-echo-v1\\51ed3c58046a5ff2.json",
+    "job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "via": "direct"
+    }
+  },
+  "control_clifford": {
+    "path": "cache\\otoc-echo-v1\\e8f29f205d89ffeb.json",
+    "job_id": "89c7f269-9a0c-473a-936d-a0ac2a08aa77",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 3.141592653589793,
+      "via": "direct"
+    }
+  },
+  "low_theta_x": {
+    "path": "cache\\otoc-echo-v1\\fc53a3ef4eeb0893.json",
+    "job_id": "6e5e76ef-0227-4f18-8b78-fadef0b48ae9",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.3141592653589793,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "via": "direct"
+    }
+  },
+  "sparse": {
+    "path": "cache\\otoc-echo-v1\\e74f14a01c83d28e.json",
+    "job_id": "253a55d0-2726-4503-8dfa-f5ad6f5c7418",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 0.7853981633974483,
+      "via": "direct"
+    }
+  },
+  "phase": {
+    "path": "cache\\otoc-echo-v1\\c534d155e09a2a92.json",
+    "job_id": "7a4ccdfa-d29a-4e2b-a275-5dbb415a2dce",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0.7853981633974483,
+      "theta_zz": 1.0995574287564276,
+      "via": "direct"
+    }
+  },
+  "disorder": {
+    "path": "cache\\otoc-echo-v1\\b7738b8f02e898ed.json",
+    "job_id": "a3dbb646-05af-4f55-aef3-b497f609759d",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0.6,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "via": "direct",
+      "seed": 7
+    }
+  },
+  "wide14_d16": {
+    "path": "cache\\otoc-echo-v1\\2a08b33c002fbc8f.json",
+    "job_id": "06a9801e-90ae-4e9d-a75b-4da42e128d21",
+    "params": {
+      "depth": 16,
+      "n_sites": 14,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "via": "direct"
+    }
+  },
+  "kick_left": {
+    "path": "cache\\otoc-echo-v1\\f3d95274393e08e0.json",
+    "job_id": "637f0daf-c4aa-4f4e-aaf4-13197c472111",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "via": "direct",
+      "kick_site": 2
+    }
+  },
+  "edge_sparse": {
+    "path": "cache\\otoc-echo-v1\\4a6ca908c20caa0b.json",
+    "job_id": "4501d88f-3666-48f6-b556-415d28595a5e",
+    "params": {
+      "depth": 32,
+      "n_sites": 12,
+      "min_tap_level": 0,
+      "include_taps": true,
+      "machine": "aer",
+      "exact": true,
+      "disorder": 0,
+      "lattice": "chain",
+      "kick": "Z",
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 0.7853981633974483,
+      "via": "direct",
+      "kick_site": 0
+    }
+  }
+}

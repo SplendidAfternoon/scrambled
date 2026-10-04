@@ -1,0 +1,258 @@
+{
+  "tool": "scrambled 0.1.0",
+  "command": "video",
+  "mode": "atlas",
+  "created": "2026-10-04T02:59:31+0800",
+  "otoc": {
+    "source": "atlas",
+    "label": "measured on Moth Atlas, otoc-echo-v1 (aer emulator)",
+    "job_id": "8df5cfa2-e57c-43a8-a93a-63975efd252c",
+    "shape": [
+      12,
+      32
+    ],
+    "kick_site": 6,
+    "light_cone_arrival_t": [
+      6,
+      5,
+      4,
+      3,
+      2,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "late_mean_absF_offkick": 0.253,
+    "params": {
+      "allow_high_shots": false,
+      "depth": 32,
+      "disorder": 0,
+      "exact": true,
+      "fractional_gates": true,
+      "height": null,
+      "include_taps": true,
+      "include_z": false,
+      "initial_layout": null,
+      "kick": "Z",
+      "kick_site": null,
+      "lattice": "chain",
+      "machine": "aer",
+      "min_tap_level": 0,
+      "n_sites": 12,
+      "ref_floor": null,
+      "seed": null,
+      "shots": 4096,
+      "theta_x": 0.9424777960769379,
+      "theta_z": 0,
+      "theta_zz": 1.0995574287564276,
+      "twirls": 1,
+      "via": "direct",
+      "width": null
+    }
+  },
+  "input": "media\\clip_720.mp4",
+  "label": "Atlas otoc-echo-v1 (emulator) + blur-v1/telablur-v1",
+  "render": {
+    "size": [
+      406,
+      720
+    ],
+    "fps": 30.0,
+    "start": 0.0,
+    "duration": 57.933333,
+    "keyframes": [
+      7.241666625,
+      21.724999874999998,
+      36.208333124999996,
+      50.691666375
+    ],
+    "jobs": [
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "43f5b515-328f-466a-b0a7-4f15f025885a"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "e12653ed-f649-42d7-b43d-5336652aff10"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "5cb56bdb-308d-4046-9721-14e8b25a2c9c"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.02
+        },
+        "job_id": "a99ce842-1848-41ec-903d-a03856c579e7"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.5
+        },
+        "job_id": "b1c31276-da22-4045-97b2-29197b1d56c6"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.98
+        },
+        "job_id": "cda5e72d-ada3-465c-a3ac-522f39523827"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "332b24cf-5ea2-4222-8932-800390b1ba27"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "635d87ed-6b0e-48bc-add8-0f67f3bb07f4"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "99435a08-e241-4edc-951f-daa675808426"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.02
+        },
+        "job_id": "8c458017-fc35-4e10-9d26-88e0cd3c8fae"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.5
+        },
+        "job_id": "64a9dd2d-d398-4c6c-9487-fb532cd625a7"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.98
+        },
+        "job_id": "715b3be6-9c21-476a-8523-c4036e84c690"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "b643f68a-458f-4d5b-8e6e-955a9be6753f"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "6e23491f-12a0-4225-bec0-da17ab491e44"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "b5555358-80f4-4519-8191-e39243697775"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.02
+        },
+        "job_id": "7042a91f-38e3-4e51-8992-2999b80f7be4"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.5
+        },
+        "job_id": "6db6ad18-6d7c-4710-a16d-71a324c3f242"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.98
+        },
+        "job_id": "57006811-4bd2-43d2-96c4-6cc21b1368d3"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.1,
+          "reach": 0.1
+        },
+        "job_id": "4ea4e829-6ad0-42e1-a889-71716db98c74"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.2,
+          "reach": 0.2
+        },
+        "job_id": "2a74e17c-abe4-44fb-9686-b23770a76f8b"
+      },
+      {
+        "engine": "blur-v1",
+        "params": {
+          "strength": 0.3,
+          "reach": 0.3
+        },
+        "job_id": "0d9bfa79-0e1b-4e63-8934-db01c62dfbec"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.02
+        },
+        "job_id": "15b90eb4-8768-4efa-b72a-ff7fc2eebde3"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.5
+        },
+        "job_id": "5f4ed7f7-fc7a-4f22-b023-0e9f2e9691de"
+      },
+      {
+        "engine": "telablur-v1",
+        "params": {
+          "strength": 0.98
+        },
+        "job_id": "938b061c-6094-4dd3-89ff-ef9d25c354ec"
+      }
+    ],
+    "audio": "local numpy tap render of the OTOC map (classical DSP)",
+    "frames": 1738
+  }
+}

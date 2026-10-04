@@ -1,0 +1,74 @@
+{
+  "grid": [
+    128,
+    128
+  ],
+  "profile": {
+    "L": 1.0,
+    "B": 0.74,
+    "W": 0.085
+  },
+  "runs": [
+    {
+      "label": "crack_s000",
+      "params": {
+        "strength": 0.0
+      },
+      "job_id": "61381c79-8679-40a7-9d41-a56c43cc5867",
+      "mean_abs_change": 4.038426760924177e-07,
+      "max_abs_change": 9.543704075909432e-07
+    },
+    {
+      "label": "crack_s015",
+      "params": {
+        "strength": 0.15
+      },
+      "job_id": "408871e7-f614-492b-80a6-7a38da1f7ce8",
+      "mean_abs_change": 0.0009795631949008317,
+      "max_abs_change": 0.007898382339588339
+    },
+    {
+      "label": "crack_s035",
+      "params": {
+        "strength": 0.35
+      },
+      "job_id": "4382a7a5-3049-48e4-b4d6-6d4690cb9028",
+      "mean_abs_change": 0.0038729435433945483,
+      "max_abs_change": 0.028256344735754002
+    },
+    {
+      "label": "crack_s060",
+      "params": {
+        "strength": 0.6
+      },
+      "job_id": "ded774e0-d3b3-404c-bca7-7f59b533498e",
+      "mean_abs_change": 0.0066405101253277,
+      "max_abs_change": 0.041695472426746705
+    },
+    {
+      "label": "crack_s060_r05",
+      "params": {
+        "strength": 0.6,
+        "reach": 0.5
+      },
+      "job_id": "3b5de2a4-190d-4b85-8e01-4f9076d0def1",
+      "mean_abs_change": 0.037898498022238825,
+      "max_abs_change": 0.11925952998192257
+    },
+    {
+      "label": "crack_s090_r10",
+      "params": {
+        "strength": 0.9,
+        "reach": 1.0
+      },
+      "job_id": "dfffd89c-d836-4347-a054-5616946eded7",
+      "mean_abs_change": 0.0836422176221611,
+      "max_abs_change": 0.15389813049557494
+    }
+  ],
+  "roundtrip": {
+    "job_id": "a3d7591d-b965-46c7-be99-f005a3ca32a1",
+    "max_abs_err": 4.999053314636015e-07,
+    "max_rel_err": 9.99810662927203e-07
+  }
+}

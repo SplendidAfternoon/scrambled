@@ -1,0 +1,121 @@
+{
+  "engine_id": "blur-v1",
+  "name": "Quantum Blur",
+  "version": "1.1.9",
+  "credits_per_run": 1,
+  "input_files": [
+    {
+      "name": "image",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": true,
+      "description": "The image of your choice. The blur effect is applied RGB pixel values only, not the alpha channel. It means that if you submitted a PNG with transparent background, the background from the output will also be transparent."
+    },
+    {
+      "name": "mask",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": false,
+      "description": "Optional mask controlling where the effect is applied, on a per-pixel\nbasis. Must match the size of `image`. Each output pixel is a soft\nblend `C = m \u00b7 C_blurred + (1 - m) \u00b7 C_original`, where `m` is the\nnormalised mask intensity at that pixel: black keeps the original,\nwhite takes the fully blurred version, and grey values blend smoothly\nbetween the two. Single-channel masks are used directly; RGB masks are\nconverted to luminance.\n\n**Alpha-channel fallback**\n\nIf no mask is provided, the alpha channel of `image` is used instead\n(transparent pixels keep the original, opaque pixels are blurred). For\nRGB input with no alpha channel, the whole image is blurred.\n"
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": true,
+      "description": "The processed image."
+    }
+  ],
+  "params_schema": {
+    "properties": {
+      "downscale": {
+        "default": true,
+        "description": "Strategy used when a mask region is larger than the maximum number of qubits allows:\n\n- `true` \u2014 the region is downscaled to fit, blurred, and upscaled back.\n- `false` \u2014 the region is split into adjacent tiles that are blurred independently.",
+        "title": "Downscale",
+        "type": "boolean"
+      },
+      "mask_bin_size": {
+        "anyOf": [
+          {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": 4,
+        "description": "Mask quantisation step as a percentage of 255 (0\u2013100). Pixel values below this threshold are treated as background, preventing near-zero JPEG/WebP compression artifacts from being detected as separate mask regions. Default 4 (~10/255).",
+        "title": "Mask Bin Size"
+      },
+      "mask_min_region": {
+        "anyOf": [
+          {
+            "minimum": 1,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": 16,
+        "description": "Minimum mask region size in pixels. Connected components smaller than this are discarded after quantisation, removing residual compression artifacts that survive the binning step. Default 16.",
+        "title": "Mask Min Region"
+      },
+      "reach": {
+        "default": 0,
+        "description": "Controls how far from its original position a pixel can be affected by the blur:\n\n- `0` \u2014 fully local: only nearby pixels are affected (default).\n- `1` \u2014 fully non-local: pixels anywhere on the canvas can be affected equally.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Reach",
+        "type": "number"
+      },
+      "size": {
+        "default": 1024,
+        "description": "Pixel budget per blur pass: a region up to `size \u00d7 size` pixels is blurred in a single pass. Internally converted to a qubit budget via `ceil(log2(size)) * 2`. Must be between 8 and 1024. Default 1024.",
+        "maximum": 1024,
+        "minimum": 8,
+        "title": "Size",
+        "type": "integer"
+      },
+      "strength": {
+        "default": 0.5,
+        "description": "Strength of the effect, which controls the rotation applied to each qubit:\n\n- `0` \u2014 the image is left unchanged.\n- `1` \u2014 maximum blur.",
+        "maximum": 1,
+        "minimum": 0,
+        "title": "Strength",
+        "type": "number"
+      },
+      "style": {
+        "default": "rx",
+        "description": "Quantum gate used to apply the effect:\n\n- `rx` \u2014 rotation around the x-axis of the Bloch sphere.\n- `ry` \u2014 rotation around the y-axis of the Bloch sphere.",
+        "enum": [
+          "rx",
+          "ry"
+        ],
+        "title": "Style",
+        "type": "string"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  }
+}

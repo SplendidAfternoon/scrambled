@@ -1,0 +1,17 @@
+.cursor/multi-agent/
+.venv/
+.env
+__pycache__/
+discord-dump/
+probes/me.json
+media/clip_raw.mp4
+media/frames/
+out/frames/
+renders/v1_unused/
+scrambled.egg-info/
+node_modules/
+web/dist/
+three/frames/
+three/meshes/*.obj
+*.egg-info/
+.pytest_cache/

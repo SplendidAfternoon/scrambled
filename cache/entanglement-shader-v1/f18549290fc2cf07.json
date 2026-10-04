@@ -1,0 +1,29 @@
+{
+  "engine_id": "entanglement-shader-v1",
+  "params": {
+    "reflectance": 0.3,
+    "absorption": 0.6,
+    "layers": 3,
+    "incoming_rays": 8,
+    "interaction": 1.0,
+    "style": "frustrated",
+    "resolution": 128
+  },
+  "input_files": {},
+  "job_id": "9214cb9d-e1ab-413d-80c1-2bd4c00c2f20",
+  "seconds": 713.1,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "result",
+        "output_asset_id": "0c1696c0-9b36-41f9-8e87-aaae36f8c687",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/9214cb9d-e1ab-413d-80c1-2bd4c00c2f20/result?<signature-removed>",
+        "expires_at": "2026-10-03T19:10:12.6865776Z",
+        "content_type": "application/zip",
+        "filename": "entanglement-shader-v1-9214cb9d.zip",
+        "size_bytes": 175968
+      }
+    ]
+  }
+}

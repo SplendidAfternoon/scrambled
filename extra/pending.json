@@ -1,0 +1,61 @@
+[
+  {
+    "engine_id": "deep-fryer-v1",
+    "job_id": "3d15bd3e-baf1-4d96-94ea-a9e603b26963",
+    "params": {
+      "gates": [
+        [
+          "rx",
+          0.3
+        ],
+        [
+          "rz",
+          0.35
+        ]
+      ],
+      "tile_size": 4
+    },
+    "dir": "deep_fryer",
+    "status": "queued",
+    "progress": {},
+    "error": null,
+    "checked_at": "2026-10-03T21:49:17+00:00"
+  },
+  {
+    "engine_id": "deep-fryer-v1",
+    "job_id": "ee750888-addb-4502-b139-d3a3e3b0a55d",
+    "params": {
+      "gates": [
+        [
+          "rx",
+          0.5
+        ]
+      ],
+      "tile_size": 4
+    },
+    "dir": "deep_fryer",
+    "status": "queued",
+    "progress": {},
+    "error": null,
+    "checked_at": "2026-10-03T21:49:19+00:00"
+  },
+  {
+    "engine_id": "retrocausal-echo-v1",
+    "job_id": "ead5c974-4171-4a11-8d10-898be01c0688",
+    "params": {
+      "n_sites": 6,
+      "depth": 8,
+      "machine": "aer",
+      "exact": true,
+      "emit": "audio"
+    },
+    "dir": "retrocausal",
+    "status": "processing",
+    "progress": {
+      "detail": "waiting on aer (638s elapsed)",
+      "step": "measure"
+    },
+    "error": null,
+    "checked_at": "2026-10-03T21:49:20+00:00"
+  }
+]

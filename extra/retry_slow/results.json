@@ -1,0 +1,26 @@
+[
+  {
+    "engine_id": "tessa-image-v1",
+    "job_id": "5d872bb7-4eb8-433b-81c1-68eae42357b0",
+    "status": "failed",
+    "error": "job 5d872bb7-4eb8-433b-81c1-68eae42357b0 failed: {\"$schema\": \"https://api.mothquantum.com/schemas/JobStatusOutputBody.json\", \"job_id\": \"5d872bb7-4eb8-433b-81c1-68eae42357b0\", \"engine_id\": \"tessa-image-v1\", \"status\": \"failed\", \"progress\": {}, \"error\": {\"message\": \"The engine did not respond in time \\u2014 retry the job\", \"retryable\": true, \"type\": \"engine_timeout\"}, \"warnings\": [], \"submitted_at\": \"2026-10-03T21:36:12Z\", \"updated_at\": \"2026-10-03T21:36:12Z\"}",
+    "params": {
+      "machine": "aer"
+    },
+    "dir": "tessa"
+  },
+  {
+    "engine_id": "retrocausal-echo-v1",
+    "job_id": "ead5c974-4171-4a11-8d10-898be01c0688",
+    "status": "local_timeout",
+    "error": "job ead5c974-4171-4a11-8d10-898be01c0688 timed out locally after 600s (state=processing)",
+    "params": {
+      "n_sites": 6,
+      "depth": 8,
+      "machine": "aer",
+      "exact": true,
+      "emit": "audio"
+    },
+    "dir": "retrocausal"
+  }
+]

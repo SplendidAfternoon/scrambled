@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f0d0b" />
+    <title>Don't Scramble the Egg: a quantum scrambling game on Moth Atlas</title>
+    <link rel="icon" href="sprites/egg_fresh.png" />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/game/game.css" />
+  </head>
+  <body class="game-body">
+    <header class="topbar">
+      <a class="brand" href="./">SCRAMB<span>L</span>ED</a>
+      <nav>
+        <a href="./explorer.html">Explorer</a>
+        <a href="./game.html" aria-current="page">Game</a>
+        <button class="icon-btn" id="mute" aria-label="Mute sound" title="Sound on/off">🔊</button>
+      </nav>
+    </header>
+
+    <main class="game" id="game">
+      <!-- title -->
+      <section class="screen" id="s-title">
+        <div class="title-eggs" aria-hidden="true">
+          <img class="sprite wob" data-sprite="egg_fresh" alt="" />
+          <img class="sprite wob d1" data-sprite="egg_crack" alt="" />
+          <img class="sprite wob d2" data-sprite="egg_scrambled" alt="" />
+        </div>
+        <h1 class="game-title">DON'T<br /><span>SCRAMBLE</span><br />THE EGG</h1>
+        <p class="tagline">A qubit chain is a pan of eggs. Nudge one and the nudge spreads to the rest: that's scrambling. Serve before your golden eggs lose their echo.</p>
+        <button class="btn primary big" id="start">Start cooking</button>
+        <p class="muted small" id="best"></p>
+        <details class="how">
+          <summary>How to play</summary>
+          <ol>
+            <li>Each level is a chain of 12 qubits, drawn as eggs. The middle one gets nudged (◆).</li>
+            <li>Pick a pan. Each pan is a different circuit, measured on Moth Atlas with <span class="mono">otoc-echo-v1</span>.</li>
+            <li>The clock runs through 32 echo steps. Eggs blur, crack and scramble as their measured echo |F| fades.</li>
+            <li>Tap <b>SERVE</b> (or press space) once the cook bar is green, while the golden eggs' echo is above the line.</li>
+            <li>Too early: raw. Echo too low: scrambled. Too late: burnt. You get three lives.</li>
+          </ol>
+        </details>
+      </section>
+
+      <!-- pan choice -->
+      <section class="screen" id="s-choose" hidden>
+        <div class="hud"><span id="c-level"></span><span id="c-lives" class="lives"></span><span id="c-score"></span></div>
+        <h2 id="c-title"></h2>
+        <p id="c-blurb" class="muted"></p>
+        <div class="rules" id="c-rules"></div>
+        <div class="choices" id="c-choices"></div>
+        <details class="live" id="live-box">
+          <summary>Measure your own pan on Atlas</summary>
+          <p class="small muted">Runs <span class="mono">otoc-echo-v1</span> live (12 qubits, depth 32, aer emulator, 1 credit) with your own key. The key stays in this tab and is only sent to the Atlas API<span id="live-route"></span>.</p>
+          <label class="small">θ<sub>x</sub> <span class="mono" id="lx-val"></span><input type="range" id="lx" min="0.05" max="0.6" step="0.01" value="0.2" /></label>
+          <label class="small">θ<sub>zz</sub> <span class="mono" id="lz-val"></span><input type="range" id="lz" min="0.1" max="1" step="0.01" value="0.3" /></label>
+          <input type="password" id="lkey" placeholder="Atlas API key (moth_…)" autocomplete="off" spellcheck="false" />
+          <button class="btn" id="lgo">Measure pan</button>
+          <div class="status" id="lstatus" aria-live="polite"></div>
+        </details>
+      </section>
+
+      <!-- cook -->
+      <section class="screen" id="s-cook" hidden>
+        <div class="hud"><span id="k-level"></span><span id="k-lives" class="lives"></span><span id="k-score"></span></div>
+        <div class="pan-wrap" id="pan-wrap">
+          <canvas id="pan" aria-label="The pan: one egg per qubit"></canvas>
+          <div class="stamp" id="stamp" hidden></div>
+        </div>
+        <div class="meters">
+          <div class="meter" aria-label="cook time">
+            <div class="meter-label"><span>cook</span><span class="mono" id="k-t"></span></div>
+            <div class="bar cook"><div class="zone" id="k-zone"></div><div class="fill" id="k-fill"></div></div>
+          </div>
+          <div class="meter" aria-label="golden egg echo">
+            <div class="meter-label"><span>golden egg echo |F|</span><span class="mono" id="k-mem"></span></div>
+            <div class="bar mem"><div class="line" id="k-thr"></div><div class="fill" id="k-memfill"></div></div>
+          </div>
+        </div>
+        <button class="btn primary serve" id="serve">SERVE</button>
+        <div class="mini">
+          <canvas id="mini" aria-label="Measured echo so far"></canvas>
+          <div class="small muted" id="k-prov"></div>
+        </div>
+      </section>
+
+      <!-- result -->
+      <section class="screen" id="s-result" hidden>
+        <h2 class="verdict" id="r-verdict"></h2>
+        <p class="score-pop" id="r-score"></p>
+        <p id="r-why"></p>
+        <canvas id="r-heat" class="r-heat" aria-label="The full measured echo for this pan"></canvas>
+        <p class="small muted" id="r-prov"></p>
+        <div class="row-btns">
+          <button class="btn primary big" id="r-next"></button>
+        </div>
+      </section>
+
+      <!-- end -->
+      <section class="screen" id="s-end" hidden>
+        <h2 class="game-title small" id="e-title"></h2>
+        <p class="score-pop" id="e-score"></p>
+        <p id="e-text"></p>
+        <div class="end-eggs" id="e-eggs"></div>
+        <button class="btn primary big" id="e-again">Play again</button>
+        <p class="small muted"><span id="e-credit"></span> Data: <span class="mono">otoc-echo-v1</span> on the aer emulator. <a href="./explorer.html">Explore the runs →</a></p>
+      </section>
+    </main>
+    <script type="module" src="/src/game/main.ts"></script>
+  </body>
+</html>

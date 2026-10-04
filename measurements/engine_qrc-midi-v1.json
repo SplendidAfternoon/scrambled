@@ -1,0 +1,160 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "qrc-midi-v1",
+  "name": "QRC MIDI",
+  "description": "Sequence MIDI with a quantum reservoir \u2014 learn the notes of a file and generate a new arrangement as a fresh .mid.",
+  "owner": "37eae1ca-66b4-46f8-aca3-0baa7b011987",
+  "owner_type": "user",
+  "created_by": "37eae1ca-66b4-46f8-aca3-0baa7b011987",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "multipart/form-data",
+  "output_type": "audio/midi",
+  "input_files": [
+    {
+      "name": "midi",
+      "mime_types": [
+        "audio/midi",
+        "audio/x-midi"
+      ],
+      "required": false,
+      "description": ""
+    },
+    {
+      "name": "model",
+      "mime_types": [
+        "application/json"
+      ],
+      "required": false,
+      "description": ""
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "audio/midi"
+      ],
+      "required": true,
+      "description": "The generated MIDI."
+    },
+    {
+      "name": "state",
+      "content_types": [
+        "application/json"
+      ],
+      "required": true,
+      "description": "Advanced reservoir state; reuse on a later call as job:<id>/state."
+    },
+    {
+      "name": "model",
+      "content_types": [
+        "application/json"
+      ],
+      "required": false,
+      "description": "Pristine trained model for fan-out; reuse as job:<id>/model."
+    }
+  ],
+  "is_multipart": true,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 3600,
+    "max_retries": 1,
+    "heartbeat": 3000
+  },
+  "params_schema": {
+    "properties": {
+      "bpm": {
+        "default": 120,
+        "description": "Tempo of the generated file in beats per minute. Note durations are preserved either way \u2014 this only sets the beat grid a DAW sees.",
+        "exclusiveMinimum": 0,
+        "title": "Bpm",
+        "type": "number"
+      },
+      "length": {
+        "default": 10,
+        "description": "How many notes to generate",
+        "exclusiveMinimum": 0,
+        "maximum": 500,
+        "title": "Length",
+        "type": "integer"
+      },
+      "loop": {
+        "default": true,
+        "description": "Treat the melody as looping material \u2014 the end flows back into the start. Learning only.",
+        "title": "Loop",
+        "type": "boolean"
+      },
+      "quality": {
+        "default": "moderate",
+        "description": "How hard to train when learning a fresh file (no `model`): instant skips training for a quick untrained shuffle; fast is quick and rough; complete is slow and tight.",
+        "enum": [
+          "instant",
+          "fast",
+          "moderate",
+          "complete"
+        ],
+        "title": "Quality",
+        "type": "string"
+      },
+      "seed": {
+        "anyOf": [
+          {
+            "maximum": 4294967295,
+            "minimum": 0,
+            "type": "integer"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null,
+        "description": "Change for a different result, keep fixed to reproduce one. On a fresh file it also fixes the learned reservoir; when reusing a `model` it just varies the take, so you can fan out independent takes by changing it.",
+        "title": "Seed"
+      },
+      "variation": {
+        "default": 1,
+        "description": "How freely the result departs from the learned order: low = tight and repetitive, high = loose and surprising.",
+        "exclusiveMinimum": 0,
+        "title": "Variation",
+        "type": "number"
+      },
+      "velocity": {
+        "default": 100,
+        "description": "How hard every generated note is struck (1\u2013127). One value for the whole file.",
+        "maximum": 127,
+        "minimum": 1,
+        "title": "Velocity",
+        "type": "integer"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 5,
+  "enabled": true,
+  "registered_at": "2026-08-25T10:54:44Z",
+  "updated_at": "2026-08-25T13:11:49Z",
+  "description_md": "qrc-midi-v1 \u2014 sequence MIDI notes with a quantum reservoir.\n\nA self-contained hybrid engine: one call trains a reservoir over the notes of a MIDI file, generates\na new ordering of them, and writes it back out as a `.mid`. Each note is a `pitch_duration` token\n(e.g. \"67_1.5\") \u2014 the reservoir work is delegated to `qrc_core` (train/generate/state); this engine\nonly owns the MIDI codec (decode/encode) and the friendly parameter surface.\n\n`quality: \"instant\"` skips training entirely (a quick untrained shuffle); the other levels train.\n\nThree seed paths, chosen by which inputs arrive (no mode flag):\n  - no `model`, quality != instant -> TRAIN on the file's notes, then generate. Emits a pristine\n    `files.model` (reusable for fan-out) plus the advanced `files.state`.\n  - no `model`, quality == instant -> untrained shuffle, emits `files.state` only.\n  - `model` given -> reuse it (no `midi` needed): a pristine model (`job:<id>/model`) fans out an\n    INDEPENDENT take (vary `seed`); an advanced state (`job:<id>/state`) CONTINUES that trajectory.\n    The note vocabulary rides inside the artifact \u2014 nothing to re-upload.\n\nReservoir tuning (qubits, shots, epochs, windowing) lives in reservoir_tuning.py \u2014 a self-contained\n\"don't touch\" file. Everything here is MIDI: the note codec and the request/response flow.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\nBASE = \"https://api.mothquantum.com/v1\"\nHEADERS = {\"Authorization\": \"Bearer YOUR_KEY\"}\n\n# 1. Learn a piece: train + first arrangement. Returns a .mid, a reusable model, and a state.\nr = requests.post(\n    f\"{BASE}/generation/qrc-midi-v1/process\",\n    headers=HEADERS,\n    files={\"midi\": open(\"piece.mid\", \"rb\")},\n    data={\"length\": 32, \"quality\": \"moderate\"},\n)\njob = r.json()[\"job_id\"]   # ... poll GET {BASE}/status/{job} until \"completed\" ...\nopen(\"out.mid\", \"wb\").write(requests.get(f\"{BASE}/result/{job}\", headers=HEADERS).content)\n\n# 2. Fan out independent takes from the pristine model \u2014 no re-upload, no re-train.\nfor s in (1, 2, 3):\n    requests.post(\n        f\"{BASE}/generation/qrc-midi-v1/process\",\n        headers=HEADERS,\n        data={\"model\": f\"job:{job}/model\", \"length\": 32, \"seed\": s},\n    )\n\n# 3. Continue the phrase instead \u2014 reference the advanced state.\nrequests.post(\n    f\"{BASE}/generation/qrc-midi-v1/process\",\n    headers=HEADERS,\n    data={\"model\": f\"job:{job}/state\", \"length\": 32},\n)\n"
+    },
+    {
+      "lang": "curl",
+      "source": "curl -X POST https://api.mothquantum.com/v1/generation/qrc-midi-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -F midi=@piece.mid \\\n  -F length=32\n# ... poll GET /v1/status/{job_id} until \"completed\", then:\ncurl -H \"Authorization: Bearer YOUR_KEY\" https://api.mothquantum.com/v1/result/{job_id} -o out.mid\n"
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

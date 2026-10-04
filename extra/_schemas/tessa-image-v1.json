@@ -1,0 +1,173 @@
+{
+  "$schema": "https://api.mothquantum.com/schemas/Engine.json",
+  "engine_id": "tessa-image-v1",
+  "name": "Tessa Image",
+  "description": "Encode an image's colours as points on a sphere with the Tessa quantum encoder and read them back",
+  "owner": "51d7e7a6-480b-41bc-a3c1-7ea1f8886ea0",
+  "owner_type": "user",
+  "created_by": "51d7e7a6-480b-41bc-a3c1-7ea1f8886ea0",
+  "visibility": "public",
+  "queue": "",
+  "input_type": "application/json",
+  "output_type": "image/png",
+  "input_files": [
+    {
+      "name": "image",
+      "mime_types": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "image/tiff",
+        "image/bmp"
+      ],
+      "required": true,
+      "description": "The image to encode. By default every pixel becomes a point on the colour sphere -- a radius and two angles, the same coordinates that describe a qubit's own state -- and each of those three goes through the quantum encode/measure/decode round trip, any that doesn't vary passed through unencoded, before the image is recomposed. With fixed_palette the image is instead quantized to a palette of its own colours (capped at 256) and only the per-pixel palette index makes the trip. The alpha channel, if any, passes through unchanged."
+    }
+  ],
+  "output_files": [
+    {
+      "name": "result",
+      "content_types": [
+        "image/png"
+      ],
+      "required": true,
+      "description": "The recomposed image after the quantum round trip."
+    }
+  ],
+  "is_multipart": true,
+  "is_async": false,
+  "execution_mode": "handler",
+  "run_policy": {
+    "timeout": 18000,
+    "max_retries": 1,
+    "heartbeat": 6000
+  },
+  "params_schema": {
+    "properties": {
+      "distortion": {
+        "default": 0,
+        "description": "Alpha for the exp(i*alpha/2*(P\u2297Q)) gate applied between adjacent data qubits in transform_channels, where (P, Q) is `gate_pauli`.",
+        "title": "Distortion",
+        "type": "number"
+      },
+      "fixed_palette": {
+        "default": false,
+        "description": "Import the image through a palette of its own colours (capped at 256) and run only the resulting per-pixel palette index through the device -- as exact, losslessly-quantized levels -- instead of decomposing it into the continuous colour-sphere coordinates. Good for flat-color/graphic-style images.",
+        "title": "Fixed Palette",
+        "type": "boolean"
+      },
+      "gate_pauli": {
+        "default": "XZ",
+        "description": "Which two-qubit Pauli pair (P, Q) to use for the exp(i*distortion/2*(P\u2297Q)) gate applied between adjacent data qubits in transform_channels, e.g. 'XY', 'ZZ'.",
+        "pattern": "^[IXYZ]{2}$",
+        "title": "Gate Pauli",
+        "type": "string"
+      },
+      "machine": {
+        "default": "aer",
+        "description": "Where to run the circuit. 'aer' is a noiseless local simulator. 'fake_<chip>' options (e.g. 'fake_fez', 'fake_sherbrooke', 'fake_torino') are local simulators calibrated to a real current IBM chip's noise. 'ibm_<chip>' options (e.g. 'ibm_fez', 'ibm_miami', 'ibm_marrakesh') submit to that real IBM Quantum hardware; 'least_busy' submits to whichever operational device currently has the shortest queue.",
+        "enum": [
+          "aer",
+          "ibm_fez",
+          "ibm_miami",
+          "ibm_marrakesh",
+          "least_busy",
+          "fake_fez",
+          "fake_marrakesh",
+          "fake_torino",
+          "fake_brisbane",
+          "fake_kyiv",
+          "fake_sherbrooke",
+          "fake_kyoto",
+          "fake_osaka",
+          "fake_quebec",
+          "fake_cusco",
+          "fake_strasbourg",
+          "fake_brussels"
+        ],
+        "title": "Machine",
+        "type": "string"
+      },
+      "range_correction": {
+        "default": false,
+        "description": "Stretch each decoded field back over its original dynamic range. Off by default -- the raw decoded values are used as-is, with no correction.",
+        "title": "Range Correction",
+        "type": "boolean"
+      },
+      "separate_rgb": {
+        "default": true,
+        "description": "Give each of the three colour coordinates its own circuit. Turn this off to put the two angles on one circuit instead: a qubit is cos(theta/2)|0> + e^(i phi)|1>, so the sphere's polar angle can ride in the rotation and hue in the phase of the same cell, turning three circuits into two at the cost of a second measurement setting and a noisier reconstruction. Ignored when fixed_palette is set.",
+        "title": "Separate Rgb",
+        "type": "boolean"
+      },
+      "shots": {
+        "default": 4096,
+        "description": "Number of measurement shots to sample, per processed field.",
+        "exclusiveMinimum": 0,
+        "title": "Shots",
+        "type": "integer"
+      }
+    },
+    "title": "Params",
+    "type": "object"
+  },
+  "credits_per_run": 1,
+  "enabled": true,
+  "registered_at": "2026-08-28T05:25:03Z",
+  "updated_at": "2026-09-15T13:34:01Z",
+  "description_md": "Encode an image onto a quantum device using Tessa (the `iqpixl` library).\n\nThe pipeline is three steps, and `run` is those three calls:\n\n    image  ->  circuits  ->  circuits  ->  image\n            encode_    transform_   decode_\n            channels    channels     channels\n\n`encode_channels` splits the image into fields and writes each onto its own\ncircuit. `transform_channels` is the seam -- the image is on the circuits and\nnothing has run yet, so gates appended there change the picture, computed on\nthe device rather than on the array. `decode_channels` measures what comes out\nand turns it back into fields. Only the middle step is optional; it is the\nidentity today.\n\n**The colour sphere.** Every pixel is a point on it\n(`media_utils.image.rgb_to_sphere`): 50% grey at the centre, the white pole at\n``theta = 0``, the black pole at ``theta = pi``, maximum brightness and\nsaturation around the equator, and hue as the azimuth ``phi``. A colour is\ntherefore ``(r, theta, phi)`` -- a radius and the two angles of a direction --\nwhich is the same shape as a qubit's own state,\n``cos(theta/2)|0> + e^{i phi} sin(theta/2)|1>``. That is what makes gates in the\nmiddle step mean something: a rotation on a cell is a rotation of a colour.\n``theta`` is bent toward the equator on the way in and bent back on the way out\n(`_EQUATOR_PULL`), which is exactly reversible and gives the saturated colours\nmore of the encoded range than the near-white and near-black caps.\n\n**What lands on a channel** is chosen by two flags:\n\n* `Params.separate_rgb` (default) puts ``r``, ``theta`` and ``phi`` on three\n  circuits. Turn it off and ``theta``/``phi`` share one cell -- see\n  `_encode_angle_pair`.\n* `Params.fixed_palette` replaces the sphere entirely: the image is quantized\n  to a palette of its own colours (capped at 256, see `_read_as_palette`) and\n  only the per-pixel palette *index* -- one discrete\n  channel -- makes the trip, encoded losslessly via iqpixl's codebook\n  quantization. Good for flat-colour/graphic-style images where the\n  discreteness itself should survive the round trip.\n\n**How a channel is read back** is `decode`'s ``per_group`` flag:\n\n* ``per_group=True`` -- one tiny (<= 4-qubit) sub-circuit per data qubit. This\n  is what makes noisy whole-chip *simulation* cheap (`machine=\"aer\"` /\n  `\"fake_<chip>\"`): a 156-qubit noise model would be infeasible to simulate\n  jointly, but each data qubit's own local sub-circuit is exactly its reduced\n  state by the bipartite construction, independent of every other group. It\n  also means a gate spanning two cells is dropped -- see `transform_channels`.\n* ``per_group=False`` -- the whole circuit read out in one joint measurement.\n  This is what you want on *real hardware* (`machine=\"ibm_fez\"` / `\"ibm_miami\"`\n  / `\"least_busy\"`): one job beats one job per data qubit.\n\n`Params.sampler` is the `SamplerV2`-like primitive built automatically from\n`Params.machine` -- see `topology.build_sampler`. `Params.shots` defaults to\n4096 and must be positive -- there's no exact/noiseless mode for a sampled run.\n\nEvery field is encoded, including one that turns out to be constant (hue on a\ngrayscale image, all three on a flat-colour one). That costs a circuit it can't\nlearn anything from, but it costs nothing in accuracy: a constant field\nnormalises to a single angle, and on a noiseless machine the device reproduces\nthat angle deterministically. The one caveat is shot starvation -- the shots\nare split across each cell's ``2**degree`` address configurations, and a\nconfiguration that draws none at all has no counts to invert, so at very low\n`Params.shots` a pixel here or there can still come back wrong.",
+  "code_samples": [
+    {
+      "lang": "Python",
+      "source": "import requests\n\nwith open(\"image.png\", \"rb\") as img:\n    r = requests.post(\n        \"https://api.mothquantum.com/v1/generation/tessa-image-v1/process\",\n        headers={\"Authorization\": \"Bearer YOUR_KEY\"},\n        files={\"image\": img},\n        data={\"machine\": \"aer\", \"fixed_palette\": False},\n    )\njob = r.json()\nprint(job[\"job_id\"])\n"
+    },
+    {
+      "lang": "curl",
+      "source": "curl -X POST https://api.mothquantum.com/v1/generation/tessa-image-v1/process \\\n  -H \"Authorization: Bearer YOUR_KEY\" \\\n  -F \"image=@image.png\" \\\n  -F \"machine=aer\"\n"
+    }
+  ],
+  "error_codes": [
+    {
+      "type": "invalid_image",
+      "description": "The image file could not be decoded."
+    },
+    {
+      "type": "distortion_without_hardware",
+      "description": "distortion is greater than 0 on a machine that reads out per-group (every machine except real IBM hardware) -- the cross-cell gate it adds is silently dropped there, so it would have no effect."
+    },
+    {
+      "type": "too_many_values",
+      "description": "the image's pixel count exceeds the largest supported simulated lattice (64x64)."
+    },
+    {
+      "type": "insufficient_qubits",
+      "description": "the image still exceeds the selected machine's data-qubit capacity after being downsampled to fit it -- a degenerate-case fallback, not the normal outcome for an oversized image."
+    },
+    {
+      "type": "unsupported_machine",
+      "description": "the requested machine name isn't recognized."
+    },
+    {
+      "type": "ibm_connection_failed",
+      "description": "Could not authenticate/connect to IBM Quantum with the given token/instance."
+    },
+    {
+      "type": "submission_failed",
+      "description": "The transpiled circuit was rejected or the sampling job failed to submit."
+    },
+    {
+      "type": "encoding_failed",
+      "description": "The output image could not be encoded."
+    }
+  ],
+  "banner_image_id": null,
+  "card_image_id": null,
+  "banner_image_tag": null,
+  "card_image_tag": null,
+  "has_estimate": false,
+  "estimate": null,
+  "has_estimate_fn": false,
+  "estimate_needs_container": false,
+  "sidecar_endpoint": null,
+  "has_validate_fn": false
+}

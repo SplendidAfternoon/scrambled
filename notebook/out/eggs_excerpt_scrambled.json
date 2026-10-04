@@ -1,0 +1,107 @@
+{
+ "size": [
+  204,
+  360
+ ],
+ "fps": 30.0,
+ "start": 26.0,
+ "duration": 8.0,
+ "keyframes": [
+  28.0,
+  32.0
+ ],
+ "jobs": [
+  {
+   "engine": "blur-v1",
+   "params": {
+    "strength": 0.1,
+    "reach": 0.1
+   },
+   "job_id": "e3ef0956-39ba-4429-868d-c8597d9047b3"
+  },
+  {
+   "engine": "blur-v1",
+   "params": {
+    "strength": 0.2,
+    "reach": 0.2
+   },
+   "job_id": "a78214e4-15ee-4be1-9b22-5ab1ff03a8ed"
+  },
+  {
+   "engine": "blur-v1",
+   "params": {
+    "strength": 0.3,
+    "reach": 0.3
+   },
+   "job_id": "a244a5bc-ff6a-4ddb-a6a3-a8c911db517a"
+  },
+  {
+   "engine": "telablur-v1",
+   "params": {
+    "strength": 0.02
+   },
+   "job_id": "60a94a2b-268e-4c6e-ba85-60b89393a54d"
+  },
+  {
+   "engine": "telablur-v1",
+   "params": {
+    "strength": 0.5
+   },
+   "job_id": "78d11602-bafd-429b-ba8c-e4256d659ca5"
+  },
+  {
+   "engine": "telablur-v1",
+   "params": {
+    "strength": 0.98
+   },
+   "job_id": "47a2017c-2cde-418b-a824-c0a821d30aa7"
+  },
+  {
+   "engine": "blur-v1",
+   "params": {
+    "strength": 0.1,
+    "reach": 0.1
+   },
+   "job_id": "094eeadc-93d6-4541-a4f4-24e6cf52a80e"
+  },
+  {
+   "engine": "blur-v1",
+   "params": {
+    "strength": 0.2,
+    "reach": 0.2
+   },
+   "job_id": "99251139-4992-4873-a369-334a0e895790"
+  },
+  {
+   "engine": "blur-v1",
+   "params": {
+    "strength": 0.3,
+    "reach": 0.3
+   },
+   "job_id": "339293cf-9d60-4426-a54c-542e764c4937"
+  },
+  {
+   "engine": "telablur-v1",
+   "params": {
+    "strength": 0.02
+   },
+   "job_id": "2ccaf044-6c1f-46a0-8665-9b2d2d5aecb7"
+  },
+  {
+   "engine": "telablur-v1",
+   "params": {
+    "strength": 0.5
+   },
+   "job_id": "631ceffc-2993-4489-a18b-9ca6944905a3"
+  },
+  {
+   "engine": "telablur-v1",
+   "params": {
+    "strength": 0.98
+   },
+   "job_id": "cdc44052-24e7-44b3-90bf-bf1712edeba8"
+  }
+ ],
+ "audio": "local numpy tap render of the OTOC map (classical DSP)",
+ "frames": 240
+}

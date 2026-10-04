@@ -1,0 +1,205 @@
+{
+ "note": "Atlas jobs submitted for this notebook (new jobs only; earlier project jobs that the notebook re-uses from cache are listed in the notebook's job table). credits = engine credits_per_run; failed jobs are listed with credits as reported unknown (null).",
+ "jobs": [
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "af384d74-3277-4466-9989-8746e7eb456e",
+   "what": "theta_zz = 0.95pi",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "98c918e3-635e-49a3-949d-656bd5fc5aa4",
+   "what": "theta_zz = 0.90pi",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "81f948b4-33a3-4b99-ba8c-531d3a0358e7",
+   "what": "theta_zz = 0.80pi",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "f9c7c3c5-8211-4891-8de5-07e687c0d0a9",
+   "what": "theta_zz = 0.70pi",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "22c9fe47-065a-48df-8cd4-52d6aab0c81c",
+   "what": "theta_zz = 0.60pi",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "590faf7f-2deb-411b-8d57-001245ac4ea3",
+   "what": "theta_zz = 0.50pi",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5 sweep",
+   "engine": "otoc-echo-v1",
+   "job_id": "130a446c-ef1c-4534-8d52-26a9916f4dc4",
+   "what": "theta_zz = 0 (no coupling)",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "9 tomography",
+   "engine": "tomography-api-v2",
+   "job_id": "c34dd701-036a-4d97-86c0-a635ce346aa4",
+   "what": "12-qubit Floquet echo circuit, t = 4, 4 qubit pairs",
+   "outcome": "failed: engine_timeout (server side, ~70 s)",
+   "credits": null
+  },
+  {
+   "section": "9 tomography",
+   "engine": "tomography-api-v2",
+   "job_id": "9a8c08d2-2889-4653-a8bc-945532b1940e",
+   "what": "2-qubit Bell-pair smoke test",
+   "outcome": "failed: engine_timeout (server side, ~70 s)",
+   "credits": null
+  },
+  {
+   "section": "2 raw API",
+   "engine": "blur-v1",
+   "job_id": "a9b666a2-e30b-46dd-9931-d53814ae8bb5",
+   "what": "raw-HTTP lifecycle demo (128 px crop)",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "7 audio",
+   "engine": "retrocausal-echo-v1",
+   "job_id": "721c5d5d-6400-431d-b21c-4b5f84d1c7bc",
+   "what": "6 s cooking audio through the measured map",
+   "outcome": "still processing after ~70 min (left pending)",
+   "credits": null
+  },
+  {
+   "section": "9 tomography",
+   "engine": "tomography-api-v2",
+   "job_id": "0b403dff-1084-4156-ab3c-8aad2aa07d23",
+   "what": "12-qubit echo circuit, t = 3",
+   "outcome": "failed: engine_timeout (server side)",
+   "credits": null
+  },
+  {
+   "section": "8 video",
+   "engine": "blur-v1",
+   "job_id": "e3ef0956-39ba-4429-868d-c8597d9047b3",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.1, \"reach\": 0.1}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "blur-v1",
+   "job_id": "a78214e4-15ee-4be1-9b22-5ab1ff03a8ed",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.2, \"reach\": 0.2}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "blur-v1",
+   "job_id": "a244a5bc-ff6a-4ddb-a6a3-a8c911db517a",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.3, \"reach\": 0.3}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "telablur-v1",
+   "job_id": "60a94a2b-268e-4c6e-ba85-60b89393a54d",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.02}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "telablur-v1",
+   "job_id": "78d11602-bafd-429b-ba8c-e4256d659ca5",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.5}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "telablur-v1",
+   "job_id": "47a2017c-2cde-418b-a824-c0a821d30aa7",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.98}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "blur-v1",
+   "job_id": "094eeadc-93d6-4541-a4f4-24e6cf52a80e",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.1, \"reach\": 0.1}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "blur-v1",
+   "job_id": "99251139-4992-4873-a369-334a0e895790",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.2, \"reach\": 0.2}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "blur-v1",
+   "job_id": "339293cf-9d60-4426-a54c-542e764c4937",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.3, \"reach\": 0.3}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "telablur-v1",
+   "job_id": "2ccaf044-6c1f-46a0-8665-9b2d2d5aecb7",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.02}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "telablur-v1",
+   "job_id": "631ceffc-2993-4489-a18b-9ca6944905a3",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.5}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "8 video",
+   "engine": "telablur-v1",
+   "job_id": "cdc44052-24e7-44b3-90bf-bf1712edeba8",
+   "what": "keyframe ladder rung (8 s excerpt, 360 px) {\"strength\": 0.98}",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "9 tomography",
+   "engine": "tomography-api-v2",
+   "job_id": "4af39a37-76a5-4b11-9d3c-d56432da78a6",
+   "what": "12-qubit echo circuit, t = 3",
+   "outcome": "failed: engine_timeout (server side)",
+   "credits": null
+  }
+ ]
+}

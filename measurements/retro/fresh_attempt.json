@@ -1,0 +1,40 @@
+{
+  "params": {
+    "min_level": 0.02,
+    "decay": 1.0,
+    "master_ms": 5333,
+    "negative_mode": "invert",
+    "mix": 0.6,
+    "include_tap_map": true,
+    "emit": "audio"
+  },
+  "input_files": {
+    "audio": "60bff4d8-0967-4073-9ec3-f8ca34946e34",
+    "ir": "11e52d63-d6e0-4ff8-950f-fb05fd38f8d2"
+  },
+  "submitted": "2026-10-04T03:19:17",
+  "attempts": [
+    {
+      "error": "job fcc78a82-2452-4fc0-865d-b85141bcfb58 failed: {\"$schema\": \"https://api.mothquantum.com/schemas/JobStatusOutputBody.json\", \"job_id\": \"fcc78a82-2452-4fc0-865d-b85141bcfb58\", \"engine_id\": \"retrocausal-echo-v1\", \"status\": \"failed\", \"progress\": {}, \"error\": {\"message\": \"The engine did not respond in time \\u2014 retry the job\", \"retryable\": true, \"type\": \"engine_timeout\"}, \"warnings\": [], \"submitted_at\": \"2026-10-03T19:19:19Z\", \"updated_at\": \"2026-10-03T19:19:19Z\"}",
+      "at_s": 74
+    },
+    {
+      "error": "job e3e80d2b-9d0f-4aed-a40e-e35bb37485e1 failed: {\"$schema\": \"https://api.mothquantum.com/schemas/JobStatusOutputBody.json\", \"job_id\": \"e3e80d2b-9d0f-4aed-a40e-e35bb37485e1\", \"engine_id\": \"retrocausal-echo-v1\", \"status\": \"failed\", \"progress\": {\"detail\": \"Building the tap map\", \"step\": \"render\"}, \"error\": {\"message\": \"The engine did not respond in time \\u2014 retry the job\", \"retryable\": true, \"type\": \"engine_timeout\"}, \"warnings\": [], \"submitted_at\": \"2026-10-03T19:30:33Z\", \"updated_at\": \"2026-10-03T19:37:04Z\"}",
+      "at_s": 8822
+    },
+    {
+      "error": "job b3d620f8-c99b-4a07-9724-7f418f763a65 failed: {\"$schema\": \"https://api.mothquantum.com/schemas/JobStatusOutputBody.json\", \"job_id\": \"b3d620f8-c99b-4a07-9724-7f418f763a65\", \"engine_id\": \"retrocausal-echo-v1\", \"status\": \"failed\", \"progress\": {\"detail\": \"Rendering 13.5s through 348 taps\", \"step\": \"render\"}, \"error\": {\"message\": \"The engine did not respond in time \\u2014 retry the job\", \"retryable\": true, \"type\": \"engine_timeout\"}, \"warnings\": [], \"submitted_at\": \"2026-10-03T21:56:21Z\", \"updated_at\": \"2026-10-03T22:02:53Z\"}",
+      "at_s": 17586
+    },
+    {
+      "error": "job b7c76c40-5e1a-43be-bf04-5eb71d508ace failed: {\"$schema\": \"https://api.mothquantum.com/schemas/JobStatusOutputBody.json\", \"job_id\": \"b7c76c40-5e1a-43be-bf04-5eb71d508ace\", \"engine_id\": \"retrocausal-echo-v1\", \"status\": \"failed\", \"progress\": {\"detail\": \"Rendering 13.5s through 348 taps\", \"step\": \"render\"}, \"error\": {\"message\": \"HTTP Error 400: Bad Request\", \"retryable\": true, \"type\": \"internal_error\"}, \"warnings\": [], \"submitted_at\": \"2026-10-04T00:22:25Z\", \"updated_at\": \"2026-10-04T00:23:39Z\"}",
+      "at_s": 22103
+    },
+    {
+      "error": "job e7703201-feb6-4562-ad6a-6b6242407dc4 failed: {\"$schema\": \"https://api.mothquantum.com/schemas/JobStatusOutputBody.json\", \"job_id\": \"e7703201-feb6-4562-ad6a-6b6242407dc4\", \"engine_id\": \"retrocausal-echo-v1\", \"status\": \"failed\", \"progress\": {\"detail\": \"Rendering 13.5s through 348 taps\", \"step\": \"render\"}, \"error\": {\"message\": \"The engine did not respond in time \\u2014 retry the job\", \"retryable\": true, \"type\": \"engine_timeout\"}, \"warnings\": [], \"submitted_at\": \"2026-10-04T01:37:43Z\", \"updated_at\": \"2026-10-04T01:44:16Z\"}",
+      "at_s": 26862
+    }
+  ],
+  "status": "failed_or_timeout",
+  "waited_s": 26862
+}

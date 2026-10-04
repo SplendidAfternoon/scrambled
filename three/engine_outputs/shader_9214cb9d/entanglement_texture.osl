@@ -1,0 +1,66 @@
+// ---------------------------------------------------------------------------
+// EntanglementTexture — texture LUT variant
+//
+// Ship R_lut.exr and T_lut.exr in the same directory as this .osl file.
+// Both textures are float32 single-channel EXR:
+//   width  = phase bins  (s axis, 0 → 2π, periodic)
+//   height = angle bins  (row 0 in file = theta=0, last row = theta=π/2)
+// Values above 1.0 are preserved and sampled without clamping.
+// Set blender=1 for Blender (t=0 at image top), 0 for OpenGL-convention renderers.
+// ---------------------------------------------------------------------------
+shader EntanglementTexture(
+    string R_texture = "R_lut.exr" [[
+        string help   = "Float32 EXR reflectance LUT (phase × angle)",
+        string widget = "filename"
+    ]],
+    string T_texture = "T_lut.exr" [[
+        string help   = "Float32 EXR transmittance LUT (phase × angle)",
+        string widget = "filename"
+    ]],
+    float thickness = 500.0 [[
+        string help   = "Physical thickness of the material in nm",
+        string widget = "slider",
+        float  min    = 0,
+        float  max    = 1000.0,
+        float  step   = 1
+    ]],
+    int blender = 1 [[
+        string help   = "Set to 1 when rendering in Blender (t=0 at top). Set to 0 for renderers that follow the OpenGL convention (t=0 at bottom).",
+        string widget = "checkBox"
+    ]],
+    output color Reflectance   = color(0, 0, 0),
+    output color Transmittance = color(0, 0, 0),
+    output closure color BSDF  = 0,
+)
+{
+    float cosTheta = abs(dot(N, -I));
+    float theta    = acos(cosTheta);              // incident angle in [0, pi/2]
+    float D        = -2 * M_2PI * thickness * cosTheta;
+
+    float wavelength[3] = {650.0, 530.0, 470.0}; // R, G, B in nm
+
+    // Precompute phase texture coordinates for each channel
+    float s0 = mod(D / wavelength[0], M_2PI) / M_2PI;
+    float s1 = mod(D / wavelength[1], M_2PI) / M_2PI;
+    float s2 = mod(D / wavelength[2], M_2PI) / M_2PI;
+
+    // t_lut: angle axis.
+    // Blender's texture() has t=0 at the top (image convention); other renderers
+    // follow OpenGL with t=0 at the bottom.  The blender parameter compensates.
+    float t_lut = blender ? (1.0 - theta / M_PI_2) : (theta / M_PI_2);
+
+    Reflectance = color(
+        texture(R_texture, s0, t_lut, "swrap", "periodic", "twrap", "clamp"),
+        texture(R_texture, s1, t_lut, "swrap", "periodic", "twrap", "clamp"),
+        texture(R_texture, s2, t_lut, "swrap", "periodic", "twrap", "clamp")
+    );
+
+    Transmittance = color(
+        texture(T_texture, s0, t_lut, "swrap", "periodic", "twrap", "clamp"),
+        texture(T_texture, s1, t_lut, "swrap", "periodic", "twrap", "clamp"),
+        texture(T_texture, s2, t_lut, "swrap", "periodic", "twrap", "clamp")
+    );
+
+    BSDF = Reflectance * microfacet("ggx", N, 0.0, 0.0, 0.0, 0.0, 0)
+         + Transmittance * transparent();
+}
