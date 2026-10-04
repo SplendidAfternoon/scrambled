@@ -16,10 +16,13 @@ ROLE = {
                      "measurements/raw/, probes/, web/public/data/, plugin/tools/measured.json"),
     "blur-v1": ("Quantum blur of photo A (whole eggs): the strip ladder for 'echo partly lost'; game sprites; "
                 "Challenge 01 hero (strength = 1 - late mean |F|).",
-                "renders/v2/index.json (blurR:*), out/piece/scrambled_piece_v3.mp4, web/public/data/ladder.json, "
+                "renders/core/ladder/index.json (piece), renders/v2/index.json (blurR:*), "
+                "out/piece/scrambled_piece_v3.mp4, web/public/data/ladder.json, "
                 "hero/params.json, hero/ladder/index.json"),
     "telablur-v1": ("Quantum rotation morph photo A -> photo B (whole -> scrambled eggs): the strip ladder for "
-                    "'echo erased'.", "renders/v2/index.json (telablur:*), out/piece/, web/public/data/ladder.json"),
+                    "'echo erased' (piece: direction vertical, strength 0.93-0.99).",
+                    "renders/core/ladder/index.json (piece), renders/v2/index.json (telablur:*), "
+                    "web/public/data/ladder.json"),
     "qrc-midi-v1": ("Quantum reservoir re-sequences the seed melody derived from the cooking audio.",
                     "renders/core/midi/index.json, out/piece/scrambled_track.wav"),
     "blur-midi-v1": ("Quantum blur of that melody, one pass per act, strength/reach set from the act's measured F.",

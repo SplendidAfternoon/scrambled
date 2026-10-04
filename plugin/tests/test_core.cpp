@@ -2,6 +2,7 @@
 // Expected values are worked by hand from the tap-mapping spec in README.md, not recomputed from the code.
 #include "ScrambledEchoCore.hpp"
 #include "MapBank.hpp"
+#include "EggView.hpp"
 
 #include <cmath>
 #include <cstdio>
@@ -215,6 +216,136 @@ static void test_commutator_view_plays_where_the_operator_spread()
     CHECK(near(o.r[1000], 0.5f * 0.894427f * 0.707107f + 0.894427f), "centre + right C=1 %f", o.r[1000]);
 }
 
+// ---- per-site edits (egg drag): split pushes pan outward and stretches delay, vertical drag sets gain ----
+
+static void test_unedited_params_match_measured_map()
+{
+    se::Params a{1000.f, 1.f, 0.f, 1.f, 1.f};
+    se::Params b = a;
+    for (int i = 0; i < se::kBands; ++i) { b.siteSplit[i] = 0.f; b.siteGainDb[i] = 0.f; }
+    CHECK(!se::isEdited(a) && !se::isEdited(b), "zero edits are not an edit");
+    b.siteGainDb[3] = -0.5f;
+    CHECK(se::isEdited(b), "gain offset counts as edited");
+    b = a; b.split = 0.2f;
+    CHECK(se::isEdited(b), "split macro counts as edited");
+}
+
+static void test_site_split_moves_pan_outward_and_stretches_delay()
+{
+    // twoTapMap: site0 (pan 0, band 0) at step 1, site2 (pan 1, band 11) at step 2. Width 0 -> both centred.
+    se::Params p{1000.f, 1.f, 0.f, 1.f, 0.f};
+    p.siteSplit[0] = 1.f;
+    se::Core core; core.prepare(1000.0); core.setMaps(twoTapMap(), twoTapMap()); core.setParams(p);
+    auto o = impulse(core, 2500);
+    // band 0: stretch = 1 + 0.5 * 1 * (0.25 + 1.5 * 0.5) = 1.5 -> 750 samples; pan 0.5 + (0 - 0.5) * 0.75 = 0.125
+    const float g = 0.447214f, ang = 0.125f * 1.57079633f;
+    CHECK(near(o.l[750], g * std::cos(ang)) && near(o.r[750], g * std::sin(ang)), "split tap at 750: %f %f", o.l[750], o.r[750]);
+    CHECK(std::fabs(o.l[500]) < 1e-5f, "nothing left at the measured slot %f", o.l[500]);
+    // band 11 is untouched: centred at its measured 1000 samples
+    CHECK(near(o.l[1000], -0.894427f * 0.707107f) && near(o.r[1000], -0.894427f * 0.707107f), "other band unchanged %f", o.l[1000]);
+}
+
+static void test_split_macro_adds_to_every_site()
+{
+    se::Params p{1000.f, 1.f, 0.f, 1.f, 1.f};
+    p.split = 0.4f; p.siteSplit[11] = 0.8f;  // band 11 clamps to 1
+    se::Core core; core.prepare(1000.0); core.setMaps(twoTapMap(), twoTapMap()); core.setParams(p);
+    auto o = impulse(core, 2500);
+    // band 0: e = 0.4 -> stretch 1.2 -> 600; pan stays 0 (already at the edge). band 11: e = 1 -> 1500
+    CHECK(near(o.l[600], 0.447214f) && near(o.r[600], 0.f), "band 0 at 600 %f %f", o.l[600], o.r[600]);
+    CHECK(near(o.r[1500], -0.894427f) && near(o.l[1500], 0.f), "band 11 clamped split at 1500 %f", o.r[1500]);
+}
+
+static void test_site_gain_scales_one_band_only()
+{
+    se::Params p{1000.f, 1.f, 0.f, 1.f, 1.f};
+    p.siteGainDb[0] = -6.0206f;  // x0.5; makeup stays that of the measured map
+    se::Core core; core.prepare(1000.0); core.setMaps(twoTapMap(), twoTapMap()); core.setParams(p);
+    auto o = impulse(core, 1500);
+    CHECK(near(o.l[500], 0.5f * 0.447214f), "band 0 halved %f", o.l[500]);
+    CHECK(near(o.r[1000], -0.894427f), "band 11 unchanged %f", o.r[1000]);
+    p.siteGainDb[0] = 40.f; p.siteGainDb[11] = -90.f;  // clamped to +6 / -24 dB
+    se::Core c2; c2.prepare(1000.0); c2.setMaps(twoTapMap(), twoTapMap()); c2.setParams(p);
+    o = impulse(c2, 1500);
+    CHECK(near(o.l[500], 1.995262f * 0.447214f, 1e-3f), "gain clamps at +6 dB %f", o.l[500]);
+    CHECK(near(o.r[1000], -0.0630957f * 0.894427f, 1e-4f), "gain clamps at -24 dB %f", o.r[1000]);
+}
+
+static void test_split_and_gain_bounds_keep_feedback_stable()
+{
+    se::TapMap m; m.nSites = 12; m.depth = 32;
+    for (int s = 0; s < 12; ++s)
+        for (int t = 1; t <= 32; ++t) m.taps.push_back({s, t, ((s * 5 + t) % 3 - 1) * 0.7f, 0.f});
+    se::Params p{300.f, 1.f, 0.98f, 1.f, 1.f};
+    p.split = 1.f;
+    for (int i = 0; i < se::kBands; ++i) p.siteGainDb[i] = 6.f;
+    se::Core core; core.prepare(48000.0); core.setMaps(m, m); core.setParams(p);
+    const int n = 48000 * 20;
+    std::vector<float> in(n, 0.f), l(n), r(n);
+    for (int i = 0; i < 4800; ++i) in[i] = std::sin(i * 0.05f);
+    for (int i = 0; i < n; i += 512) core.process(in.data() + i, in.data() + i, l.data() + i, r.data() + i, std::min(512, n - i));
+    float peak = 0, tail = 0;
+    for (int i = 0; i < n; ++i) peak = std::max(peak, std::fabs(l[i]) + std::fabs(r[i]));
+    for (int i = n - 48000; i < n; ++i) tail = std::max(tail, std::fabs(l[i]));
+    CHECK(std::isfinite(peak) && peak < 16.f, "full split + 6 dB everywhere bounded, peak %f", peak);
+    CHECK(tail < 1e-2f, "and still decays, tail %f", tail);
+}
+
+static void test_split_drag_is_smoothed()
+{
+    // Constant input through one tap; a sudden full split/gain move must glide, not click.
+    se::TapMap m; m.nSites = 12; m.depth = 1; m.taps = { {0, 1, 1.f, 0.f} };
+    se::Core core; core.prepare(48000.0); core.setMaps(m, m);
+    se::Params p{20.f, 1.f, 0.f, 1.f, 1.f};
+    core.setParams(p);
+    const int n = 48000;
+    std::vector<float> in(n), l(n), r(n);
+    for (int i = 0; i < n; ++i) in[i] = 0.5f * std::sin(i * 2 * 3.14159265f * 110 / 48000);
+    core.process(in.data(), in.data(), l.data(), r.data(), 4800);
+    p.siteSplit[0] = 1.f; p.siteGainDb[0] = -24.f;
+    core.setParams(p);
+    for (int i = 4800; i < n; i += 256) core.process(in.data() + i, in.data() + i, l.data() + i, r.data() + i, std::min(256, n - i));
+    float maxStep = 0, ref = 0;
+    for (int i = 1; i < 4800; ++i) ref = std::max(ref, std::fabs(l[i] - l[i - 1]));
+    for (int i = 4801; i < n; ++i) maxStep = std::max(maxStep, std::fabs(l[i] - l[i - 1]));
+    CHECK(maxStep < 1.5f * ref + 1e-3f, "no zipper/click on drag: max step %f vs steady %f", maxStep, ref);
+    float late = 0;
+    for (int i = n - 2000; i < n; ++i) late = std::max(late, std::fabs(l[i]));
+    // settles at -24 dB (x0.063) and pan 0 stays hard left
+    CHECK(late < 0.5f * 0.08f && late > 0.5f * 0.04f, "settled at the dragged gain, peak %f", late);
+}
+
+static void test_telemetry_reports_firing_bands()
+{
+    se::Core core; core.prepare(1000.0);
+    core.setMaps(twoTapMap(), twoTapMap());
+    core.setParams({1000.f, 1.f, 0.f, 1.f, 1.f});
+    std::vector<float> in(1200, 0.f), l(1200), r(1200);
+    in[0] = 1.f;
+    core.process(in.data(), in.data(), l.data(), r.data(), 400);
+    const auto& tel = core.telemetry();
+    CHECK(tel.bandPos[0].load() == 0.f && tel.bandNeg[11].load() == 0.f, "quiet before the taps");
+    core.process(in.data() + 400, in.data() + 400, l.data() + 400, r.data() + 400, 200);  // covers sample 500
+    CHECK(tel.bandPos[0].load() > 0.f && tel.bandNeg[0].load() == 0.f, "site 0 fired positive %f", tel.bandPos[0].load());
+    CHECK(tel.bandNeg[11].load() == 0.f, "site 11 not yet");
+    core.process(in.data() + 600, in.data() + 600, l.data() + 600, r.data() + 600, 500);  // covers sample 1000
+    CHECK(tel.bandNeg[11].load() > 0.f && tel.bandPos[11].load() == 0.f, "site 11 fired inverted %f", tel.bandNeg[11].load());
+    const float ph = tel.phase.load();
+    CHECK(ph > 1.0f && ph < 1.2f, "cursor phase counts train lengths since the onset: %f", ph);
+}
+
+static void test_egg_view_state_round_trip()
+{
+    se::EggView v; v.yaw = -1.25f; v.pitch = 0.3f; v.zoom = 1.4f; v.selected = 7;
+    se::EggView back;
+    CHECK(se::decodeEggView(se::encodeEggView(v), back), "decodes its own encoding '%s'", se::encodeEggView(v).c_str());
+    CHECK(near(back.yaw, v.yaw) && near(back.pitch, v.pitch) && near(back.zoom, v.zoom) && back.selected == 7, "round trip");
+    se::EggView junk;
+    CHECK(!se::decodeEggView("garbage", junk) && near(junk.zoom, 1.f), "garbage leaves defaults");
+    se::decodeEggView("yaw=1;pitch=9;zoom=99;sel=40", junk);
+    CHECK(junk.pitch <= 1.3f && junk.zoom <= 2.5f && junk.selected < se::kBands, "decoded values are clamped");
+}
+
 static void test_parse_otoc_record()
 {
     const char* json = R"({"job_id":"abc","response":{"result":{"output":{"extras":{
@@ -275,6 +406,14 @@ int main(int argc, char** argv)
     test_map_swap_ramps_without_click();
     test_scramble_move_ramps_without_click();
     test_commutator_view_plays_where_the_operator_spread();
+    test_unedited_params_match_measured_map();
+    test_site_split_moves_pan_outward_and_stretches_delay();
+    test_split_macro_adds_to_every_site();
+    test_site_gain_scales_one_band_only();
+    test_split_and_gain_bounds_keep_feedback_stable();
+    test_split_drag_is_smoothed();
+    test_telemetry_reports_firing_bands();
+    test_egg_view_state_round_trip();
     test_parse_otoc_record();
     test_parse_preset_and_infer_grid();
     test_parse_rejects_garbage();

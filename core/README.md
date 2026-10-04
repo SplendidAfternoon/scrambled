@@ -34,9 +34,12 @@ Tests: `cd core; ..\.venv\Scripts\python -m pytest -q`. They cover the simulator
 
 Each of the 12 vertical strips is one qubit. At echo step t, with f = Re F(qubit, t) and loss L = 1 − |f|:
 
-- L from 0 to 0.5 crossfades photo A along the `blur-v1` ladder.
-- L from 0.5 to 1 continues along the `telablur-v1` ladder from A to photo B (scrambled eggs).
-- An RdBu tint shows the sign: blue means the echo returns, red means it returns inverted.
+- L from 0 to 0.45 crossfades photo A along the `blur-v1` ladder (strength = reach 0.1–0.3).
+- L from 0.45 to 0.55 bridges into the `telablur-v1` A→B ladder (direction vertical, strength 0.93–0.99).
+- L ≥ 0.8, i.e. |F| ≤ 0.2, shows photo B (scrambled eggs) itself.
+- A thin RdBu band under each strip shows the sign: blue means the echo returns, red means it returns inverted.
+
+Within each ladder the rungs sit at positions proportional to their CIELAB distance, so equal changes in F give equal visual change. Between measured steps F follows a Catmull-Rom curve that is exact at every measured step. The ladders (`ladder_v4.py`, `renders/core/ladder/`) were re-run on lossless PNG crops of the full-resolution photos. The vertical telablur direction keeps the yolk colour that the earlier full-direction rungs lost to grey. Classical finishing: each engine rung's luminance mean and contrast are moved 70 % of the way to its reference photo, every source gets one grade (gentle S-curve, set blacks, warm balance, +12 % chroma), and strips are separated by 2 px gutters. Before/after comparisons are in `out/piece/compare/`. The film uses the two photos only; the cooking clip feeds the audio stem.
 
 F is not accumulated, so the finite-size revival shows on screen: around t = 15 in act III the strips sharpen and the whole eggs reappear. The panel reveals the act's measured heatmap up to the cursor and prints t and the off-kick mean |F| ("echo returning"). The video sweeps t = 1…32 across each act, so one echo step takes 0.5–0.85 s on screen. In the audio, one step is a sixteenth note at 90 bpm (167 ms).
 

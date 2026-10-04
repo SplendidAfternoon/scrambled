@@ -1,0 +1,27 @@
+{
+  "engine_id": "telablur-v1",
+  "params": {
+    "strength": 0.93,
+    "direction": "vertical"
+  },
+  "input_files": {
+    "image1": "87e44f9e-fcdc-4dba-9fdc-e0ea7e9a3268",
+    "image2": "2e7c7e0a-363f-4a43-b06b-78fc3ec341db"
+  },
+  "job_id": "153029ee-5c61-4bf7-9a81-028e1e726cf8",
+  "seconds": 20.5,
+  "response": {
+    "$schema": "https://api.mothquantum.com/schemas/JobResultOutputBody.json",
+    "outputs": [
+      {
+        "slot": "result",
+        "output_asset_id": "4f0d65af-ff7b-419b-8709-aa9e3e1b45dd",
+        "url": "https://moth-api-assets-us-east-1.s3.us-east-1.amazonaws.com/jobs/153029ee-5c61-4bf7-9a81-028e1e726cf8/result?<signature-removed>",
+        "expires_at": "2026-10-04T19:07:55.297818813Z",
+        "content_type": "image/png",
+        "filename": "telablur-v1-153029ee.png",
+        "size_bytes": 1351714
+      }
+    ]
+  }
+}

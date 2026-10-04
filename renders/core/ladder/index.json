@@ -1,0 +1,118 @@
+{
+  "tela_full:0.95": {
+    "file": "renders\\core\\ladder\\09cecf87_result_telablur-v1-09cecf87.png",
+    "job_id": "09cecf87-354c-400a-b25d-99f78519f135",
+    "params": {
+      "strength": 0.95
+    },
+    "engine": "telablur-v1"
+  },
+  "tela_vert:0.95": {
+    "file": "renders\\core\\ladder\\d7461ff8_result_telablur-v1-d7461ff8.png",
+    "job_id": "d7461ff8-44b2-449a-bf59-c32f11a1d280",
+    "params": {
+      "strength": 0.95,
+      "direction": "vertical"
+    },
+    "engine": "telablur-v1"
+  },
+  "tela_vert:0.8": {
+    "file": "renders\\core\\ladder\\72d6ee51_result_telablur-v1-72d6ee51.png",
+    "job_id": "72d6ee51-3b6d-4bca-9c4f-0db740d5bfce",
+    "params": {
+      "strength": 0.8,
+      "direction": "vertical"
+    },
+    "engine": "telablur-v1"
+  },
+  "blurR:0.2": {
+    "file": "renders\\core\\ladder\\2446b50c_result_blur-v1-2446b50c.png",
+    "job_id": "2446b50c-0d2b-4d2a-b85a-ea11f18e3145",
+    "params": {
+      "strength": 0.2,
+      "reach": 0.2
+    },
+    "engine": "blur-v1"
+  },
+  "blurR:0.1": {
+    "file": "renders\\core\\ladder\\a3e3e855_result_blur-v1-a3e3e855.png",
+    "job_id": "a3e3e855-af03-44ba-b725-c8623fef084f",
+    "params": {
+      "strength": 0.1,
+      "reach": 0.1
+    },
+    "engine": "blur-v1"
+  },
+  "blurR:0.15": {
+    "file": "renders\\core\\ladder\\116cf662_result_blur-v1-116cf662.png",
+    "job_id": "116cf662-5def-4173-8ec6-e232b27cff1d",
+    "params": {
+      "strength": 0.15,
+      "reach": 0.15
+    },
+    "engine": "blur-v1"
+  },
+  "blurR:0.25": {
+    "file": "renders\\core\\ladder\\9c704b9f_result_blur-v1-9c704b9f.png",
+    "job_id": "9c704b9f-bbbd-4a2d-8d7b-b9bfb948850a",
+    "params": {
+      "strength": 0.25,
+      "reach": 0.25
+    },
+    "engine": "blur-v1"
+  },
+  "blurR:0.3": {
+    "file": "renders\\core\\ladder\\510bab29_result_blur-v1-510bab29.png",
+    "job_id": "510bab29-9dbc-465f-b4ef-682247a4ac2a",
+    "params": {
+      "strength": 0.3,
+      "reach": 0.3
+    },
+    "engine": "blur-v1"
+  },
+  "blurR:0.4": {
+    "file": "renders\\core\\ladder\\f1167b20_result_blur-v1-f1167b20.png",
+    "job_id": "f1167b20-6ea3-4360-9771-12ba58c982f0",
+    "params": {
+      "strength": 0.4,
+      "reach": 0.4
+    },
+    "engine": "blur-v1"
+  },
+  "tela_vert:0.9": {
+    "file": "renders\\core\\ladder\\8382eedb_result_telablur-v1-8382eedb.png",
+    "job_id": "8382eedb-ff60-4a48-b828-75a36f26f770",
+    "params": {
+      "strength": 0.9,
+      "direction": "vertical"
+    },
+    "engine": "telablur-v1"
+  },
+  "tela_vert:0.93": {
+    "file": "renders\\core\\ladder\\153029ee_result_telablur-v1-153029ee.png",
+    "job_id": "153029ee-5c61-4bf7-9a81-028e1e726cf8",
+    "params": {
+      "strength": 0.93,
+      "direction": "vertical"
+    },
+    "engine": "telablur-v1"
+  },
+  "tela_vert:0.97": {
+    "file": "renders\\core\\ladder\\a89f0dab_result_telablur-v1-a89f0dab.png",
+    "job_id": "a89f0dab-bdd0-4ecf-9b66-3378b2307392",
+    "params": {
+      "strength": 0.97,
+      "direction": "vertical"
+    },
+    "engine": "telablur-v1"
+  },
+  "tela_vert:0.99": {
+    "file": "renders\\core\\ladder\\dc37c8d5_result_telablur-v1-dc37c8d5.png",
+    "job_id": "dc37c8d5-2e26-435d-b1a2-911810374108",
+    "params": {
+      "strength": 0.99,
+      "direction": "vertical"
+    },
+    "engine": "telablur-v1"
+  }
+}

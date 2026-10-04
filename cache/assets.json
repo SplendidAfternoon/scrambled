@@ -130,5 +130,13 @@
   "af8db18560e624d1b6aa024d0d46af493788947775edf2296f3520713a1409dd": {
     "asset_id": "22e8392b-b422-42fa-9806-622507ea5d81",
     "file": "ir_lowx_n12.json"
+  },
+  "a51c63d82c8d4ffa3cd27ca499ec324b079dbaa54167a7361f21b7e77b001f68": {
+    "asset_id": "87e44f9e-fcdc-4dba-9fdc-e0ea7e9a3268",
+    "file": "A_1024.png"
+  },
+  "7f285dedd8f6f745e2033822fad1ad2a002c7ce656a6394afb197d4ce69633ad": {
+    "asset_id": "2e7c7e0a-363f-4a43-b06b-78fc3ec341db",
+    "file": "B_1024.png"
   }
 }
