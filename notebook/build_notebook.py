@@ -87,7 +87,7 @@ n_records = sum(1 for p in client.cache.glob("*/*.json"))
 print(f"scrambled {scrambled.__version__} | MODE = {MODE} | cache: {n_records} job records in cache/")
 print("API key:", ("found (not shown)" if _load_key() else "MISSING: set MOTH_API_KEY") if MODE == "atlas"
       else "not needed in replay mode")
-print("ffmpeg:", "found" if shutil.which("ffmpeg") else "not found (sections 8 needs it)")
+print("ffmpeg:", "found" if shutil.which("ffmpeg") else "not found (section 8 needs it)")
 
 # Ledger of the Atlas jobs submitted for this notebook (persisted; replay mode only reads it).
 LEDGER_PATH = DATA / "job_ledger.json"
@@ -186,8 +186,12 @@ def param_rows(engine, names):
     for n in names:
         p = props[n]
         rng = ""
-        if "minimum" in p or "maximum" in p:
-            rng = f"{p.get('minimum', '')} .. {p.get('maximum', '')}"
+        if "minimum" in p and "maximum" in p:
+            rng = f"{p['minimum']} .. {p['maximum']}"
+        elif "maximum" in p:
+            rng = f"≤ {p['maximum']}"
+        elif "minimum" in p:
+            rng = f"≥ {p['minimum']}"
         elif "enum" in p:
             rng = " / ".join(map(str, p["enum"]))
         desc = p.get("description", "").replace("|", "/")
@@ -351,6 +355,8 @@ arr = otoc.arrival_steps(scr.F)
 for a_ in ax[0]:
     a_.plot([t for t in arr if t], [i for i, t in enumerate(arr) if t], "k.--", lw=0.8, ms=3, label="light-cone arrival")
 ax[0, 0].legend(loc="lower right", fontsize=8)
+for a_ in ax[0]:
+    a_.set_xlabel("")
 fig.colorbar(im, ax=ax, shrink=0.8, label="F  (red -1, white 0, blue +1)")
 fig.suptitle("Measured on Moth Atlas: otoc-echo-v1, 12 qubits, aer emulator (exact)", y=0.99)
 plt.show()
@@ -503,13 +509,13 @@ ledger_new_since(n0, "6 image", "egg photo ladder rung")
 print("ladder jobs:", *[f"{e} {p} {j[:8]}" for e, p, j in lad.jobs], sep="\n  ")
 
 imgA, imgB = image.load_rgb(A, (1024, 1024)), image.load_rgb(B, (1024, 1024))
-fig, ax = plt.subplots(2, 5, figsize=(12, 5.2))
+fig, ax = plt.subplots(2, 5, figsize=(12, 5.6))
 row0 = [("photo A", imgA)] + [(f"blur-v1 {s}", L) for s, L in zip(image.BLUR_LEVELS, lad.blur)]
 row1 = [("photo B (target)", imgB)] + [(f"telablur-v1 {s}", M) for s, M in zip(image.MORPH_LEVELS, lad.morph)]
 for a_, (title, im) in zip(list(ax[0]) + list(ax[1]), row0 + row1):
     a_.imshow(thumb(im, 240)); a_.set_title(title, fontsize=9); a_.axis("off")
 fig.suptitle("Quantum image ladders rendered on Atlas (strength increases to the right)", y=0.99)
-plt.tight_layout(); plt.show()
+plt.tight_layout(h_pad=1.5); plt.show()
 """)
 
 code(r"""
@@ -589,12 +595,17 @@ plt.tight_layout(); plt.show()
 
 dry, sr = audio.read_mono(ROOT / "media/prep/stem_20s.wav")
 import soundfile as sf
-for name, m in [("scrambling", scr), ("control", ctl)]:
+echoes = [("scrambling", scr, r"**Scrambling run** ($\theta_{zz} = 0.35\pi$): the taps decay and scatter as the kick spreads."),
+          ("control", ctl, r"**Clifford control** ($\theta_{zz} = \pi$): nothing scrambles, so the echo stays a clean, regular repeat.")]
+previews = []
+for name, m, label in echoes:
     wet = audio.render_taps(dry, sr, m.F)
     sf.write(OUT / f"echo_{name}.wav", wet, sr, subtype="PCM_16")
     print(f"notebook/out/echo_{name}.wav: {len(wet)/sr:.1f} s stereo, local numpy tap render (classical DSP)")
-    seg = wet[: int(sr * 8)][::2]                      # 8 s preview at 24 kHz, embedded below
-    display(Markdown(f"**{name}** echo (8 s preview, cooking audio + OTOC echo):"))
+    previews.append((label, wet[: int(sr * 8)][::2]))   # 8 s preview at 24 kHz, embedded below
+display(Markdown("The same 8 s of cooking audio through each measured map:"))
+for label, seg in previews:
+    display(Markdown(label))
     display(Audio(seg.T, rate=sr // 2))
 """)
 
@@ -634,7 +645,7 @@ if retro_job is None and MODE == "atlas":
                res["outcome"].split(" (")[0], 2 if res["outcome"] == "completed" else None)
     retro_job = res["job_id"] if res["outcome"] == "completed" else None
 
-md_table(["when", "job id", "outcome", "wall time (s)"],
+md_table(["when", "job id", "outcome", "notebook waited (s)"],
          [["2026-10-03 (earlier project run)", "`6dabddfc-5ba3-4281-be12-c1d8e1303b72`", "failed: engine_timeout (server side)", ""]]
          + [[a["when"], f"`{a['job_id']}`" if a["job_id"] else "", a["outcome"], a["seconds"]]
             for a in {a["job_id"]: a for a in attempts}.values()])   # latest status per job
@@ -810,7 +821,7 @@ md(r"""
 
 | step | where it runs |
 |---|---|
-| $F(i,t)$, all 12 maps in sections 3 and 5 | Atlas `otoc-echo-v1`, `machine: aer`: the exact, noiseless **emulator**, not quantum hardware |
+| $F(i,t)$, all 10 maps in sections 3 and 5 (the two section 3 runs are part of the sweep) | Atlas `otoc-echo-v1`, `machine: aer`: the exact, noiseless **emulator**, not quantum hardware |
 | image ladders (blur, morph) | Atlas `blur-v1` / `telablur-v1` (quantum image-encoding circuits, run by Atlas) |
 | verification and the dense sweep curve | classical numpy statevector (labelled) |
 | strip cutting, crossfades, overlays, video encoding | classical, local |
