@@ -32,9 +32,9 @@ struct TapMap {
 // The egg has 12 latitude bands, one per qubit site; taps of maps with another site count go to the band
 // nearest their pan position.
 constexpr int kBands = 12;
-constexpr float kMinSiteGainDb = -24.f, kMaxSiteGainDb = 6.f;
-constexpr float kSplitPan = 0.75f;    // full split moves a site 75 % of the way to its stereo edge
-constexpr float kSplitDelay = 0.5f;   // full split stretches an edge site's delays by 50 % (centre: 12.5 %)
+constexpr float kMinSiteGainDb = -60.f, kMaxSiteGainDb = 12.f;  // the bottom of the range mutes the site
+constexpr float kSplitPan = 1.f;      // full split moves a site all the way to its stereo edge
+constexpr float kSplitDelay = 1.f;    // full split doubles a site's delays, centre and edge alike
 
 struct Params {
     float trainMs = 1000.f;  // length of the whole echo train (t = depth lands here)
@@ -84,7 +84,7 @@ public:
     void prepare(double sampleRate)
     {
         sr = (float) sampleRate;
-        size_t need = (size_t) (kMaxSeconds * sr) + 8, size = 1;
+        size_t need = (size_t) (kMaxSeconds * (1.f + kSplitDelay) * sr) + 8, size = 1;
         while (size < need) size <<= 1;
         buf.assign(size, 0.f);
         mask = size - 1;
@@ -153,7 +153,7 @@ public:
         for (int b = 0; b < kBands; ++b) {
             const float e = std::clamp(macro + std::clamp(params.siteSplit[b], 0.f, 1.f), 0.f, 1.f);
             const float db = std::isfinite(params.siteGainDb[b]) ? std::clamp(params.siteGainDb[b], kMinSiteGainDb, kMaxSiteGainDb) : 0.f;
-            const float g = std::pow(10.f, db / 20.f);
+            const float g = db <= kMinSiteGainDb ? 0.f : std::pow(10.f, db / 20.f);
             bandSplit[b] += (e - bandSplit[b]) * bandCoef;
             bandGain[b] += (g - bandGain[b]) * bandCoef;
         }
@@ -299,7 +299,7 @@ private:
             const float p = p0 + (edge - p0) * kSplitPan * e;
             const float angle = p * 1.57079633f;
             const float tl = g * makeup * std::cos(angle), tr = g * makeup * std::sin(angle), tm = t.regen ? g * fbScale : 0.f;
-            const float ts = 1.f + kSplitDelay * e * (0.25f + 1.5f * std::fabs(t.pan - 0.5f));
+            const float ts = 1.f + kSplitDelay * e;
             t.shown = g * makeup;
             if (jump) { t.gl = tl; t.gr = tr; t.gm = tm; t.st = ts; t.dl = t.dr = t.dm = t.dst = 0.f; }
             else { t.dl = (tl - t.gl) * inv; t.dr = (tr - t.gr) * inv; t.dm = (tm - t.gm) * inv; t.dst = (ts - t.st) * inv; }

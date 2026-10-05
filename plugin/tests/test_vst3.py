@@ -62,7 +62,7 @@ def egg_edits(p, presets):
     want = {"split"} | {f"site_{s}_split" for s in range(12)} | {f"site_{s}_gain_db" for s in range(12)}
     check(want <= names, "exposes Split macro + 12 site split + 12 site gain parameters (automatable)")
     g = p.parameters["site_3_gain_db"]
-    check(abs(g.min_value - -24) < 1e-6 and abs(g.max_value - 6) < 1e-6, f"site gain range {g.min_value}..{g.max_value} dB")
+    check(abs(g.min_value - -60) < 1e-6 and abs(g.max_value - 12) < 1e-6, f"site gain range {g.min_value}..{g.max_value} dB")
 
     ctl = json.loads(presets[0].read_text(encoding="utf-8"))
     p.map = "Control (Clifford)"
@@ -91,12 +91,24 @@ def egg_edits(p, presets):
     left_same = float(np.abs(base[0] - y[0]).max())
     check(err < 2e-3 and left_same < 1e-5, f"site 11 gain -24 dB scales only that site (err {err:.1e}, left change {left_same:.1e})")
 
-    # Site 0 split 100 %: its delays stretch by 1.5 (edge site), so the last echo moves from 1.0 s to 1.5 s.
-    p.site_0_split = 100.0
+    # The bottom of the range mutes: the right channel loses all of site 11's taps.
+    p.site_11_gain_db = -60.0
     y = impulse_response(p, 1.8)
-    last_l = int(np.nonzero(np.abs(y[0]) > 1e-6)[0][-1])
-    check(abs(last_l - 1.5 * SR) <= 3, f"site 0 split 100 %: last left echo at {last_l / SR:.4f} s (expect 1.5000)")
-    p.site_0_split = 0.0
+    p.site_11_gain_db = 0.0
+    err = 0.0
+    for tap in (t for t in ctl["taps"] if t["site"] == 11):
+        c = int(np.floor(tap["depth"] * step))
+        mag = float(np.hypot(tap["F_re"], tap["F_im"])) * (-1 if tap["F_re"] < 0 else 1)
+        err = max(err, abs(float((base[1, c - 2:c + 3] - y[1, c - 2:c + 3]).sum()) - mag * norm))
+    check(err < 2e-3, f"site 11 at the bottom of the range is muted (err {err:.1e})")
+
+    # Full split doubles a site's delays, so the last echo moves from 1.0 s to 2.0 s, at the edge and in the centre.
+    for site, ch, side in ((0, 0, "left"), (6, 1, "right")):
+        setattr(p, f"site_{site}_split", 100.0)
+        y = impulse_response(p, 2.3)
+        setattr(p, f"site_{site}_split", 0.0)
+        last = int(np.nonzero(np.abs(y[ch]) > 1e-6)[0][-1])
+        check(abs(last - 2.0 * SR) <= 3, f"site {site} split 100 %: last {side} echo at {last / SR:.4f} s (expect 2.0000)")
 
     # Split macro moves every site off the shell; at 0 the IR is the measured map again.
     p.split = 100.0

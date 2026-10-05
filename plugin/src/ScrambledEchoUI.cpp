@@ -54,9 +54,10 @@ std::string envString(const char* name)
 
 float clampf(float v, float lo, float hi) { return v < lo ? lo : v > hi ? hi : v; }
 
-// Vertical drag <-> site gain: up to +6 dB above the shell, down to -24 dB below.
-float gainToLift(float db) { return db >= 0.f ? db / se::kMaxSiteGainDb : -db / se::kMinSiteGainDb; }
-float liftToGain(float lift) { return lift >= 0.f ? lift * se::kMaxSiteGainDb : -lift * se::kMinSiteGainDb; }
+// Vertical drag <-> site gain: up to +12 dB above the shell, down to mute below. The downward half is
+// quadratic in dB so the first half of the drag covers 0 to -15 dB and the last part fades out.
+float gainToLift(float db) { return db >= 0.f ? db / se::kMaxSiteGainDb : -std::sqrt(db / se::kMinSiteGainDb); }
+float liftToGain(float lift) { return lift >= 0.f ? lift * se::kMaxSiteGainDb : lift * lift * se::kMinSiteGainDb; }
 
 double nowSeconds()
 {
@@ -673,9 +674,12 @@ private:
             text(nx + 11.f, ny + 0.5f, label, nullptr);
 
             if (hot) {
-                char info[96];
-                std::snprintf(info, sizeof info, "site %d   split %.0f %%   %+.1f dB   F %.2f", b,
-                              effectiveSplit(b) * 100.f, fValues[kParamSiteGain0 + b], effectiveF(b, fCursor));
+                char info[96], gain[16];
+                const float db = fValues[kParamSiteGain0 + b];
+                if (db <= se::kMinSiteGainDb) std::snprintf(gain, sizeof gain, "mute");
+                else std::snprintf(gain, sizeof gain, "%+.1f dB", db);
+                std::snprintf(info, sizeof info, "site %d   split %.0f %%   %s   F %.2f", b,
+                              effectiveSplit(b) * 100.f, gain, effectiveF(b, fCursor));
                 fontSize(11.f);
                 const float tw = 236.f;
                 beginPath();

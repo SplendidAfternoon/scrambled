@@ -36,7 +36,7 @@ protected:
     const char* getMaker() const override { return "Moth Hack 2026 / SCRAMBLED"; }
     const char* getHomePage() const override { return DISTRHO_PLUGIN_URI; }
     const char* getLicense() const override { return "ISC"; }
-    uint32_t getVersion() const override { return d_version(2, 0, 0); }
+    uint32_t getVersion() const override { return d_version(2, 1, 0); }
 
     void initAudioPort(bool input, uint32_t index, AudioPort& port) override
     {

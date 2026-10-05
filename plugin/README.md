@@ -22,7 +22,7 @@ Downloads for both platforms: [releases/tag/vst](https://github.com/SplendidAfte
 
 ## Install in Ableton Live (Windows)
 
-1. Unzip `dist/ScrambledEcho-2.0.0-win64-vst3.zip` (or use the folder `plugin/dist` directly). It contains the
+1. Unzip `dist/ScrambledEcho-2.1.0-win64-vst3.zip` (or use the folder `plugin/dist` directly). It contains the
    bundle `ScrambledEcho.vst3`; keep the whole folder.
 2. Live → **Options → Preferences → Plug-Ins**: switch **Use VST3 Plug-In Custom Folder** on, click **Browse**
    and pick `…\moth-hack\plugin\dist` (the folder that *contains* `ScrambledEcho.vst3`).
@@ -79,8 +79,8 @@ Every band has a **grab node** on the egg's right-hand silhouette (labelled with
 
 | gesture | effect |
 |---|---|
-| drag a node **outward** (right) | splits that band's shards away from the shell. Audio: that site's taps move toward their stereo edge (up to 75 % of the way) and their delays stretch (up to +50 % for edge sites, +12.5 % for the centre), spreading the echo in space and time |
-| drag a node **up / down** | site gain, +6 dB at the top to −24 dB at the bottom; the shards rise or sink with it |
+| drag a node **outward** (right) | splits that band's shards away from the shell. Audio: that site's taps move toward their stereo edge (all the way at full split) and their delays stretch (up to double, for every site), so a fully split site becomes its own echo train, hard left or right and twice as long |
+| drag a node **up / down** | site gain, +12 dB at the top down to mute at the bottom; the lower half of the drag covers 0 to −15 dB and the rest fades out. The shards rise or sink with it |
 | **Shift** while dragging | fine adjustment |
 | **double-click** a node | heals that site (split 0, gain 0 dB) |
 | **right-drag** or left-drag on empty space | orbit the camera; horizontal two-finger swipe also orbits |
@@ -117,7 +117,7 @@ The strip under the egg keeps the original controls.
 | **Split** | 0–100 % | macro added to every site's split: the whole egg comes apart |
 | **Load JSON…** | file | loads a custom map and selects Custom JSON |
 | **Site N split** (×12) | 0–100 % | automatable parameter behind each node's outward drag |
-| **Site N gain** (×12) | −24…+6 dB | automatable parameter behind each node's vertical drag |
+| **Site N gain** (×12) | −60…+12 dB (−60 = mute) | automatable parameter behind each node's vertical drag |
 
 Knobs: drag vertically (Shift = fine) or use the mouse wheel. The window is resizable (default 900 × 640,
 minimum 720 × 520) and scales with Windows display scaling.
@@ -258,11 +258,12 @@ and redraws at full rate only while audio plays, while dragging or while the egg
 
 ## Tests
 
-- `tests/test_core.cpp` (78 checks): echoes land on the measured taps with the right gain, pan and polarity;
+- `tests/test_core.cpp` (80 checks): echoes land on the measured taps with the right gain, pan and polarity;
   Scramble interpolates F; Width 0 is mono; Mix 0 is dry; feedback replays only `t = depth`, stays bounded and
   decays; Time sweeps, map swaps and Scramble moves are click-free; View C. Egg edits: zero edits are not an
-  edit; a site split moves pan and stretches delay by the hand-worked amounts and leaves other sites alone; the
-  Split macro adds and clamps; site gain scales one site and clamps to −24/+6 dB; full split with +6 dB
+  edit; a site split moves pan and stretches delay by the hand-worked amounts and leaves other sites alone; a
+  centre site splits as far as an edge site (hard to its side, double delay); the Split macro adds and clamps;
+  site gain scales one site, clamps at +12 dB and mutes at the bottom of its range; full split with +12 dB
   everywhere at 98 % feedback stays bounded and decays; a sudden drag glides (DC test: no step larger than
   6e-4, still above half-way 10 ms later, lands on −24 dB); telemetry reports which site fired with which
   polarity and the cursor phase; the camera state string round-trips and clamps garbage. JSON loader accepts
@@ -271,8 +272,8 @@ and redraws at full rate only while audio plays, while dragging or while the egg
   and C view for two maps; error ≤ 2e-7, threshold 2e-3); Scramble 0 % gives the Control map; Feedback 95 %
   decays; Sync 1/4 at 120 BPM puts the last echo at 0.500 s; three sample rates and odd block sizes; Mix 0 %
   passes the input. Egg: Split + 12 site split + 12 site gain parameters exist with the right ranges; site 11 at
-  −24 dB removes exactly `1 − 10^(−24/20)` of site 11's taps and nothing else; site 0 split 100 % moves its last
-  echo from 1.0 s to 1.5 s; the Split macro changes the IR and 0 % restores it bit-exactly; the host state blob
+  −24 dB removes exactly `1 − 10^(−24/20)` of site 11's taps and nothing else, and at −60 dB removes all of them;
+  site 0 and site 6 split 100 % each move their last echo from 1.0 s to 2.0 s; the Split macro changes the IR and 0 % restores it bit-exactly; the host state blob
   restores map, Time and edits in a fresh instance with an identical impulse response.
 - UI: `tools/screenshot_ui.py` renders the four images above through the real editor in a host;
   `tools/make_demo.py` renders the video frames through the same editor code with the DSP's telemetry.

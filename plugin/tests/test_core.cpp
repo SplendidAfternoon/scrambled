@@ -234,15 +234,27 @@ static void test_site_split_moves_pan_outward_and_stretches_delay()
 {
     // twoTapMap: site0 (pan 0, band 0) at step 1, site2 (pan 1, band 11) at step 2. Width 0 -> both centred.
     se::Params p{1000.f, 1.f, 0.f, 1.f, 0.f};
-    p.siteSplit[0] = 1.f;
+    p.siteSplit[0] = 0.5f;
     se::Core core; core.prepare(1000.0); core.setMaps(twoTapMap(), twoTapMap()); core.setParams(p);
     auto o = impulse(core, 2500);
-    // band 0: stretch = 1 + 0.5 * 1 * (0.25 + 1.5 * 0.5) = 1.5 -> 750 samples; pan 0.5 + (0 - 0.5) * 0.75 = 0.125
-    const float g = 0.447214f, ang = 0.125f * 1.57079633f;
+    // band 0, half split: stretch = 1 + 1 * 0.5 = 1.5 -> 750 samples; pan 0.5 + (0 - 0.5) * 0.5 = 0.25
+    const float g = 0.447214f, ang = 0.25f * 1.57079633f;
     CHECK(near(o.l[750], g * std::cos(ang)) && near(o.r[750], g * std::sin(ang)), "split tap at 750: %f %f", o.l[750], o.r[750]);
     CHECK(std::fabs(o.l[500]) < 1e-5f, "nothing left at the measured slot %f", o.l[500]);
     // band 11 is untouched: centred at its measured 1000 samples
     CHECK(near(o.l[1000], -0.894427f * 0.707107f) && near(o.r[1000], -0.894427f * 0.707107f), "other band unchanged %f", o.l[1000]);
+}
+
+static void test_centre_site_split_is_as_large_as_an_edge_site()
+{
+    // One centre tap (site 1 of 3 -> pan 0.5, band 6). Full split: hard right and twice the delay.
+    se::TapMap m; m.nSites = 3; m.depth = 1; m.taps = { {1, 1, 1.f, 0.f} };
+    se::Params p{1000.f, 1.f, 0.f, 1.f, 1.f};
+    p.siteSplit[6] = 1.f;
+    se::Core core; core.prepare(1000.0); core.setMaps(m, m); core.setParams(p);
+    auto o = impulse(core, 2500);
+    CHECK(near(o.r[2000], 1.f, 1e-3f) && std::fabs(o.l[2000]) < 1e-3f, "centre split lands hard right at 2000: %f %f", o.l[2000], o.r[2000]);
+    CHECK(std::fabs(o.r[1000]) < 1e-5f && std::fabs(o.l[1000]) < 1e-5f, "nothing left at 1000 %f", o.r[1000]);
 }
 
 static void test_split_macro_adds_to_every_site()
@@ -251,9 +263,9 @@ static void test_split_macro_adds_to_every_site()
     p.split = 0.4f; p.siteSplit[11] = 0.8f;  // band 11 clamps to 1
     se::Core core; core.prepare(1000.0); core.setMaps(twoTapMap(), twoTapMap()); core.setParams(p);
     auto o = impulse(core, 2500);
-    // band 0: e = 0.4 -> stretch 1.2 -> 600; pan stays 0 (already at the edge). band 11: e = 1 -> 1500
-    CHECK(near(o.l[600], 0.447214f) && near(o.r[600], 0.f), "band 0 at 600 %f %f", o.l[600], o.r[600]);
-    CHECK(near(o.r[1500], -0.894427f) && near(o.l[1500], 0.f), "band 11 clamped split at 1500 %f", o.r[1500]);
+    // band 0: e = 0.4 -> stretch 1.4 -> 700; pan stays 0 (already at the edge). band 11: e = 1 -> 2000
+    CHECK(near(o.l[700], 0.447214f) && near(o.r[700], 0.f), "band 0 at 700 %f %f", o.l[700], o.r[700]);
+    CHECK(near(o.r[2000], -0.894427f) && near(o.l[2000], 0.f), "band 11 clamped split at 2000 %f", o.r[2000]);
 }
 
 static void test_site_gain_scales_one_band_only()
@@ -264,11 +276,11 @@ static void test_site_gain_scales_one_band_only()
     auto o = impulse(core, 1500);
     CHECK(near(o.l[500], 0.5f * 0.447214f), "band 0 halved %f", o.l[500]);
     CHECK(near(o.r[1000], -0.894427f), "band 11 unchanged %f", o.r[1000]);
-    p.siteGainDb[0] = 40.f; p.siteGainDb[11] = -90.f;  // clamped to +6 / -24 dB
+    p.siteGainDb[0] = 40.f; p.siteGainDb[11] = -90.f;  // clamped to +12 dB / the bottom of the range, which mutes
     se::Core c2; c2.prepare(1000.0); c2.setMaps(twoTapMap(), twoTapMap()); c2.setParams(p);
     o = impulse(c2, 1500);
-    CHECK(near(o.l[500], 1.995262f * 0.447214f, 1e-3f), "gain clamps at +6 dB %f", o.l[500]);
-    CHECK(near(o.r[1000], -0.0630957f * 0.894427f, 1e-4f), "gain clamps at -24 dB %f", o.r[1000]);
+    CHECK(near(o.l[500], 3.981072f * 0.447214f, 1e-3f), "gain clamps at +12 dB %f", o.l[500]);
+    CHECK(o.r[1000] == 0.f && o.l[1000] == 0.f, "bottom of the range mutes the site %f", o.r[1000]);
 }
 
 static void test_split_and_gain_bounds_keep_feedback_stable()
@@ -278,7 +290,7 @@ static void test_split_and_gain_bounds_keep_feedback_stable()
         for (int t = 1; t <= 32; ++t) m.taps.push_back({s, t, ((s * 5 + t) % 3 - 1) * 0.7f, 0.f});
     se::Params p{300.f, 1.f, 0.98f, 1.f, 1.f};
     p.split = 1.f;
-    for (int i = 0; i < se::kBands; ++i) p.siteGainDb[i] = 6.f;
+    for (int i = 0; i < se::kBands; ++i) p.siteGainDb[i] = 12.f;
     se::Core core; core.prepare(48000.0); core.setMaps(m, m); core.setParams(p);
     const int n = 48000 * 20;
     std::vector<float> in(n, 0.f), l(n), r(n);
@@ -287,7 +299,7 @@ static void test_split_and_gain_bounds_keep_feedback_stable()
     float peak = 0, tail = 0;
     for (int i = 0; i < n; ++i) peak = std::max(peak, std::fabs(l[i]) + std::fabs(r[i]));
     for (int i = n - 48000; i < n; ++i) tail = std::max(tail, std::fabs(l[i]));
-    CHECK(std::isfinite(peak) && peak < 16.f, "full split + 6 dB everywhere bounded, peak %f", peak);
+    CHECK(std::isfinite(peak) && peak < 32.f, "full split + 12 dB everywhere bounded, peak %f", peak);
     CHECK(tail < 1e-2f, "and still decays, tail %f", tail);
 }
 
@@ -424,6 +436,7 @@ int main(int argc, char** argv)
     test_commutator_view_plays_where_the_operator_spread();
     test_unedited_params_match_measured_map();
     test_site_split_moves_pan_outward_and_stretches_delay();
+    test_centre_site_split_is_as_large_as_an_edge_site();
     test_split_macro_adds_to_every_site();
     test_site_gain_scales_one_band_only();
     test_split_and_gain_bounds_keep_feedback_stable();
