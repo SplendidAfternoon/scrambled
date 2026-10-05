@@ -58,6 +58,16 @@ def test_image_still_classical_is_labelled_and_changed(tiny_image, tmp_path):
     assert prov["mode"] == "classical" and "CLASSICAL" in prov["label"]
 
 
+def test_image_rings_layout_differs_from_strips_and_is_recorded(tiny_image, tmp_path):
+    strips, rings = tmp_path / "s.png", tmp_path / "r.png"
+    assert cli.main(["image", str(tiny_image), "-o", str(strips), *SMALL, "--no-overlay"]) == 0
+    assert cli.main(["image", str(tiny_image), "-o", str(rings), *SMALL, "--no-overlay", "--layout", "rings"]) == 0
+    a = np.asarray(Image.open(strips), np.float32)
+    b = np.asarray(Image.open(rings), np.float32)
+    assert np.abs(a - b).mean() > 2
+    assert json.loads((tmp_path / "r.png.json").read_text(encoding="utf-8"))["layout"] == "rings"
+
+
 def test_audio_classical_echo_is_longer_stereo_and_finite(tmp_path):
     sr = 16000
     t = np.arange(sr // 2) / sr

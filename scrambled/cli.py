@@ -87,9 +87,9 @@ def cmd_image(args):
     lad = _ladders(args, client, args.input, args.pair)
     label = _label(omap, lad.source, paired=bool(args.pair))
     out = image.scramble_image(args.input, args.output, omap, lad, seconds=args.seconds, fps=args.fps, at=args.at,
-                               show_overlay=not args.no_overlay, label=label)
+                               show_overlay=not args.no_overlay, label=label, layout=args.layout)
     side = _provenance(out, args, omap, {"input": str(args.input), "pair": str(args.pair) if args.pair else None,
-                                         "label": label, "ladder_jobs": lad.jobs})
+                                         "layout": args.layout, "label": label, "ladder_jobs": lad.jobs})
     print(f"wrote {out}\nprovenance {side}")
     return 0
 
@@ -115,7 +115,7 @@ def cmd_video(args):
                          duration=args.duration, keyframes=args.keyframes, pair=args.pair, max_side=args.max_side,
                          fps=args.fps, show_overlay=not args.no_overlay, label=label, audio_mix=args.audio_mix,
                          audio_engine=args.audio_engine, timeout=args.timeout, audio_src=args.audio,
-                         log=_log(args))
+                         layout=args.layout, log=_log(args))
     side = _provenance(args.output, args, omap, {"input": str(args.input), "label": label, "render": rep})
     print(f"wrote {args.output} ({rep['frames']} frames, {len(rep['jobs'])} ladder jobs)\nprovenance {side}")
     return 0
@@ -192,6 +192,11 @@ def build_parser():
     g.add_argument("--machine", default="aer", help="aer (emulator, default) or an IBM backend name")
     g.add_argument("--control", action="store_true", help="Clifford control: theta_zz = pi (cannot scramble)")
 
+    look = argparse.ArgumentParser(add_help=False)
+    look.add_argument("--layout", choices=("strips", "rings"), default="strips",
+                      help="strips: one vertical strip per qubit (default); rings: concentric rings around the "
+                           "centre, ring r = the qubits r steps from the kick, so the scramble spreads outward")
+
     ap = argparse.ArgumentParser(prog="scrambled", description=__doc__)
     ap.add_argument("--version", action="version", version=f"scrambled {__version__}")
     sub = ap.add_subparsers(dest="command", required=True)
@@ -200,7 +205,7 @@ def build_parser():
     m.add_argument("-o", "--output", type=Path, default=Path("out/otoc_map.json"))
     m.set_defaults(func=cmd_measure)
 
-    i = sub.add_parser("image", parents=[common, phys], help="scramble an image -> PNG (one echo step) or MP4")
+    i = sub.add_parser("image", parents=[common, phys, look], help="scramble an image -> PNG (one echo step) or MP4")
     i.add_argument("input", type=Path)
     i.add_argument("--pair", type=Path, help="target picture, same framing (e.g. the 'after' photo)")
     i.add_argument("-o", "--output", type=Path, required=True, help=".png/.jpg = still at --at; .mp4 = animation")
@@ -220,7 +225,7 @@ def build_parser():
     a.add_argument("--engine-timeout", type=float, default=180)
     a.set_defaults(func=cmd_audio)
 
-    v = sub.add_parser("video", parents=[common, phys], help="scramble a video (frames + echoed audio) -> MP4")
+    v = sub.add_parser("video", parents=[common, phys, look], help="scramble a video (frames + echoed audio) -> MP4")
     v.add_argument("input", type=Path)
     v.add_argument("-o", "--output", type=Path, required=True)
     v.add_argument("--start", type=float, default=0.0)

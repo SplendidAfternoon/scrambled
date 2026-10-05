@@ -40,7 +40,9 @@ every ladder job id and which audio renderer actually ran.
 
 All commands accept `--mode`, `--cache-dir`, `--timeout` and `-q`. The media commands also accept the OTOC options
 (`--sites 12 --depth 32 --theta-x 0.3pi --theta-zz 0.35pi --kick Z --kick-site N --machine aer --control`) or
-`--otoc map.json` to reuse a saved map. Angles take radians or multiples of pi (`0.35pi`).
+`--otoc map.json` to reuse a saved map. Angles take radians or multiples of pi (`0.35pi`). `image` and `video` take
+`--layout strips` (default, one vertical strip per qubit) or `--layout rings`, where ring r holds the qubits r steps
+from the kicked one, so the scramble spreads outward from the middle of the picture like a ripple.
 
 | command | what it does |
 |---|---|
@@ -67,6 +69,8 @@ F(i, t).
   `telablur-v1` ladder toward the pair image: an unreadable quantum texture in the middle, the target at 0.98.
 * **Light cone**: in the measured run the kick reaches one more qubit per echo step on each side
   (arrival t = 6,5,4,3,2,1,1,1,2,3,4,5). Outside it F = 1 exactly, so those strips play the untouched media.
+  With `--layout rings` the same cone is a disc that grows from the centre; a ring holding two qubits averages them,
+  and a flipped ring is turned half a turn, which keeps it on itself.
 * **Finite-size revival**: on 12 qubits |F| partly recovers around t ≈ 13–16 (strips briefly re-sharpen) before
   decaying again. This is a real feature of a small system, not a rendering artefact.
 
@@ -159,6 +163,7 @@ outside the light cone always show the real video.
 |---|---|
 | `out/cli_demo/eggs_scrambled.mp4` | `scrambled video media/clip_720.mp4 --audio media/stem_full.wav --keyframes 4 -o ...` (atlas; 58 s, 406×720, 24 ladder jobs; OTOC job `8df5cfa2-e57c-43a8-a93a-63975efd252c`) |
 | `out/cli_demo/eggs_image.mp4` | `scrambled image media/prep/A_sq.jpg --pair media/prep/B_sq.jpg -o ...` (atlas; all 8 ladder jobs were cache hits) |
+| `out/cli_demo/eggs_rings.mp4` | `scrambled image media/prep/A_sq.jpg --pair media/prep/B_sq.jpg --layout rings --theta-x 0.1pi --mode replay -o ...` (the gentle drive, OTOC job `6e5e76ef`: a ring of scrambled egg opens from the centre of the pan; no key, all jobs from the cache) |
 | `out/cli_demo/life_scrambled.mp4` | a procedurally generated Game of Life video with a synth melody (`sample_life.mp4`, made with ffmpeg's `life` and `aevalsrc` sources), run with `--keyframes 3 --pair none`. This shows the tool works on media that has nothing to do with eggs and needs no pair image. |
 | `out/cli_demo/*_contact.jpg` | contact sheets of the videos |
 | `out/cli_demo/replay/` | `scrambled replay --video` with `MOTH_API_KEY` empty and no network |

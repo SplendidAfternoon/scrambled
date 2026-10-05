@@ -38,7 +38,7 @@ An independent numpy statevector reproduces every Atlas map to ~1e−13, which p
 | [core/](core/) | The film and track: measurement analysis, image ladders, arrangement, mixing (`piece.py` renders the film) |
 | [plugin/](plugin/) | Scrambled Echo VST3 source, tests and build script |
 | [notebook/](notebook/) | The workflow notebook (`.ipynb` + rendered `.html`) and the script that builds it |
-| [scrambled/](scrambled/) | Python package + CLI: apply a measured map to any image, audio or video ([docs/CLI.md](docs/CLI.md)) |
+| [scrambled/](scrambled/) | Python package + CLI: apply a measured map to any image, audio or video, as strips or as rings spreading from the centre ([docs/CLI.md](docs/CLI.md)) |
 | [web/](web/) | The live site: explorer and the keyless Atlas proxy |
 | [three/](three/) | 3D egg mesh and crack timing (the plugin's egg shell comes from here) |
 | [pipeline/](pipeline/) | The first Atlas runs: probes, uploads and the original image and audio renders |

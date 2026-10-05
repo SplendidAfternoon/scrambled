@@ -16,6 +16,7 @@ import hashlib
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -130,8 +131,55 @@ def lerp_stack(stack, x):
     return stack[i] if f == 0 else stack[i] * (1 - f) + stack[i + 1] * f
 
 
-def compose(frame, ladders: Ladders, states, edges=None):
-    """One output frame: per-strip blur / morph / polarity from the OTOC states."""
+LAYOUTS = ("strips", "rings")
+
+
+@lru_cache(maxsize=8)
+def ring_index(h, w, n_rings):
+    """Ring number of every pixel: equal-width rings from the centre out to the farthest pixel."""
+    y, x = np.mgrid[0:h, 0:w]
+    r = np.hypot(x + 0.5 - w / 2, y + 0.5 - h / 2)
+    return np.minimum((r / r.max() * n_rings).astype(int), n_rings - 1)
+
+
+def ring_states(states, kick):
+    """Ring r holds the sites r steps from the kicked one (one or two of them), averaged."""
+    n = len(states)
+    kick = int(np.clip(kick, 0, n - 1))
+    out = []
+    for r in range(max(kick, n - 1 - kick) + 1):
+        grp = [states[s] for s in sorted({kick - r, kick + r}) if 0 <= s < n]
+        out.append(mapping.StripState(blur=float(np.mean([g.blur for g in grp])),
+                                      morph=float(np.mean([g.morph for g in grp])),
+                                      flipped=np.mean([g.flipped for g in grp]) >= 0.5))
+    return out
+
+
+def _compose_rings(frame, ladders: Ladders, states, kick):
+    h, w = frame.shape[:2]
+    rs = ring_states(states, kick)
+    idx = ring_index(h, w, len(rs))
+    out = np.empty((h, w, 3), np.float32)
+    for r, st in enumerate(rs):
+        m = idx == r
+        tile = lerp_stack([frame] + ladders.blur, st.blur)
+        if st.morph > 0:
+            tile = lerp_stack([tile] + ladders.morph, st.morph)
+        if st.flipped:
+            tile = tile[::-1, ::-1]   # a half turn keeps every ring on itself
+        out[m] = tile[m]
+    return out
+
+
+def compose(frame, ladders: Ladders, states, edges=None, layout="strips", kick=None):
+    """One output frame: per-strip (or per-ring) blur / morph / polarity from the OTOC states.
+
+    strips: one vertical strip per qubit, left to right along the chain.
+    rings: concentric rings around the centre, ring r = the qubits r steps from the kicked one, so the light cone
+    spreads outward from the middle of the picture.
+    """
+    if layout == "rings":
+        return _compose_rings(frame, ladders, states, len(states) // 2 if kick is None else kick)
     h, w = frame.shape[:2]
     edges = mapping.strip_edges(w, len(states)) if edges is None else edges
     out = np.empty((h, w, 3), np.float32)
@@ -193,15 +241,19 @@ def echo_times(depth, n_frames):
     return 1 + (depth - 1) * np.arange(n_frames) / max(n_frames - 1, 1)
 
 
-def scramble_image(src, dst, omap, ladders: Ladders, seconds=8.0, fps=24, at=None, show_overlay=True, label=""):
+def scramble_image(src, dst, omap, ladders: Ladders, seconds=8.0, fps=24, at=None, show_overlay=True, label="",
+                   layout="strips"):
     """Write a PNG/JPEG of one echo step (default: the last) or an MP4 animating t = 1..T."""
     from scrambled import ffmpeg
     dst = Path(dst)
     size = ladders.blur[0].shape[1], ladders.blur[0].shape[0]
     img = load_rgb(src, size)
+
+    def frame_at(t):
+        return compose(img, ladders, mapping.strip_states(omap.F, t), layout=layout, kick=omap.kick_site)
     if dst.suffix.lower() in (".png", ".jpg", ".jpeg", ".webp"):
         t = omap.depth if at is None else at
-        fr = compose(img, ladders, mapping.strip_states(omap.F, t))
+        fr = frame_at(t)
         fr = overlay(fr, omap.F, t, label) if show_overlay else fr
         dst.parent.mkdir(parents=True, exist_ok=True)
         Image.fromarray(np.asarray(fr).clip(0, 255).astype(np.uint8)).save(dst)
@@ -209,6 +261,6 @@ def scramble_image(src, dst, omap, ladders: Ladders, seconds=8.0, fps=24, at=Non
     n = max(2, int(seconds * fps))
     with ffmpeg.Writer(dst, size[0], size[1], fps) as wr:
         for t in echo_times(omap.depth, n):
-            fr = compose(img, ladders, mapping.strip_states(omap.F, t))
+            fr = frame_at(t)
             wr.write(overlay(fr, omap.F, t, label) if show_overlay else fr.clip(0, 255))
     return dst

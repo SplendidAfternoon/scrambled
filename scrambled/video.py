@@ -39,7 +39,7 @@ def _mix(a: image.Ladders, b: image.Ladders, w):
 
 def scramble_video(src, dst, omap, mode="atlas", client=None, start=0.0, duration=None, keyframes=4, pair="last",
                    max_side=720, fps=None, show_overlay=True, label="", audio_mix=0.5, audio_engine=False,
-                   timeout=900, audio_src=None, log=print):
+                   timeout=900, audio_src=None, layout="strips", log=print):
     """Render the scrambled video. `pair`: 'last' (final frame of the excerpt), 'none' (non-local blur), or a path.
 
     The soundtrack (the video's own, or `audio_src` if given, cut to the same excerpt) keeps its dry signal and gains
@@ -53,7 +53,8 @@ def scramble_video(src, dst, omap, mode="atlas", client=None, start=0.0, duratio
     fps = float(fps or min(info.fps, 30.0))
     K = max(1, int(keyframes))
     key_times = [start + dur * (k + 0.5) / K for k in range(K)]
-    report = {"size": [w, h], "fps": fps, "start": start, "duration": dur, "keyframes": key_times, "jobs": []}
+    report = {"size": [w, h], "fps": fps, "start": start, "duration": dur, "keyframes": key_times, "layout": layout,
+              "jobs": []}
 
     with tempfile.TemporaryDirectory() as td:
         td = Path(td)
@@ -96,7 +97,8 @@ def scramble_video(src, dst, omap, mode="atlas", client=None, start=0.0, duratio
                 k0 = min(int(p), K - 1)
                 k1 = min(k0 + 1, K - 1)
                 lad = _mix(ladders[k0], ladders[k1], p - k0)
-                out = image.compose(fr.astype(np.float32), lad, mapping.strip_states(omap.F, t), edges)
+                out = image.compose(fr.astype(np.float32), lad, mapping.strip_states(omap.F, t), edges,
+                                    layout=layout, kick=omap.kick_site)
                 wr.write(image.overlay(out, omap.F, t, label) if show_overlay else out.clip(0, 255))
                 n_frames += 1
         report["frames"] = n_frames
