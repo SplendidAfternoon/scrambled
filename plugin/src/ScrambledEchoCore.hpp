@@ -168,7 +168,8 @@ public:
             train += (targetTrain - train) * trainCoef;
             mix += (targetMix - mix) * mixCoef;
             const float dryL = inL[i], dryR = inR[i];
-            const float mono = 0.5f * (dryL + dryR);
+            // A single NaN or inf from upstream would otherwise circulate in the delay line for good.
+            const float mono = std::isfinite(dryL + dryR) ? 0.5f * (dryL + dryR) : 0.f;
             // Onset follower for the UI time cursor (not part of the audio path).
             const float a = std::fabs(mono);
             envFast += (a - envFast) * (a > envFast ? envAtk : envRel);
@@ -200,6 +201,7 @@ public:
             hpIn = lpState; hpOut = hp;
             fbState = std::tanh(hp);
 
+            wl = softLimit(wl); wr = softLimit(wr);
             outL[i] = dryL * (1.f - mix) + wl * mix;
             outR[i] = dryR * (1.f - mix) + wr * mix;
             peak = std::max(peak, std::max(std::fabs(wl), std::fabs(wr)));
@@ -228,6 +230,14 @@ private:
         std::vector<CTap> taps;
         bool primed = false;
     };
+
+    // Identity up to full scale, then a smooth knee that never exceeds 1.5 (+3.5 dBFS), so site gains of
+    // +12 dB on every band cannot blast the output.
+    static float softLimit(float x)
+    {
+        const float a = std::fabs(x);
+        return a <= 1.f ? x : std::copysign(1.f + 0.5f * std::tanh(2.f * (a - 1.f)), x);
+    }
 
     static float signedMag(const Tap& t)
     {

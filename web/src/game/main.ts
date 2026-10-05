@@ -301,6 +301,7 @@ function updateMeters() {
   ready = t < d && judge(level, run, t).win;
   const cookedEnough = t >= level.minT;
   $("k-t").textContent = cookedEnough ? "done enough" : "still raw";
+  $("k-t").dataset.t = t.toFixed(2);
   $("k-fill").style.width = `${((t - 1) / (d - 1)) * 100}%`;
   $("k-mem").textContent = `${Math.round(mem * 100)}%`;
   const mf = $("k-memfill");

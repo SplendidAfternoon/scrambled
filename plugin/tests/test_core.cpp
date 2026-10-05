@@ -23,10 +23,10 @@ static se::TapMap twoTapMap()
 
 struct Rendered { std::vector<float> l, r; };
 
-static Rendered impulse(se::Core& core, int n, int block = 64)
+static Rendered impulse(se::Core& core, int n, int block = 64, float amp = 1.f)
 {
     std::vector<float> inL(n, 0.f), inR(n, 0.f);
-    inL[0] = inR[0] = 1.f;
+    inL[0] = inR[0] = amp;
     Rendered out{std::vector<float>(n), std::vector<float>(n)};
     for (int i = 0; i < n; i += block) {
         int len = std::min(block, n - i);
@@ -210,10 +210,10 @@ static void test_commutator_view_plays_where_the_operator_spread()
     se::Params prm{1000.f, 1.f, 0.f, 1.f, 1.f};
     prm.commutator = true;
     se::Core core; core.prepare(1000.0); core.setMaps(m, m); core.setParams(prm);
-    auto o = impulse(core, 1200);
+    auto o = impulse(core, 1200, 64, 0.5f);  // half amplitude keeps the summed tap below the soft limit
     // taps: site1 (centre) C = 0.5, site2 (right) C = 1.0; makeup = 1/sqrt(1.25)
-    CHECK(near(o.l[1000], 0.5f * 0.894427f * 0.707107f), "centre C=0.5 left %f", o.l[1000]);
-    CHECK(near(o.r[1000], 0.5f * 0.894427f * 0.707107f + 0.894427f), "centre + right C=1 %f", o.r[1000]);
+    CHECK(near(o.l[1000], 0.5f * 0.5f * 0.894427f * 0.707107f), "centre C=0.5 left %f", o.l[1000]);
+    CHECK(near(o.r[1000], 0.5f * (0.5f * 0.894427f * 0.707107f + 0.894427f)), "centre + right C=1 %f", o.r[1000]);
 }
 
 // ---- per-site edits (egg drag): split pushes pan outward and stretches delay, vertical drag sets gain ----
@@ -278,8 +278,8 @@ static void test_site_gain_scales_one_band_only()
     CHECK(near(o.r[1000], -0.894427f), "band 11 unchanged %f", o.r[1000]);
     p.siteGainDb[0] = 40.f; p.siteGainDb[11] = -90.f;  // clamped to +12 dB / the bottom of the range, which mutes
     se::Core c2; c2.prepare(1000.0); c2.setMaps(twoTapMap(), twoTapMap()); c2.setParams(p);
-    o = impulse(c2, 1500);
-    CHECK(near(o.l[500], 3.981072f * 0.447214f, 1e-3f), "gain clamps at +12 dB %f", o.l[500]);
+    o = impulse(c2, 1500, 64, 0.5f);  // half amplitude keeps +12 dB below the soft limit
+    CHECK(near(o.l[500], 0.5f * 3.981072f * 0.447214f, 1e-3f), "gain clamps at +12 dB %f", o.l[500]);
     CHECK(o.r[1000] == 0.f && o.l[1000] == 0.f, "bottom of the range mutes the site %f", o.r[1000]);
 }
 
@@ -403,6 +403,48 @@ static void test_parse_rejects_garbage()
     CHECK(!se::parseMapJson("{\"hello\": 1}", m, err) && !err.empty(), "JSON without taps rejected: %s", err.c_str());
 }
 
+static void test_parse_rejects_maps_too_large_to_play()
+{
+    se::TapMap m; std::string err;
+    CHECK(se::parseMapJson("{\"n_sites\": 16, \"depth\": 64, \"taps\": [{\"site\": 0, \"depth\": 1, \"F_re\": 1}]}", m, err),
+          "16 x 64 (1024 cells) loads: %s", err.c_str());
+    err.clear();
+    CHECK(!se::parseMapJson("{\"n_sites\": 16, \"depth\": 4096, \"taps\": [{\"site\": 0, \"depth\": 1, \"F_re\": 1}]}", m, err)
+          && err.find("too large") != std::string::npos, "16 x 4096 rejected: %s", err.c_str());
+    err.clear();
+    CHECK(!se::parseMapJson("{\"taps\": [{\"site\": 2000, \"depth\": 1, \"F_re\": 1}]}", m, err)
+          && err.find("too large") != std::string::npos, "site 2000 rejected: %s", err.c_str());
+}
+
+static void test_non_finite_input_does_not_poison_the_delay()
+{
+    auto m = twoTapMap();
+    se::Core core; core.prepare(1000.0); core.setMaps(m, m);
+    core.setParams({1000.f, 1.f, 0.5f, 1.f, 1.f});
+    std::vector<float> in(4000, 0.f), l(4000), r(4000);
+    in[10] = std::nanf(""); in[11] = INFINITY;
+    in[2000] = 1.f;
+    for (int i = 0; i < 4000; i += 64) core.process(in.data() + i, in.data() + i, l.data() + i, r.data() + i, std::min(64, 4000 - i));
+    bool finite = true;
+    for (int i = 1600; i < 4000; ++i) finite = finite && std::isfinite(l[i]) && std::isfinite(r[i]);
+    CHECK(finite && near(l[2500], 0.447214f), "wet stays finite after NaN/inf input and the next echo plays (%f)", l[2500]);
+}
+
+static void test_wet_is_soft_limited_above_full_scale()
+{
+    se::TapMap m; m.nSites = 1; m.depth = 1; m.taps = { {0, 1, 1.f, 0.f} };
+    se::Core core; core.prepare(1000.0); core.setMaps(m, m);
+    se::Params p; p.trainMs = 100.f; p.mix = 1.f; p.width = 0.f;
+    for (float& g : p.siteGainDb) g = 12.f;
+    core.setParams(p);
+    std::vector<float> in(400, 0.f), l(400), r(400);
+    for (int i = 0; i < 100; ++i) in[i] = 0.9f;
+    core.process(in.data(), in.data(), l.data(), r.data(), 400);
+    float peak = 0.f;
+    for (int i = 0; i < 400; ++i) peak = std::max(peak, std::fabs(l[i]));
+    CHECK(peak < 1.5f && peak > 1.f, "+12 dB on a 0.9 signal is soft-limited, peak %f", peak);
+}
+
 // Real files passed on the command line: "<path>=<n_sites>x<depth>" must load with that grid.
 static void test_real_files(int argc, char** argv)
 {
@@ -446,6 +488,9 @@ int main(int argc, char** argv)
     test_parse_otoc_record();
     test_parse_preset_and_infer_grid();
     test_parse_rejects_garbage();
+    test_parse_rejects_maps_too_large_to_play();
+    test_non_finite_input_does_not_poison_the_delay();
+    test_wet_is_soft_limited_above_full_scale();
     test_real_files(argc, argv);
     std::printf("%d/%d checks passed\n", g_checks - g_failed, g_checks);
     return g_failed ? 1 : 0;

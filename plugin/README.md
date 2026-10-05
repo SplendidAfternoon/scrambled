@@ -258,7 +258,7 @@ and redraws at full rate only while audio plays, while dragging or while the egg
 
 ## Tests
 
-- `tests/test_core.cpp` (80 checks): echoes land on the measured taps with the right gain, pan and polarity;
+- `tests/test_core.cpp` (85 checks): echoes land on the measured taps with the right gain, pan and polarity;
   Scramble interpolates F; Width 0 is mono; Mix 0 is dry; feedback replays only `t = depth`, stays bounded and
   decays; Time sweeps, map swaps and Scramble moves are click-free; View C. Egg edits: zero edits are not an
   edit; a site split moves pan and stretches delay by the hand-worked amounts and leaves other sites alone; a
@@ -267,7 +267,8 @@ and redraws at full rate only while audio plays, while dragging or while the egg
   everywhere at 98 % feedback stays bounded and decays; a sudden drag glides (DC test: no step larger than
   6e-4, still above half-way 10 ms later, lands on −24 dB); telemetry reports which site fired with which
   polarity and the cursor phase; the camera state string round-trips and clamps garbage. JSON loader accepts
-  engine records and presets and rejects garbage.
+  engine records and presets and rejects garbage and maps over 1024 cells. A NaN or inf in the input does not
+  stick in the delay line, and the wet signal is soft-limited above full scale (at most +3.5 dBFS).
 - `tests/test_vst3.py`: in pedalboard, the impulse response for every preset matches the preset JSON (F view,
   and C view for two maps; error ≤ 2e-7, threshold 2e-3); Scramble 0 % gives the Control map; Feedback 95 %
   decays; Sync 1/4 at 120 BPM puts the last echo at 0.500 s; three sample rates and odd block sizes; Mix 0 %

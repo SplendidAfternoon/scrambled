@@ -12,6 +12,9 @@
 
 namespace se {
 
+// Every cell becomes a tap read on every sample; the largest Atlas run (16 qubits, depth 32) is 512 cells.
+constexpr int kMaxMapCells = 1024;
+
 struct JVal {
     enum Type { Null, Bool, Num, Str, Arr, Obj } type = Null;
     double num = 0.0;
@@ -168,6 +171,11 @@ inline const JVal* findNum(const JVal& v, const char* key, int depth = 0)
 }
 
 inline double num(const JVal* v, double fallback) { return v && v->type == JVal::Num ? v->num : fallback; }
+inline int count(const JVal* v, int fallback)
+{
+    const double d = num(v, fallback);
+    return std::isfinite(d) ? (int) std::clamp(d, -1.0, 1e6) : fallback;
+}
 inline std::string str(const JVal* v) { return v && v->type == JVal::Str ? v->str : std::string(); }
 
 }  // namespace detail
@@ -185,8 +193,8 @@ inline bool parseMapJson(const std::string& text, TapMap& out, std::string& err)
     for (const JVal& t : taps->arr) {
         if (t.type != JVal::Obj) continue;
         Tap tap;
-        tap.site = (int) detail::num(t.get("site"), -1);
-        tap.step = (int) detail::num(t.get("depth") ? t.get("depth") : t.get("step"), 0);
+        tap.site = detail::count(t.get("site"), -1);
+        tap.step = detail::count(t.get("depth") ? t.get("depth") : t.get("step"), 0);
         if (t.get("F_re")) {
             tap.re = (float) detail::num(t.get("F_re"), 0.0);
             tap.im = (float) detail::num(t.get("F_im"), 0.0);
@@ -201,8 +209,13 @@ inline bool parseMapJson(const std::string& text, TapMap& out, std::string& err)
     }
     if (m.taps.empty()) { err = "tap list has no valid taps"; return false; }
 
-    m.nSites = std::max(maxSite + 1, (int) detail::num(detail::findNum(root, "n_sites"), 0));
-    m.depth = std::max(maxStep, (int) detail::num(detail::findNum(root, "depth"), 0));
+    m.nSites = std::max(maxSite + 1, detail::count(detail::findNum(root, "n_sites"), 0));
+    m.depth = std::max(maxStep, detail::count(detail::findNum(root, "depth"), 0));
+    if ((int64_t) m.nSites * m.depth > kMaxMapCells) {
+        err = "map too large to play: " + std::to_string(m.nSites) + " sites x " + std::to_string(m.depth) +
+              " steps (limit " + std::to_string(kMaxMapCells) + " cells)";
+        return false;
+    }
     m.kickSite = (int) detail::num(detail::findNum(root, "kick_site"), m.nSites / 2);
     m.name = detail::str(root.get("name"));
     m.description = detail::str(root.get("description"));
