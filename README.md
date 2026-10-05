@@ -16,7 +16,7 @@ Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas *
 |---|---|---|
 | 04 Moving image | SCRAMBLED, an 88 s film: twelve strips of egg, one per qubit, each cooked by its measured echo | [out/piece/scrambled_piece_v3.mp4](out/piece/scrambled_piece_v3.mp4), [watch on the site](https://scrambled-mu.vercel.app/#pieces) |
 | 02 Make it audible | The film's track: cooking audio echoed on Atlas by `retrocausal-echo-v1` through the measured maps, plus a qrc-midi and blur-midi melody | [out/piece/scrambled_track.mp3](out/piece/scrambled_track.mp3), [listen on the site](https://scrambled-mu.vercel.app/#pieces) |
-| 07 VST | Scrambled Echo, a VST3 whose echo taps are measured OTOC maps, played through an egg you crack open | [plugin/](plugin/) (Windows x64; zip in `plugin/dist/`) |
+| 07 VST | Scrambled Echo, a VST3 whose echo taps are measured OTOC maps, played through an egg you crack open | [plugin/](plugin/), [download for Windows or macOS](https://github.com/SplendidAfternoon/scrambled/releases/tag/vst) |
 | 10 Quantum-native | Workflow notebook, from probe to film, including a θzz sweep of where scrambling switches on | [notebook/](notebook/), [read it](https://scrambled-mu.vercel.app/notebook.html), [run it in Colab](https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb) |
 
 ## The measurement
