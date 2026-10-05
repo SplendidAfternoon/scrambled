@@ -30,7 +30,7 @@ This notebook is the complete SCRAMBLED workflow, end to end, on [Moth Quantum's
 4. **Verify**: an independent classical statevector simulation reproduces the Atlas data to rounding error (about $10^{-13}$).
 5. **New physics**: a $\theta_{zz}$ sweep (10 Atlas runs) showing scrambling switch on and off, plotted as a scrambling phase diagram.
 6. **F to image**: quantum image ladders (`blur-v1`, `telablur-v1`) composed strip by strip from the measured map.
-7. **F to audio**: the measured taps as a multi-tap echo, plus an attempt at `retrocausal-echo-v1`.
+7. **F to audio**: the measured taps as a multi-tap echo, rendered locally and on Atlas by `retrocausal-echo-v1`.
 8. **F to video**: the `scrambled` package on an excerpt of a cooking clip.
 9. **Another view of scrambling**: tomography of the same echo circuit (`tomography-api-v2`).
 10. **Reproducibility and honesty**: which steps are quantum and which are classical, credits used, and a table of every job id.
@@ -573,7 +573,7 @@ The same map works as a **multi-tap delay line**. This mirrors the tap map that 
 
 Outside the light cone the taps stay at full level. Inside it they decay and scatter, so the echo is an audible picture of how far the kick has spread.
 
-**Renderer.** This notebook renders the audio **locally with numpy**, a classical convolution of the measured taps, and labels it that way. Below we also try Atlas's own `retrocausal-echo-v1` once, with a timeout, and record what happened.
+**Two renderers.** The first cell renders the echo **locally with numpy**, a classical convolution of the measured taps, so it can be re-run instantly and is labelled classical. The track's echo layer was rendered **on Atlas** by `retrocausal-echo-v1`, with each act's measured `otoc-echo-v1` map as the engine's `ir` input. The second cell shows those engine renders and compares them with the local renderer.
 """)
 
 code(r"""
@@ -607,6 +607,33 @@ display(Markdown("The same 8 s of cooking audio through each measured map:"))
 for label, seg in previews:
     display(Markdown(label))
     display(Audio(seg.T, rate=sr // 2))
+""")
+
+code(r"""
+# The track's echo layer: one retrocausal-echo-v1 job per act, ir = that act's measured otoc-echo-v1 map
+RETRO = ROOT / "measurements" / "retro"
+ACTS = json.loads((RETRO / "acts.json").read_text(encoding="utf-8"))
+AB = json.loads((RETRO / "acts_ab.json").read_text(encoding="utf-8"))
+ACT_NAMES = {"control": "Clifford control", "lowx": "gentle drive (low θx)", "scrambling": "scrambling"}
+rows = []
+for name, label in ACT_NAMES.items():
+    a, ab = ACTS["acts"][name], AB[name]
+    client.jobs.append(("retrocausal-echo-v1", a["job_id"], True))
+    rows.append([label, f"`{a['ir_job_id'][:8]}`", f"`{a['job_id'][:8]}`", a["status"], a["seconds"],
+                 f"{ab['bus_gain']:.3f}", f"{ab['envelope_corr']:.2f}", f"{ab['log_spectral_distance_db']:.1f}"])
+print("retrocausal-echo-v1 renders used by the track (params:", json.dumps(ACTS["params"]) + ")")
+md_table(["act", "ir: otoc-echo-v1 job", "retrocausal-echo-v1 job", "status", "engine s",
+          "bus gain", "envelope corr. vs local", "log-spectral dist. (dB)"], rows)
+display(Markdown(
+    "The engine power-normalises each render (`bus gain` = 1/√Σ level²), which would erase the contrast between acts, "
+    "so the track divides it back out and applies one common echo gain. Envelope and spectrum agree with the local "
+    "renderer; the waveforms differ in detail because the engine handles grain and panning its own way, most visibly "
+    "on the scrambling act's many inverted taps."))
+for name in ["scrambling", "control"]:
+    a = ACTS["acts"][name]
+    x, r = sf.read(ROOT / a["outputs"]["result"].replace("\\", "/"), always_2d=True)
+    display(Markdown(f"**{ACT_NAMES[name].capitalize()}**, rendered on Atlas (job `{a['job_id'][:8]}`, first 8 s of that act's segment):"))
+    display(Audio(x[: r * 8 : 2].T, rate=r // 2))
 """)
 
 code(r"""
@@ -645,6 +672,7 @@ if retro_job is None and MODE == "atlas":
                res["outcome"].split(" (")[0], 2 if res["outcome"] == "completed" else None)
     retro_job = res["job_id"] if res["outcome"] == "completed" else None
 
+print("Extra retrocausal-echo-v1 test jobs (6 s clip) submitted while building this notebook:")
 md_table(["when", "job id", "outcome", "notebook waited (s)"],
          [["2026-10-03 (earlier project run)", "`6dabddfc-5ba3-4281-be12-c1d8e1303b72`", "failed: engine_timeout (server side)", ""]]
          + [[a["when"], f"`{a['job_id']}`" if a["job_id"] else "", a["outcome"], a["seconds"]]
@@ -655,7 +683,7 @@ if retro_job:
           "(echo rendered server-side by Atlas from its own OTOC measurement)")
     display(Audio(x.T[:, ::2], rate=r // 2))
 else:
-    print("No retrocausal-echo-v1 result is available, so the project's soundtracks use the local tap render above (labelled classical).")
+    print("This notebook's own 6 s test job has not returned yet; the engine renders above are the ones the track uses.")
 """)
 
 # =====================================================================================================================
@@ -825,7 +853,8 @@ md(r"""
 | image ladders (blur, morph) | Atlas `blur-v1` / `telablur-v1` (quantum image-encoding circuits, run by Atlas) |
 | verification and the dense sweep curve | classical numpy statevector (labelled) |
 | strip cutting, crossfades, overlays, video encoding | classical, local |
-| echo audio | classical numpy convolution of the measured taps (`retrocausal-echo-v1` was attempted, see section 7) |
+| track echo audio | Atlas `retrocausal-echo-v1`, one job per act with the measured map as input (section 7) |
+| inline echo previews | classical numpy convolution of the measured taps (labelled) |
 | tomography predictions | classical numpy (the Atlas engine timed out, see section 9) |
 
 A 12-qubit chain is small enough to simulate exactly on a laptop, and section 4 does this on purpose. The value of Atlas here is measured-on-platform provenance, the quantum image engines, and the same code path running unchanged on IBM hardware (`machine: ibm_*`). That hardware path is passed through by the package but **was not exercised** in this notebook.

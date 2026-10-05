@@ -11,7 +11,7 @@ All inputs come from the measured n = 12 OTOC in `probes/otoc_scrambling.json` (
 | `qdrive-api-v1` | **used** | one 12-qubit circuit per echo step whose ⟨Z_j⟩ is the measured front | `extra/qdrive/front_circuits.png`, `extra/qdrive/out/*.brf` (QASM 3) | 8 |
 | `deep-fryer-v1` | attempted, not completed | photo B (scrambled eggs) with the run's gate angles | none | 2 jobs still queued |
 | `tessa-image-v1` | attempted, failed | 64 × 64 crop of photo A | none | 1 job, `engine_timeout` |
-| `retrocausal-echo-v1` | attempted, not completed | 6-site impulse response | none | 1 job still processing |
+| `retrocausal-echo-v1` | attempted, not completed | 6-site impulse response (this job only; the track's three per-act renders completed, see `measurements/MEASUREMENTS.md`) | none | 1 job still processing |
 
 Reproduce everything from cache with no credits by setting `$env:MODE='replay'` and running each `run.py`. Checks: `.venv\Scripts\python -m pytest -q extra\test_extra.py`.
 

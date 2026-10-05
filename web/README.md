@@ -5,7 +5,7 @@ Live at [scrambled-mu.vercel.app](https://scrambled-mu.vercel.app).
 | Page | What it is |
 |---|---|
 | `index.html` | Landing page with the physics and honesty notes. |
-| `explorer.html` | **SCRAMBLED Explorer.** Set θx, θzz (snaps to π, the Clifford point) and chain length, then press **Measure on Atlas** to run `otoc-echo-v1` live. It draws the measured `F(site, t)` heatmap, the light cone, how much echo survives over time, and the egg photo scrambling one strip per qubit as you scrub t. With no key it uses the site's lent demo key (rate limited) or browses the runs measured ahead of time. |
+| `explorer.html` | **SCRAMBLED Explorer.** Set θx, θzz (snaps to π, the Clifford point) and chain length, then press **Measure on Atlas** to run `otoc-echo-v1` live. It draws the measured `F(site, t)` heatmap, the light cone, how much echo survives over time, and the egg photo scrambling one strip per qubit as you scrub t. With no key it uses the site's lent key or browses the runs measured ahead of time. |
 
 Static site: `npm run build` writes `dist/`. Deployed to Vercel with project root `web/`, which also serves the proxy in `api/`.
 

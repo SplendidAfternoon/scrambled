@@ -10,8 +10,8 @@ top to bottom:
 4. an independent classical statevector check (matches Atlas to about 1e-13)
 5. a theta_zz sweep over 10 Atlas runs (7 of them new) with a scrambling phase-diagram figure (`out/theta_zz_sweep.png`)
 6. F to image: `blur-v1` / `telablur-v1` ladders and the per-qubit strip mapping
-7. F to audio: the measured taps as an echo (local renderer, labelled classical), plus a recorded
-   `retrocausal-echo-v1` attempt
+7. F to audio: the measured taps as an echo, rendered locally (labelled classical) and on Atlas by
+   `retrocausal-echo-v1` (the track's three per-act renders, with an A/B against the local renderer)
 8. F to video: `scrambled.video` on an 8 s excerpt (2 keyframes, 12 ladder jobs)
 9. `tomography-api-v2` on the same echo circuit. The engine timed out server-side on every attempt, so the notebook
    shows the classical prediction and lists the failed job ids.
