@@ -1,4 +1,4 @@
-# Scrambled Echo (VST3, Windows x64)
+# Scrambled Echo (VST3, Windows x64 and macOS)
 
 A multi-tap delay whose echo pattern is a quantum measurement, edited on a real-time 3D egg. Each tap is one
 cell of an out-of-time-order correlator map **F(site, t)** measured on Moth Atlas with the `otoc-echo-v1`
@@ -18,6 +18,8 @@ shows the map as an egg that cracks where the echo has scrambled:
 Demo with sound: [`docs/ui_demo.mp4`](docs/ui_demo.mp4) (18 s; frames rendered by the editor itself, audio
 rendered through the plugin binary with the same automation).
 
+Downloads for both platforms: [releases/tag/vst](https://github.com/SplendidAfternoon/scrambled/releases/tag/vst).
+
 ## Install in Ableton Live (Windows)
 
 1. Unzip `dist/ScrambledEcho-2.0.0-win64-vst3.zip` (or use the folder `plugin/dist` directly). It contains the
@@ -32,6 +34,16 @@ rendered through the plugin binary with the same automation).
 Everything is statically linked; nothing else needs installing. The editor needs OpenGL 2.1 (any GPU or
 integrated graphics from the last decade). Edits, map choice and camera are saved with the Live set; every
 egg drag is also an automatable parameter (see below), so you can record the drags as automation.
+
+## Install on macOS
+
+Unzip `ScrambledEcho-macos-universal-vst3.zip` from the release (Intel and Apple Silicon, macOS 10.15+), copy `ScrambledEcho.vst3` into `~/Library/Audio/Plug-Ins/VST3/`, then clear the download quarantine once, because the build is ad-hoc signed and not notarised:
+
+```
+xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/ScrambledEcho.vst3
+```
+
+In Live, enable **Use VST3 Plug-In System Folders** and rescan. The macOS build comes from [`mac/Makefile`](mac/Makefile) via GitHub Actions ([workflow](../.github/workflows/vst.yml)).
 
 ## The egg editor
 
@@ -267,7 +279,7 @@ and redraws at full rate only while audio plays, while dragging or while the egg
 
 ## Limitations
 
-- Windows x64 VST3 only (no AU, no macOS build).
+- VST3 only (no AU). The macOS build is compiled and signature-checked in CI but has not been opened on a Mac by hand.
 - Tested hosts: pedalboard 0.9.25 (audio, state, editor rendering). Not yet opened in Ableton Live by the
   developer; the steps above are the standard VST3 custom-folder route. Pedalboard on Windows will not scan the
   bundle folder itself; point it at the inner binary `dist/ScrambledEcho.vst3/Contents/x86_64-win/ScrambledEcho.vst3`.
