@@ -109,7 +109,7 @@ The strip under the egg keeps the original controls.
 | **Map** | 9 measured maps + Custom JSON | `<` / `>` or click the name in the header to step |
 | **Scramble** | 0–100 % | interpolates F cell by cell from the **Control (Clifford)** map at 0 % to the selected map at 100 % |
 | **View** | F / C | **F**: gain = signed \|F\| (the echo that survives). **C**: gain = `(1 − Re F) / 2`, the normalised squared commutator, loud only where the kicked operator has spread: the light cone itself. The egg always cracks by `1 − \|F\|` |
-| **Time** | 50 ms – 8 s | length of the whole echo train. Smoothed, so sweeping it bends pitch rather than clicking |
+| **Time** | 50 ms – 8 s | length of the whole echo train. Smoothed, so sweeping it bends pitch like tape, with no clicks |
 | **Sync** + **Division** | 1/4, 1/2, 1 bar, 2 bars, 4 bars | locks the train length to host tempo (4/4); 120 BPM if the host sends none. With Sync on, the Time knob selects the division |
 | **Mix** | 0–100 % | dry/wet |
 | **Feedback** | 0–95 % | re-injects the final echo step (`t = depth`) so the whole train replays. Loop gain is normalised by that column's summed \|gain\| (including site gains), so it never exceeds the knob value |
@@ -289,6 +289,6 @@ and redraws at full rate only while audio plays, while dragging or while the egg
 - Changing Map rebuilds the tap set on the thread that sets the parameter (a few hundred taps, a small
   allocation); the audio thread then swaps it in with a 20 ms crossfade.
 - The Control end of Scramble is always the 12-site Clifford map. For maps with a different grid (Wide) the two
-  maps' taps are blended as separate taps rather than cell by cell.
+  maps' taps are blended as separate taps, since their cells do not line up.
 - The time cursor follows input onsets (a fast/slow envelope ratio). On dense, continuous material it restarts
   often, so the egg mostly shows the early echo steps.

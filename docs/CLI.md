@@ -134,8 +134,8 @@ sequenceDiagram
 ```
 
 Requests that hit 429 or 5xx are retried with exponential backoff, honouring `Retry-After`. A job that outlives
-`--timeout` is saved under `cache/pending/`; the next identical call resumes polling that job instead of submitting
-and paying again. A failed ladder rung is skipped with a warning (the ladder just gets coarser); if a whole ladder
+`--timeout` is saved under `cache/pending/`; the next identical call resumes polling that job, so it is paid for
+once. A failed ladder rung is skipped with a warning (the ladder just gets coarser); if a whole ladder
 fails, the command exits with an error that suggests `--mode classical`.
 
 ## Cost model (Atlas credits)
@@ -180,7 +180,7 @@ Each `.mp4` has a `.mp4.json` provenance sidecar listing every Atlas job id used
   scramble progress is monotone and bounded.
 * Cache keying matches the records already in the repo, so the original scripts and the package share one cache.
 * Client behaviour without a network: replay with no key, a clear error on a replay miss, a timed-out job is
-  resumed rather than resubmitted, unknown params are rejected before submitting, 429 retry, and expired output
+  resumed on the next call, unknown params are rejected before submitting, 429 retry, and expired output
   URLs are re-signed.
 * CLI smoke tests on tiny generated image, audio and video inputs in classical mode, plus `replay` with the network
   blocked.

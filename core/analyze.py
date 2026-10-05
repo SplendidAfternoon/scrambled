@@ -322,7 +322,7 @@ def write_md(rows, fails):
     L += ["", "`engine_timeout` = no worker picked the job up in ~60 s (queue congestion; retryable). "
           "`execution_failed` = the engine's Aer estimator raised an error (\"aer estimator failed: \", "
           "not retryable). Identical resubmissions sometimes succeeded later (e.g. scrambling n = 16), so these "
-          "look like intermittent backend failures rather than invalid parameters. n = 24 is the documented aer "
+          "look like intermittent backend failures; the parameters themselves were valid. n = 24 is the documented aer "
           "cap; any n = 24 row above is classical.", ""]
     sc = {r["n"]: r for r in rows if r["name"].startswith("scrambling_")}
     L += ["## Findings", "",
@@ -369,7 +369,7 @@ def write_md(rows, fails):
     for r in xc:
         L.append(f"| {r['name']} (`{r['job_id'][:8]}`) | {r['classical_max_abs_err']:.1e} |")
     L += ["", "Layer order matters: with RX applied before RZZ inside each layer, the error is ≈ 1.04 at n = 12. "
-          "So the cross-check pins down the engine's circuit, not just its general behaviour.", "",
+          "So the cross-check pins down the engine's exact circuit, gate by gate.", "",
           "## Figures", "",
           "- `regimes_n12.png`: the three measured regimes side by side (the piece's three acts).",
           "- `size_study.png`: m(t) for every scrambling size, with t_sat and t_rev marked.",

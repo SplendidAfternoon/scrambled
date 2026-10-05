@@ -217,7 +217,7 @@ A file-in, file-out job (here `blur-v1` on a 128 px crop of the egg photo) takes
 6. `GET /jobs/{id}/result` returns inline JSON and/or `outputs[]` with presigned download URLs. A `409` right after completion means the result is not visible yet.
 7. `GET` each output URL. If it has expired (`403/404/410`), `GET /assets/{output_asset_id}/download` returns a fresh one.
 
-The cell below runs this once in `atlas` mode and saves a transcript. Presigned URLs carry temporary credentials, so their query strings are **redacted** before anything is printed or saved. Later runs, and `replay` mode, show the saved transcript instead of paying again. Set `RAW_API_FORCE=1` to redo it.
+The cell below runs this once in `atlas` mode and saves a transcript. Presigned URLs carry temporary credentials, so their query strings are **redacted** before anything is printed or saved. Later runs, and `replay` mode, show the saved transcript for free. Set `RAW_API_FORCE=1` to redo it.
 """)
 
 code(r"""
@@ -301,8 +301,8 @@ md(r"""
 `scrambled.client.AtlasClient` wraps that lifecycle. It adds:
 
 * **A content-addressed cache.** Every job is keyed by `sha256(engine_id, params, input asset ids)`, and the record is stored at `cache/<engine>/<key>.json`. An identical call is free and needs no network. Uploads are deduplicated by file hash in `cache/assets.json`.
-* **Replay mode.** No key and no network. A cache miss raises `ReplayMiss` instead of silently computing something else.
-* **Resumable timeouts.** A job that outlives the local timeout is remembered in `cache/pending/`, and the next identical call resumes polling it instead of paying for a new one.
+* **Replay mode.** No key and no network. A cache miss raises `ReplayMiss`, so every number shown is a recorded one.
+* **Resumable timeouts.** A job that outlives the local timeout is remembered in `cache/pending/`, and the next identical call picks it up again at no extra cost.
 * **Retries.** 429 and 5xx responses are retried with backoff, `409` on a result is retried, and expired download URLs are re-signed.
 
 Credits: `otoc-echo-v1`, `blur-v1`, `telablur-v1` and `tomography-api-v2` cost 1 credit per job and `retrocausal-echo-v1` costs 2. Cache hits cost 0.

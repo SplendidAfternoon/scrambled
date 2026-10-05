@@ -38,7 +38,7 @@ $env:MOTH_API_KEY = ""          # optional: proves no key is needed
 ```
 
 Or open it in Jupyter or VS Code and run all cells. `MODE` defaults to `replay`, so every Atlas result is read from
-`cache/`. A missing cache entry raises `ReplayMiss` instead of quietly computing something else.
+`cache/`. A missing cache entry raises `ReplayMiss`, so a replayed number is always a recorded one.
 
 ### Atlas: live API
 

@@ -6,6 +6,7 @@ Live at [scrambled-mu.vercel.app](https://scrambled-mu.vercel.app).
 |---|---|
 | `index.html` | Landing page with the physics and honesty notes. |
 | `explorer.html` | **SCRAMBLED Explorer.** Set θx, θzz (snaps to π, the Clifford point) and chain length, then press **Measure on Atlas** to run `otoc-echo-v1` live. It draws the measured `F(site, t)` heatmap, the light cone, how much echo survives over time, and the egg photo scrambling one strip per qubit as you scrub t. With no key it uses the site's lent key or browses the runs measured ahead of time. |
+| `game.html` | **Don't Scramble the Egg.** Five levels, each pan a measured `otoc-echo-v1` run. The golden rings turn green when serving would win; the measured map is one click away on the result screen. |
 
 Static site: `npm run build` writes `dist/`. Deployed to Vercel with project root `web/`, which also serves the proxy in `api/`.
 

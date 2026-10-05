@@ -47,7 +47,7 @@ Where the engine failed (see below) or exceeded what we waited for, the size stu
 | scrambling_n16 | `87afb977-6964-49c7-b027-48aefde94c45` | `execution_failed` | aer estimator failed:  |
 | scrambling_n10 | `cdb8c037-ba1a-4f31-b6be-1576f21dfc59` | `execution_failed` | aer estimator failed:  |
 
-`engine_timeout` = no worker picked the job up in ~60 s (queue congestion; retryable). `execution_failed` = the engine's Aer estimator raised an error ("aer estimator failed: ", not retryable). Identical resubmissions sometimes succeeded later (e.g. scrambling n = 16), so these look like intermittent backend failures rather than invalid parameters. n = 24 is the documented aer cap; any n = 24 row above is classical.
+`engine_timeout` = no worker picked the job up in ~60 s (queue congestion; retryable). `execution_failed` = the engine's Aer estimator raised an error ("aer estimator failed: ", not retryable). Identical resubmissions sometimes succeeded later (e.g. scrambling n = 16), so these look like intermittent backend failures; the parameters themselves were valid. n = 24 is the documented aer cap; any n = 24 row above is classical.
 
 ## Findings
 
@@ -75,7 +75,7 @@ A caveat on the word "scrambling": with θz = 0 and no disorder, this kicked Isi
 | scrambling_n12 (`8df5cfa2`) | 5.1e-14 |
 | scrambling_n16 (`5288b305`) | 5.9e-14 |
 
-Layer order matters: with RX applied before RZZ inside each layer, the error is ≈ 1.04 at n = 12. So the cross-check pins down the engine's circuit, not just its general behaviour.
+Layer order matters: with RX applied before RZZ inside each layer, the error is ≈ 1.04 at n = 12. So the cross-check pins down the engine's exact circuit, gate by gate.
 
 ## Figures
 

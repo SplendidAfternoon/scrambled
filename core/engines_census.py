@@ -120,7 +120,7 @@ def main():
     for e in engines:
         lines.append(f"<details><summary>{e} ({len(jobs[e])})</summary>\n")
         for j, sec, path in jobs[e]:
-            lines.append(f"- `{j}`" + (f" ({sec} s)" if sec else "") + f" — `{path}`")
+            lines.append(f"- `{j}`" + (f" ({sec} s)" if sec else "") + f" · `{path}`")
         lines.append("\n</details>\n")
     (ROOT / "core" / "ENGINES.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(len(engines), "engines:", ", ".join(f"{e}={len(jobs[e])}" for e in engines))

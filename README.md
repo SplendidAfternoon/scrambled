@@ -18,7 +18,9 @@ Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas *
 | 02 Make it audible | The film's track: cooking audio echoed on Atlas by `retrocausal-echo-v1` through the measured maps, plus a qrc-midi and blur-midi melody | [out/piece/scrambled_track.mp3](out/piece/scrambled_track.mp3), [listen on the site](https://scrambled-mu.vercel.app/#pieces) |
 | 07 VST | Scrambled Echo, a VST3 whose echo taps are measured OTOC maps, played through an egg you crack open | [plugin/](plugin/), [download for Windows or macOS](https://github.com/SplendidAfternoon/scrambled/releases/tag/vst) |
 | 08 Web app | SCRAMBLED Explorer: set the drive angles and measure a chain live on Atlas from the browser (no key needed), then scrub through time as the eggs scramble strip by strip | [scrambled-mu.vercel.app/explorer.html](https://scrambled-mu.vercel.app/explorer.html), [web/](web/) |
-| 10 Quantum-native | Workflow notebook, from probe to film, including a θzz sweep of where scrambling switches on | [notebook/](notebook/), [read it](https://scrambled-mu.vercel.app/notebook.html), [run it in Colab](https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb) |
+| 10 Quantum-native | Workflow notebook, from probe to film, including a θzz sweep of where scrambling switches on and a test of whether it is chaos | [notebook/](notebook/), [read it](https://scrambled-mu.vercel.app/notebook.html), [run it in Colab](https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb) |
+
+The web app also has a game, **Don't Scramble the Egg**: five levels on the same measured runs, where you serve a pan of eggs before the scramble reaches the golden ones. [Play it](https://scrambled-mu.vercel.app/game.html).
 
 ## The measurement
 
@@ -27,7 +29,7 @@ Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas *
 | Clifford control (θzz = π) | The nudge never spreads: every other qubit returns perfectly, the kicked one flips sign. |
 | Scrambling (θx = 0.3π, θzz = 0.35π) | The nudge spreads inside a light cone, reaching both ends by step 6; echoes fade and invert; part returns around step 13–16 because the chain is finite. |
 
-An independent numpy statevector reproduces every Atlas map to ~1e−13, which pins down the circuit (ZZ layer, then Rx, per Floquet step). The clean chain (θz = 0) is free-fermion integrable, so "scrambling" here means operator spreading; adding a z-field (θz = 0.25π, also measured) removes the revival. Full study: [measurements/MEASUREMENTS.md](measurements/MEASUREMENTS.md).
+An independent numpy statevector reproduces every Atlas map to ~1e−13, which pins down the circuit (ZZ layer, then Rx, per Floquet step). The clean chain (θz = 0) is free-fermion integrable, so the notebook tests whether its spreading is real scrambling. With an X kick, the integrable chain keeps 0.71 of the nudge at late times; a z-field (θz = 0.3π) drops that to 0.22 with the same light cone, which is the signature of chaos. The media use the integrable run, and its light cone and decay are real measurements of operator spreading. Full study: [measurements/MEASUREMENTS.md](measurements/MEASUREMENTS.md).
 
 ## Repo map
 

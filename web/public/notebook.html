@@ -8140,7 +8140,7 @@ mjx-container[display="true"] {
 </style></head>
 <body class="jp-Notebook" data-jp-theme-light="true" data-jp-theme-name="JupyterLab Light">
 <main>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e477f4cc">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2921d849">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8163,7 +8163,7 @@ mjx-container[display="true"] {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0362134e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=f4609c7d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8264,7 +8264,7 @@ ffmpeg: found
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=874dfcda">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=27998f74">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8291,7 +8291,7 @@ ffmpeg: found
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4eff5c50">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b7fd05dc">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8301,7 +8301,7 @@ ffmpeg: found
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8193ada3">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c12bfe04">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8522,7 +8522,7 @@ ffmpeg: found
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=be9f1f79">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0c3a22b3">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8537,11 +8537,11 @@ ffmpeg: found
 <li><code>GET /jobs/{id}/result</code> returns inline JSON and/or <code>outputs[]</code> with presigned download URLs. A <code>409</code> right after completion means the result is not visible yet.</li>
 <li><code>GET</code> each output URL. If it has expired (<code>403/404/410</code>), <code>GET /assets/{output_asset_id}/download</code> returns a fresh one.</li>
 </ol>
-<p>The cell below runs this once in <code>atlas</code> mode and saves a transcript. Presigned URLs carry temporary credentials, so their query strings are <strong>redacted</strong> before anything is printed or saved. Later runs, and <code>replay</code> mode, show the saved transcript instead of paying again. Set <code>RAW_API_FORCE=1</code> to redo it.</p>
+<p>The cell below runs this once in <code>atlas</code> mode and saves a transcript. Presigned URLs carry temporary credentials, so their query strings are <strong>redacted</strong> before anything is printed or saved. Later runs, and <code>replay</code> mode, show the saved transcript for free. Set <code>RAW_API_FORCE=1</code> to redo it.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bc99775d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=19e97f26">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8653,7 +8653,7 @@ ffmpeg: found
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ff317433">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9c0e4e96">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8661,15 +8661,15 @@ ffmpeg: found
 <h3 id="2.3-The-same-thing-through-the-scrambled-client:-caching-and-cost">2.3 The same thing through the <code>scrambled</code> client: caching and cost<a class="anchor-link" href="#2.3-The-same-thing-through-the-scrambled-client:-caching-and-cost">¶</a></h3><p><code>scrambled.client.AtlasClient</code> wraps that lifecycle. It adds:</p>
 <ul>
 <li><strong>A content-addressed cache.</strong> Every job is keyed by <code>sha256(engine_id, params, input asset ids)</code>, and the record is stored at <code>cache/&lt;engine&gt;/&lt;key&gt;.json</code>. An identical call is free and needs no network. Uploads are deduplicated by file hash in <code>cache/assets.json</code>.</li>
-<li><strong>Replay mode.</strong> No key and no network. A cache miss raises <code>ReplayMiss</code> instead of silently computing something else.</li>
-<li><strong>Resumable timeouts.</strong> A job that outlives the local timeout is remembered in <code>cache/pending/</code>, and the next identical call resumes polling it instead of paying for a new one.</li>
+<li><strong>Replay mode.</strong> No key and no network. A cache miss raises <code>ReplayMiss</code>, so every number shown is a recorded one.</li>
+<li><strong>Resumable timeouts.</strong> A job that outlives the local timeout is remembered in <code>cache/pending/</code>, and the next identical call picks it up again at no extra cost.</li>
 <li><strong>Retries.</strong> 429 and 5xx responses are retried with backoff, <code>409</code> on a result is retried, and expired download URLs are re-signed.</li>
 </ul>
 <p>Credits: <code>otoc-echo-v1</code>, <code>blur-v1</code>, <code>telablur-v1</code> and <code>tomography-api-v2</code> cost 1 credit per job and <code>retrocausal-echo-v1</code> costs 2. Cache hits cost 0.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=bb993e9f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=dc335168">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8704,7 +8704,7 @@ engine params sent: {"depth": 32, "n_sites": 12, "min_tap_level": 0, "include_ta
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a3d27b4b">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f1d96430">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8713,7 +8713,7 @@ engine params sent: {"depth": 32, "n_sites": 12, "min_tap_level": 0, "include_ta
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3c3f6d5f">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=aa4cd17b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8784,7 +8784,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=586b3ee5">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=61c7eb7f">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8794,7 +8794,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f9e24fa3">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=1e56c5ad">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8803,7 +8803,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=11e0a64c">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=6a5adf06">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8852,7 +8852,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=6195594f">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b2a14667">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -8863,7 +8863,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3414382d">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=7d0ed2b4">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9012,7 +9012,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=80762bd6">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=7680b4f9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9073,7 +9073,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=bba0aff3">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=be3f4998">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9094,7 +9094,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2440abee">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=37717e84">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9105,7 +9105,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2e9fa401">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2edaa382">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9218,7 +9218,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=abade3ee">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=19dbd492">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9234,7 +9234,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=74e8cb74">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c2a38e67">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9250,7 +9250,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ff3db2af">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=8b4f239d">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9301,7 +9301,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=56f267c6">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=0a50dd60">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9363,7 +9363,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=78d495dd">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3ce7c234">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9401,7 +9401,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=47891706">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ef98b17e">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9418,7 +9418,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=b62c5384">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a6834e33">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9514,7 +9514,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=37c6cdfb">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fcf681aa">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9643,7 +9643,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=7c917b06">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ccb414d4">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9749,7 +9749,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=0070a3ae">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=d363047b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9758,7 +9758,7 @@ control: max | |F| - 1 | = 2.220446049250313e-16   F on the kick site: [-1.]
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=94b6ef9e">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ab064794">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9832,7 +9832,7 @@ keyframe 2/2 at 32.00s: ladders ready (atlas)
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=4906b084">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ddf716d8">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9842,7 +9842,7 @@ keyframe 2/2 at 32.00s: ladders ready (atlas)
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=3e8b13ea">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c6fcb241">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -9946,7 +9946,7 @@ h q[2];
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a45ce81c">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=7617f047">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -10042,7 +10042,7 @@ h q[2];
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b2b66fbe">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=f2a6d6c9">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -10097,7 +10097,7 @@ h q[2];
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=514fa863">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ee49a73b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -10220,22 +10220,17 @@ h q[2];
 </tr>
 <tr>
 <td><code>blur-v1</code></td>
-<td><code>e3b9ba8e-f945-427f-b8c5-5a1388bd2f2c</code></td>
-<td>cache</td>
-</tr>
-<tr>
-<td><code>blur-v1</code></td>
 <td><code>df5be01b-637e-40a6-b1c1-b708cda247e4</code></td>
 <td>cache</td>
 </tr>
 <tr>
 <td><code>blur-v1</code></td>
-<td><code>94b48e49-2780-477c-ba9b-df574d8e88f1</code></td>
+<td><code>e3b9ba8e-f945-427f-b8c5-5a1388bd2f2c</code></td>
 <td>cache</td>
 </tr>
 <tr>
-<td><code>telablur-v1</code></td>
-<td><code>d5fe1183-82ad-449b-9ffb-c36b9d913d24</code></td>
+<td><code>blur-v1</code></td>
+<td><code>94b48e49-2780-477c-ba9b-df574d8e88f1</code></td>
 <td>cache</td>
 </tr>
 <tr>
@@ -10246,6 +10241,11 @@ h q[2];
 <tr>
 <td><code>telablur-v1</code></td>
 <td><code>e705a08b-a7eb-47ce-9286-2b8b2597eaf8</code></td>
+<td>cache</td>
+</tr>
+<tr>
+<td><code>telablur-v1</code></td>
+<td><code>d5fe1183-82ad-449b-9ffb-c36b9d913d24</code></td>
 <td>cache</td>
 </tr>
 <tr>
@@ -10275,12 +10275,12 @@ h q[2];
 </tr>
 <tr>
 <td><code>blur-v1</code></td>
-<td><code>a78214e4-15ee-4be1-9b22-5ab1ff03a8ed</code></td>
+<td><code>a244a5bc-ff6a-4ddb-a6a3-a8c911db517a</code></td>
 <td>cache</td>
 </tr>
 <tr>
 <td><code>blur-v1</code></td>
-<td><code>a244a5bc-ff6a-4ddb-a6a3-a8c911db517a</code></td>
+<td><code>a78214e4-15ee-4be1-9b22-5ab1ff03a8ed</code></td>
 <td>cache</td>
 </tr>
 <tr>
