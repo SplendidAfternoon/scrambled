@@ -14,9 +14,20 @@
 #  define NOMINMAX
 # endif
 # include <windows.h>
+#else
+# include <dlfcn.h>
 #endif
-#include <GL/gl.h>
-#include <GL/glext.h>
+#ifdef __APPLE__
+# define GL_SILENCE_DEPRECATION
+# define GL_GLEXT_PROTOTYPES
+# include <OpenGL/gl.h>
+# include <OpenGL/glext.h>
+# define SE_FN(type, name) decltype(&::gl##name) name = nullptr
+#else
+# include <GL/gl.h>
+# include <GL/glext.h>
+# define SE_FN(type, name) type name = nullptr
+#endif
 
 namespace se {
 
@@ -27,46 +38,46 @@ constexpr float kPi = 3.14159265f;
 // ------------------------------------------------------------------------------------------------ GL 2.0 entry points
 
 struct GLApi {
-    PFNGLCREATESHADERPROC CreateShader = nullptr;
-    PFNGLSHADERSOURCEPROC ShaderSource = nullptr;
-    PFNGLCOMPILESHADERPROC CompileShader = nullptr;
-    PFNGLGETSHADERIVPROC GetShaderiv = nullptr;
-    PFNGLGETSHADERINFOLOGPROC GetShaderInfoLog = nullptr;
-    PFNGLDELETESHADERPROC DeleteShader = nullptr;
-    PFNGLCREATEPROGRAMPROC CreateProgram = nullptr;
-    PFNGLATTACHSHADERPROC AttachShader = nullptr;
-    PFNGLBINDATTRIBLOCATIONPROC BindAttribLocation = nullptr;
-    PFNGLLINKPROGRAMPROC LinkProgram = nullptr;
-    PFNGLGETPROGRAMIVPROC GetProgramiv = nullptr;
-    PFNGLGETPROGRAMINFOLOGPROC GetProgramInfoLog = nullptr;
-    PFNGLDELETEPROGRAMPROC DeleteProgram = nullptr;
-    PFNGLUSEPROGRAMPROC UseProgram = nullptr;
-    PFNGLGETUNIFORMLOCATIONPROC GetUniformLocation = nullptr;
-    PFNGLUNIFORM1FPROC Uniform1f = nullptr;
-    PFNGLUNIFORM1IPROC Uniform1i = nullptr;
-    PFNGLUNIFORM2FPROC Uniform2f = nullptr;
-    PFNGLUNIFORM3FPROC Uniform3f = nullptr;
-    PFNGLUNIFORM4FVPROC Uniform4fv = nullptr;
-    PFNGLUNIFORMMATRIX4FVPROC UniformMatrix4fv = nullptr;
-    PFNGLENABLEVERTEXATTRIBARRAYPROC EnableVertexAttribArray = nullptr;
-    PFNGLDISABLEVERTEXATTRIBARRAYPROC DisableVertexAttribArray = nullptr;
-    PFNGLVERTEXATTRIBPOINTERPROC VertexAttribPointer = nullptr;
-    PFNGLGENBUFFERSPROC GenBuffers = nullptr;
-    PFNGLBINDBUFFERPROC BindBuffer = nullptr;
-    PFNGLBUFFERDATAPROC BufferData = nullptr;
-    PFNGLDELETEBUFFERSPROC DeleteBuffers = nullptr;
-    PFNGLACTIVETEXTUREPROC ActiveTexture = nullptr;
+    SE_FN(PFNGLCREATESHADERPROC, CreateShader);
+    SE_FN(PFNGLSHADERSOURCEPROC, ShaderSource);
+    SE_FN(PFNGLCOMPILESHADERPROC, CompileShader);
+    SE_FN(PFNGLGETSHADERIVPROC, GetShaderiv);
+    SE_FN(PFNGLGETSHADERINFOLOGPROC, GetShaderInfoLog);
+    SE_FN(PFNGLDELETESHADERPROC, DeleteShader);
+    SE_FN(PFNGLCREATEPROGRAMPROC, CreateProgram);
+    SE_FN(PFNGLATTACHSHADERPROC, AttachShader);
+    SE_FN(PFNGLBINDATTRIBLOCATIONPROC, BindAttribLocation);
+    SE_FN(PFNGLLINKPROGRAMPROC, LinkProgram);
+    SE_FN(PFNGLGETPROGRAMIVPROC, GetProgramiv);
+    SE_FN(PFNGLGETPROGRAMINFOLOGPROC, GetProgramInfoLog);
+    SE_FN(PFNGLDELETEPROGRAMPROC, DeleteProgram);
+    SE_FN(PFNGLUSEPROGRAMPROC, UseProgram);
+    SE_FN(PFNGLGETUNIFORMLOCATIONPROC, GetUniformLocation);
+    SE_FN(PFNGLUNIFORM1FPROC, Uniform1f);
+    SE_FN(PFNGLUNIFORM1IPROC, Uniform1i);
+    SE_FN(PFNGLUNIFORM2FPROC, Uniform2f);
+    SE_FN(PFNGLUNIFORM3FPROC, Uniform3f);
+    SE_FN(PFNGLUNIFORM4FVPROC, Uniform4fv);
+    SE_FN(PFNGLUNIFORMMATRIX4FVPROC, UniformMatrix4fv);
+    SE_FN(PFNGLENABLEVERTEXATTRIBARRAYPROC, EnableVertexAttribArray);
+    SE_FN(PFNGLDISABLEVERTEXATTRIBARRAYPROC, DisableVertexAttribArray);
+    SE_FN(PFNGLVERTEXATTRIBPOINTERPROC, VertexAttribPointer);
+    SE_FN(PFNGLGENBUFFERSPROC, GenBuffers);
+    SE_FN(PFNGLBINDBUFFERPROC, BindBuffer);
+    SE_FN(PFNGLBUFFERDATAPROC, BufferData);
+    SE_FN(PFNGLDELETEBUFFERSPROC, DeleteBuffers);
+    SE_FN(PFNGLACTIVETEXTUREPROC, ActiveTexture);
     // optional (supersampling)
-    PFNGLGENFRAMEBUFFERSPROC GenFramebuffers = nullptr;
-    PFNGLBINDFRAMEBUFFERPROC BindFramebuffer = nullptr;
-    PFNGLFRAMEBUFFERTEXTURE2DPROC FramebufferTexture2D = nullptr;
-    PFNGLGENRENDERBUFFERSPROC GenRenderbuffers = nullptr;
-    PFNGLBINDRENDERBUFFERPROC BindRenderbuffer = nullptr;
-    PFNGLRENDERBUFFERSTORAGEPROC RenderbufferStorage = nullptr;
-    PFNGLFRAMEBUFFERRENDERBUFFERPROC FramebufferRenderbuffer = nullptr;
-    PFNGLCHECKFRAMEBUFFERSTATUSPROC CheckFramebufferStatus = nullptr;
-    PFNGLDELETEFRAMEBUFFERSPROC DeleteFramebuffers = nullptr;
-    PFNGLDELETERENDERBUFFERSPROC DeleteRenderbuffers = nullptr;
+    SE_FN(PFNGLGENFRAMEBUFFERSPROC, GenFramebuffers);
+    SE_FN(PFNGLBINDFRAMEBUFFERPROC, BindFramebuffer);
+    SE_FN(PFNGLFRAMEBUFFERTEXTURE2DPROC, FramebufferTexture2D);
+    SE_FN(PFNGLGENRENDERBUFFERSPROC, GenRenderbuffers);
+    SE_FN(PFNGLBINDRENDERBUFFERPROC, BindRenderbuffer);
+    SE_FN(PFNGLRENDERBUFFERSTORAGEPROC, RenderbufferStorage);
+    SE_FN(PFNGLFRAMEBUFFERRENDERBUFFERPROC, FramebufferRenderbuffer);
+    SE_FN(PFNGLCHECKFRAMEBUFFERSTATUSPROC, CheckFramebufferStatus);
+    SE_FN(PFNGLDELETEFRAMEBUFFERSPROC, DeleteFramebuffers);
+    SE_FN(PFNGLDELETERENDERBUFFERSPROC, DeleteRenderbuffers);
 
     template <class T> static bool get(T& fn, const char* name)
     {
@@ -74,7 +85,7 @@ struct GLApi {
         PROC p = wglGetProcAddress(name);
         fn = reinterpret_cast<T>(reinterpret_cast<void*>(p));
 #else
-        fn = nullptr;
+        fn = reinterpret_cast<T>(dlsym(RTLD_DEFAULT, name));
 #endif
         return fn != nullptr;
     }
