@@ -47,7 +47,13 @@ from pathlib import Path
 MODE = os.environ.get("SCRAMBLED_MODE", "replay")   # "replay" (default: cache only, no key) | "atlas" (live API)
 assert MODE in ("replay", "atlas"), MODE
 
-ROOT = next(p for p in [Path.cwd(), *Path.cwd().parents] if (p / "scrambled" / "__init__.py").exists())
+ROOT = next((p for p in [Path.cwd(), *Path.cwd().parents] if (p / "scrambled" / "__init__.py").exists()), None)
+if ROOT is None:   # opened outside a clone (Colab, a downloaded .ipynb): fetch the repo, job cache included
+    ROOT = Path.cwd() / "scrambled-repo"
+    if not ROOT.exists():
+        subprocess.run(["git", "clone", "--depth", "1", "https://github.com/SplendidAfternoon/scrambled", str(ROOT)], check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "-e", f"{ROOT}[core]"], check=True)
+    sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 NB, OUT, DATA = ROOT / "notebook", ROOT / "notebook" / "out", ROOT / "notebook" / "data"
 OUT.mkdir(parents=True, exist_ok=True); DATA.mkdir(parents=True, exist_ok=True)

@@ -17,6 +17,8 @@ top to bottom:
    shows the classical prediction and lists the failed job ids.
 10. reproducibility, what is quantum and what is classical, credits, and a job id table
 
+Read it in the browser at [scrambled-mu.vercel.app/notebook.html](https://scrambled-mu.vercel.app/notebook.html), or [run it in Colab](https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb): opened outside a clone, the first cell fetches the repo and its job cache, so it replays with no key.
+
 The committed notebook and `scrambled_workflow.html` come from a run with no API key (replay mode). Every Atlas
 number in them comes from cached job records in `../cache/`.
 

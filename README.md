@@ -4,7 +4,7 @@ Quantum information scrambling, measured on [Moth Quantum's Atlas](https://platf
 
 You cannot unscramble an egg. SCRAMBLED measures the quantum version of that fact: nudge one qubit in a chain of twelve, run the circuit forward and backward, and see how much of the nudge comes back at each qubit and step. That map, an out-of-time-order correlator F(site, t) from `otoc-echo-v1`, drives everything in this repo.
 
-**Live:** [scrambled-mu.vercel.app](https://scrambled-mu.vercel.app) (explorer; judges can run a real Atlas measurement without a key)
+**Live:** [scrambled-mu.vercel.app](https://scrambled-mu.vercel.app) has every piece playable in the browser: the film, the track, the notebook and the explorer, where you can run a real Atlas measurement without a key.
 
 Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas **Qiskit Aer emulator**; compositing, mixing and rendering are classical and labelled as such.
 
@@ -14,10 +14,10 @@ Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas *
 
 | Challenge | Piece | Where |
 |---|---|---|
-| 04 Moving image | SCRAMBLED, an 88 s film: twelve strips of egg, one per qubit, each cooked by its measured echo | [out/piece/scrambled_piece_v3.mp4](out/piece/scrambled_piece_v3.mp4) |
-| 02 Make it audible | The film's track: cooking audio echoed on Atlas by `retrocausal-echo-v1` through the measured maps, plus a qrc-midi and blur-midi melody | [out/piece/scrambled_track.mp3](out/piece/scrambled_track.mp3), [core/](core/) |
-| 07 VST | Scrambled Echo, a VST3 whose echo taps are measured OTOC maps, played through an egg you crack open | [plugin/](plugin/) |
-| 10 Quantum-native | Workflow notebook, from probe to film, including a θzz sweep of where scrambling switches on | [notebook/](notebook/) |
+| 04 Moving image | SCRAMBLED, an 88 s film: twelve strips of egg, one per qubit, each cooked by its measured echo | [out/piece/scrambled_piece_v3.mp4](out/piece/scrambled_piece_v3.mp4), [watch on the site](https://scrambled-mu.vercel.app/#pieces) |
+| 02 Make it audible | The film's track: cooking audio echoed on Atlas by `retrocausal-echo-v1` through the measured maps, plus a qrc-midi and blur-midi melody | [out/piece/scrambled_track.mp3](out/piece/scrambled_track.mp3), [listen on the site](https://scrambled-mu.vercel.app/#pieces) |
+| 07 VST | Scrambled Echo, a VST3 whose echo taps are measured OTOC maps, played through an egg you crack open | [plugin/](plugin/) (Windows x64; zip in `plugin/dist/`) |
+| 10 Quantum-native | Workflow notebook, from probe to film, including a θzz sweep of where scrambling switches on | [notebook/](notebook/), [read it](https://scrambled-mu.vercel.app/notebook.html), [run it in Colab](https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb) |
 
 ## The measurement
 
@@ -53,6 +53,8 @@ Each has completed jobs whose output is used; [core/ENGINES.md](core/ENGINES.md)
 
 ## Run it
 
+Needs Python 3.11+, git and `ffmpeg` on `PATH` (for video and non-WAV audio). Windows:
+
 ```powershell
 python -m venv .venv
 .venv\Scripts\pip install -e ".[test,core]"
@@ -60,6 +62,8 @@ python -m venv .venv
 .venv\Scripts\scrambled --help
 .venv\Scripts\scrambled replay --video        # rebuilds the demos from cache/, no key, no network
 ```
+
+macOS / Linux: the same with `source .venv/bin/activate`, then `pip install -e ".[test,core]"`, `pytest -q core tests` and `scrambled replay --video`.
 
 Every Atlas job is cached by content hash under `cache/`, so the whole project replays offline. To run live, put `MOTH_API_KEY=...` in `.env` and use `--mode atlas`. Web app: see [web/README.md](web/README.md). Plugin build: [plugin/README.md](plugin/README.md).
 
