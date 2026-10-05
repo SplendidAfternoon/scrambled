@@ -1,0 +1,11 @@
+Scrambled Echo: a VST3 delay whose echo taps are OTOC maps measured on Moth Atlas (`otoc-echo-v1`). Stereo effect, category Fx | Delay. Details: [plugin/README.md](https://github.com/SplendidAfternoon/scrambled/tree/main/plugin).
+
+**Windows (x64):** unzip `ScrambledEcho-*-win64-vst3.zip` and copy the `ScrambledEcho.vst3` folder into `C:\Program Files\Common Files\VST3\`, then rescan plugins in your DAW.
+
+**macOS (Intel and Apple Silicon, 10.15+):** unzip `ScrambledEcho-macos-universal-vst3.zip` and copy `ScrambledEcho.vst3` into `~/Library/Audio/Plug-Ins/VST3/`. The build is ad-hoc signed, not notarised, so clear the download quarantine once in Terminal before rescanning:
+
+```
+xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/ScrambledEcho.vst3
+```
+
+The macOS build is made by GitHub Actions from the same source ([workflow](https://github.com/SplendidAfternoon/scrambled/blob/main/.github/workflows/vst.yml)); it was not tested on a Mac by hand.
