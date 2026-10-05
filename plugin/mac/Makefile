@@ -13,7 +13,7 @@ USE_FILE_BROWSER = true
 
 include ../third_party/DPF/Makefile.plugins.mk
 
-BUILD_CXX_FLAGS += -I../src
+BUILD_CXX_FLAGS += -std=gnu++17 -I../src
 
 TARGETS += vst3
 
