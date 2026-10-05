@@ -849,6 +849,7 @@ def main():
     nb.cells = CELLS
     nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
     nb.metadata["language_info"] = {"name": "python"}
+    nb.metadata["title"] = "SCRAMBLED: measuring quantum information scrambling on Moth Atlas and turning it into media"
     out = Path(__file__).with_name("scrambled_workflow.ipynb")
     nbf.write(nb, out)
     print(f"wrote {out} ({len(CELLS)} cells)")

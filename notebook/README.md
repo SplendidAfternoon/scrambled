@@ -55,8 +55,11 @@ The raw-HTTP demo in section 2.2 runs once and is then shown from `data/raw_api_
 ### Export HTML
 
 ```powershell
-.venv\Scripts\jupyter nbconvert --to html notebook\scrambled_workflow.ipynb
+.venv\Scripts\jupyter nbconvert --to html --TemplateExporter.extra_template_basedirs=notebook --template paper --no-prompt notebook\scrambled_workflow.ipynb
+Copy-Item notebook\scrambled_workflow.html web\public\notebook.html
 ```
+
+`paper/` is a small template on top of JupyterLab's: one text column with no prompt gutters, serif text, and tables drawn with plain horizontal rules.
 
 ### Regenerate the notebook source
 
@@ -73,6 +76,7 @@ The cells are defined in `build_notebook.py`, which keeps the notebook easy to d
 | `scrambled_workflow.ipynb` | the executed notebook |
 | `scrambled_workflow.html` | static HTML export |
 | `build_notebook.py` | cell sources |
+| `paper/` | nbconvert template for the HTML export |
 | `data/engine_schemas.json` | engine schemas fetched live from `GET /engines/{id}` (shown in replay mode) |
 | `data/raw_api_transcript.json` | the raw-HTTP lifecycle transcript (URLs redacted) |
 | `data/job_ledger.json` | every Atlas job submitted for this notebook, with outcome and credits |

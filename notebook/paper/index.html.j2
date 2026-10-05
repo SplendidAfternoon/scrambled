@@ -1,0 +1,348 @@
+{%- extends 'lab/index.html.j2' -%}
+
+{%- block html_head_css -%}
+<style type="text/css">
+:root {
+  --paper-serif: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --paper-mono: "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+  --paper-ink: #1a1a1a;
+  --paper-muted: #555;
+  --paper-rule: #c9c9c4;
+  --paper-code-bg: #f6f6f3;
+  --paper-gap: 1rem;
+  --jp-content-font-family: var(--paper-serif);
+  --jp-ui-font-family: var(--paper-serif);
+  --jp-code-font-family: var(--paper-mono);
+  --jp-content-font-color1: var(--paper-ink);
+  --jp-content-link-color: #1d4f91;
+  --jp-code-font-size: 0.8rem;
+  --jp-content-font-size1: 1.05rem;
+  --jp-layout-color0: #fff;
+}
+
+body.jp-Notebook {
+  background: #fff;
+  color: var(--paper-ink);
+  font-family: var(--paper-serif);
+  padding: 0;
+  overflow: visible;
+}
+
+main {
+  box-sizing: border-box;
+  max-width: 50rem;
+  margin: 0 auto;
+  padding: 4.5rem 2rem 6rem;
+}
+
+/* One left edge: no prompt gutters, no collapsers, no per-cell padding. */
+.jp-InputPrompt,
+.jp-OutputPrompt,
+.jp-Collapser {
+  display: none !important;
+}
+
+.jp-Cell,
+.jp-Cell-inputWrapper,
+.jp-Cell-outputWrapper,
+.jp-InputArea,
+.jp-OutputArea,
+.jp-OutputArea-child,
+.jp-OutputArea-output,
+.jp-RenderedHTMLCommon {
+  display: block;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.jp-OutputArea-child,
+.jp-OutputArea-child > .jp-OutputArea-output {
+  display: block !important;
+  width: auto;
+  min-width: 0;
+  margin: 0 !important;
+}
+
+.jp-Cell {
+  margin-bottom: var(--paper-gap);
+}
+
+.jp-Cell-outputWrapper,
+.jp-OutputArea-child + .jp-OutputArea-child {
+  margin-top: 0.75rem;
+}
+
+/* Prose */
+.jp-RenderedHTMLCommon {
+  font-family: var(--paper-serif);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--paper-ink);
+}
+
+.jp-RenderedHTMLCommon p {
+  margin: 0 0 var(--paper-gap);
+  text-align: justify;
+  hyphens: auto;
+}
+
+.jp-RenderedHTMLCommon ul,
+.jp-RenderedHTMLCommon ol {
+  margin: 0 0 var(--paper-gap);
+  padding-left: 1.6em;
+}
+
+.jp-RenderedHTMLCommon li {
+  margin: 0 0 0.3em;
+  text-align: left;
+}
+
+.jp-RenderedHTMLCommon li > p {
+  margin: 0;
+}
+
+.jp-RenderedHTMLCommon > :last-child {
+  margin-bottom: 0;
+}
+
+.jp-RenderedHTMLCommon blockquote {
+  margin: 0 0 var(--paper-gap);
+  padding: 0 0 0 1.6em;
+  border: 0;
+  color: var(--paper-muted);
+  background: none;
+}
+
+.jp-RenderedHTMLCommon a {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Headings */
+.jp-RenderedHTMLCommon h1,
+.jp-RenderedHTMLCommon h2,
+.jp-RenderedHTMLCommon h3,
+.jp-RenderedHTMLCommon h4 {
+  font-family: var(--paper-serif);
+  color: var(--paper-ink);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+  padding: 0;
+}
+
+.jp-RenderedHTMLCommon h1 {
+  font-size: 1.9rem;
+  text-align: center;
+  margin: 0 auto 2.25rem;
+  max-width: 40rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid var(--paper-rule);
+}
+
+.jp-RenderedHTMLCommon h2 {
+  font-size: 1.4rem;
+  margin: 3rem 0 0.9rem;
+}
+
+.jp-RenderedHTMLCommon h3 {
+  font-size: 1.15rem;
+  margin: 2rem 0 0.7rem;
+}
+
+.jp-RenderedHTMLCommon h4 {
+  font-size: 1.05rem;
+  font-style: italic;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.jp-RenderedHTMLCommon :is(h1, h2, h3, h4):first-child {
+  margin-top: 0;
+}
+
+.jp-MarkdownCell:not(:first-child) .jp-RenderedHTMLCommon h2:first-child {
+  margin-top: 3rem;
+}
+
+.jp-MarkdownCell:not(:first-child) .jp-RenderedHTMLCommon h3:first-child {
+  margin-top: 2rem;
+}
+
+/* Inline code reads as plain monospace, as in print. */
+.jp-RenderedHTMLCommon :not(pre) > code {
+  font-family: var(--paper-mono);
+  font-size: 0.86em;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+}
+
+/* Code listings */
+.jp-InputArea-editor,
+.jp-CodeMirrorEditor {
+  display: block;
+  width: auto;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--paper-rule);
+  border-bottom: 1px solid var(--paper-rule);
+  border-radius: 0;
+  background: var(--paper-code-bg);
+  overflow: visible;
+}
+
+.jp-InputArea-editor .highlight,
+.cm-editor.cm-s-jupyter .highlight {
+  background: transparent;
+}
+
+.jp-InputArea-editor .highlight pre,
+.cm-editor.cm-s-jupyter .highlight pre {
+  margin: 0;
+  padding: 0.8rem 1rem;
+  font-family: var(--paper-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: transparent;
+}
+
+/* Text outputs */
+.jp-OutputArea-output.jp-RenderedText {
+  padding: 0;
+}
+
+.jp-RenderedText pre,
+.jp-OutputArea-output pre {
+  margin: 0;
+  padding: 0;
+  font-family: var(--paper-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--paper-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: none;
+}
+
+/* Display math scrolls inside its own line on narrow screens. */
+.MathJax_Display,
+mjx-container[display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Figures */
+.jp-RenderedImage {
+  text-align: center;
+}
+
+.jp-RenderedImage img,
+.jp-RenderedHTMLCommon img {
+  display: block;
+  margin: 0.5rem auto;
+  max-width: 100%;
+  height: auto;
+}
+
+.jp-OutputArea-output audio,
+.jp-OutputArea-output video {
+  display: block;
+  margin: 0.5rem auto;
+  max-width: 100%;
+}
+
+/* Tables: three rules, no shading */
+.jp-RenderedHTMLCommon table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0.5rem auto var(--paper-gap);
+  border-collapse: collapse;
+  border: 0;
+  border-top: 1.5px solid var(--paper-ink);
+  border-bottom: 1.5px solid var(--paper-ink);
+  font-family: var(--paper-serif);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  table-layout: auto;
+}
+
+.jp-RenderedHTMLCommon thead {
+  border-bottom: 1px solid var(--paper-ink);
+}
+
+.jp-RenderedHTMLCommon th,
+.jp-RenderedHTMLCommon td {
+  padding: 0.35rem 0.75rem;
+  border: 0;
+  text-align: left;
+  vertical-align: top;
+  max-width: none;
+}
+
+.jp-RenderedHTMLCommon th {
+  font-weight: 700;
+}
+
+.jp-RenderedHTMLCommon tr,
+.jp-RenderedHTMLCommon tbody tr:nth-child(odd),
+.jp-RenderedHTMLCommon tbody tr:nth-child(even),
+.jp-RenderedHTMLCommon tbody tr:hover {
+  background: none;
+}
+
+.jp-RenderedHTMLCommon hr {
+  border: 0;
+  border-top: 1px solid var(--paper-rule);
+  margin: 2rem 0;
+}
+
+@media (max-width: 640px) {
+  main {
+    padding: 2.5rem 1.1rem 4rem;
+  }
+
+  .jp-RenderedHTMLCommon {
+    font-size: 1rem;
+  }
+
+  .jp-RenderedHTMLCommon p {
+    text-align: left;
+  }
+
+  .jp-InputArea-editor .highlight pre,
+  .cm-editor.cm-s-jupyter .highlight pre {
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .jp-RenderedHTMLCommon h1 {
+    font-size: 1.5rem;
+  }
+
+  .jp-RenderedHTMLCommon h2 {
+    font-size: 1.25rem;
+  }
+}
+
+@media print {
+  main {
+    max-width: none;
+    padding: 0;
+  }
+
+  .jp-Cell {
+    break-inside: avoid-page;
+  }
+}
+</style>
+{%- endblock html_head_css -%}
