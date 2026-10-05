@@ -20,14 +20,6 @@ export interface RecordedRun extends Run {
 }
 export const loadLiveRecorded = () => json<RecordedRun[]>("data/live_recorded.json");
 
-export interface SpriteMeta {
-  job_id?: string;
-  engine_id?: string;
-  source: string;
-  params: Record<string, unknown>;
-  error?: string;
-}
-export const loadSprites = () => json<Record<string, SpriteMeta>>("data/sprites.json");
 
 export const fmtPi = (x: number) => (x === 1 ? "π" : `${+x.toFixed(3)}π`);
 export const shortId = (id: string) => id.slice(0, 8);

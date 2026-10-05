@@ -12,9 +12,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 ROLE = {
     "otoc-echo-v1": ("Measures the OTOC F(site, t): the data behind everything. Piece acts I-III, size study, "
-                     "explorer, game levels, explainer, 3D egg crack timing, plugin tap maps.",
+                     "explorer, 3D egg crack timing, plugin tap maps.",
                      "measurements/raw/, probes/, web/public/data/, plugin/tools/measured.json"),
-    "blur-v1": ("Quantum blur of photo A (whole eggs): the strip ladder for 'echo partly lost'; game sprites; "
+    "blur-v1": ("Quantum blur of photo A (whole eggs): the strip ladder for 'echo partly lost'; egg sprites (site icon); "
                 "Challenge 01 hero (strength = 1 - late mean |F|).",
                 "renders/core/ladder/index.json (piece), renders/v2/index.json (blurR:*), "
                 "out/piece/scrambled_piece_v3.mp4, web/public/data/ladder.json, "
@@ -41,7 +41,7 @@ ROLE = {
     "qdrive-api-v1": ("Compiles the measured scrambling front Re F(site, t), t = 0..7, into one 12-qubit "
                       "circuit per step (product state, <Z> within 0.042 of target).",
                       "extra/qdrive/front_circuits.png, extra/qdrive/out/"),
-    "tessa-image-v1": ("Attempted for game sprites; every job ended in engine_timeout.",
+    "tessa-image-v1": ("Attempted for egg sprites (site icon); every job ended in engine_timeout.",
                        "web/public/data/sprites.json, extra/README.md"),
     "retrocausal-echo-v1": ("Renders the track's echo layer: each act's stem segment through that act's measured "
                             "otoc-echo-v1 IR (control 45dddb1f, gentle cb1d37e3, scrambling 4c4e6d2a). An 8 s "

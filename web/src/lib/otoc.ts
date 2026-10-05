@@ -72,7 +72,7 @@ export function offKickMean(run: Run): number[] {
 
 /**
  * Accumulated "cooking" per site at continuous t: 1.45/(depth-1) * integral_1^t (1 - |F|) dtau, clipped to [0, 1].
- * Same accumulator compose.py uses for the video, as a pure function of t.
+ * The cooked accumulator, a pure function of t.
  */
 export function cooked(run: Run, site: number, t: number, gain = 1.45): number {
   const d = depth(run);

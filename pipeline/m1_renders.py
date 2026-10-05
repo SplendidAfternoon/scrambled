@@ -8,9 +8,10 @@ from pathlib import Path
 
 from PIL import Image, ImageOps
 
-import moth
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import moth  # noqa: E402
 
-ROOT = Path(__file__).parent
 MEDIA = ROOT / "media"
 PREP = MEDIA / "prep"
 OUT = ROOT / "renders"

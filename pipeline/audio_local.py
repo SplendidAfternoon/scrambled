@@ -10,7 +10,8 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).resolve().parents[1]
+
 
 
 def taps_of(name):

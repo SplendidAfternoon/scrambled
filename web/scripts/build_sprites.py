@@ -1,4 +1,4 @@
-"""Game sprites: classical crops of the two egg photos, then a quantum round trip through tessa-image-v1 on Atlas.
+"""Egg sprites: classical crops of the two egg photos, then a quantum round trip through tessa-image-v1 on Atlas.
 
 Run from the repo root:  .venv\\Scripts\\python web\\scripts\\build_sprites.py
 Writes web/scripts/sprite_src/*.png (classical inputs), web/public/sprites/*.png (Atlas outputs)

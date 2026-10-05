@@ -2,13 +2,22 @@
 
 Quantum information scrambling, measured on [Moth Quantum's Atlas](https://platform.mothquantum.com) and rendered as eggs.
 
-You cannot unscramble an egg. SCRAMBLED measures the quantum version of that fact: nudge one qubit in a chain of twelve, run the circuit forward and backward, and see how much of the nudge comes back at each qubit and step. That map, an out-of-time-order correlator F(site, t) from `otoc-echo-v1`, then drives every piece in this repo: a film, a track, a 3D egg, a game, a web app, a VST plugin, a CLI, a notebook and an explainer.
+You cannot unscramble an egg. SCRAMBLED measures the quantum version of that fact: nudge one qubit in a chain of twelve, run the circuit forward and backward, and see how much of the nudge comes back at each qubit and step. That map, an out-of-time-order correlator F(site, t) from `otoc-echo-v1`, drives everything in this repo.
 
-**Live:** [scrambled-mu.vercel.app](https://scrambled-mu.vercel.app) (explorer + game; judges can run a real Atlas measurement without a key)
+**Live:** [scrambled-mu.vercel.app](https://scrambled-mu.vercel.app) (explorer; judges can run a real Atlas measurement without a key)
 
 Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas **Qiskit Aer emulator**; compositing, mixing and rendering are classical and labelled as such.
 
 ![poster](extra/poster/scrambled_poster.jpg)
+
+## Entries
+
+| Challenge | Piece | Where |
+|---|---|---|
+| 04 Moving image | SCRAMBLED, an 88 s film: twelve strips of egg, one per qubit, each cooked by its measured echo | [out/piece/scrambled_piece_v3.mp4](out/piece/scrambled_piece_v3.mp4) |
+| 02 Make it audible | The film's track: cooking audio echoed on Atlas by `retrocausal-echo-v1` through the measured maps, plus a qrc-midi and blur-midi melody | [out/piece/scrambled_track.mp3](out/piece/scrambled_track.mp3), [core/](core/) |
+| 07 VST | Scrambled Echo, a VST3 whose echo taps are measured OTOC maps, played through an egg you crack open | [plugin/](plugin/) |
+| 10 Quantum-native | Workflow notebook, from probe to film, including a θzz sweep of where scrambling switches on | [notebook/](notebook/) |
 
 ## The measurement
 
@@ -19,21 +28,22 @@ Built solo for **Moth Hack 2026** by Mana Blumicz. Everything ran on the Atlas *
 
 An independent numpy statevector reproduces every Atlas map to ~1e−13, which pins down the circuit (ZZ layer, then Rx, per Floquet step). The clean chain (θz = 0) is free-fermion integrable, so "scrambling" here means operator spreading; adding a z-field (θz = 0.25π, also measured) removes the revival. Full study: [measurements/MEASUREMENTS.md](measurements/MEASUREMENTS.md).
 
-## What's in the repo
+## Repo map
 
-| Challenge | Piece | Where |
-|---|---|---|
-| 01 One image, one engine | Hero image: blur-v1, strength = 1 − late mean \|F\| | [hero/](hero/) |
-| 02 Make it audible | 88 s track: cooking audio echoed on Atlas through measured scrambling maps, qrc-midi + blur-midi melody | [out/piece/](out/piece/), [core/](core/) |
-| 03 Three dimensions | The Quantum Egg: entanglement-shader shell, cracks timed by F, blur-core interior | [three/](three/) |
-| 04 Moving image | SCRAMBLED, 88 s film: twelve strips, one per qubit | [out/piece/scrambled_piece_v3.mp4](out/piece/scrambled_piece_v3.mp4) |
-| 05 Quantum game | Don't Scramble the Egg, 5 levels from measured runs | [web/](web/) (`game.html`) |
-| 06 Daisy Chain | 11 Atlas engines, every job id listed | [core/ENGINES.md](core/ENGINES.md), [extra/](extra/) |
-| 07 VST | Scrambled Echo VST3: taps are measured OTOC maps | [plugin/](plugin/) |
-| 08 Web app | SCRAMBLED Explorer: measure on Atlas from the browser | [web/](web/) (`explorer.html`) |
-| 09 Quantum-native 1 | `scrambled` Python package + CLI for any image, audio or video | [scrambled/](scrambled/), [docs/CLI.md](docs/CLI.md) |
-| 10 Quantum-native 2 | Workflow notebook, incl. a θzz sweep of where scrambling switches on | [notebook/](notebook/) |
-| 11 FQxI | "Why you can't unscramble an egg (quantum edition)" explainer | [edu/](edu/) |
+| Folder | What's inside |
+|---|---|
+| [core/](core/) | The film and track: measurement analysis, image ladders, arrangement, mixing (`piece.py` renders the film) |
+| [plugin/](plugin/) | Scrambled Echo VST3 source, tests and build script |
+| [notebook/](notebook/) | The workflow notebook (`.ipynb` + rendered `.html`) and the script that builds it |
+| [scrambled/](scrambled/) | Python package + CLI: apply a measured map to any image, audio or video ([docs/CLI.md](docs/CLI.md)) |
+| [web/](web/) | The live site: explorer and the keyless Atlas proxy |
+| [three/](three/) | 3D egg mesh and crack timing (the plugin's egg shell comes from here) |
+| [pipeline/](pipeline/) | The first Atlas runs: probes, uploads and the original image and audio renders |
+| [extra/](extra/) | Side runs on other engines, including the ones that never completed |
+| [hero/](hero/) | Single-image blur-v1 study, used for the poster |
+| `moth.py`, `fmap.py` | Shared Atlas client (with the job cache) and the F(site, t) loader |
+| `cache/`, `probes/`, `measurements/`, `renders/`, `media/` | Data: cached Atlas jobs, measured maps, rendered assets, source photos and audio |
+| `out/` | Finished outputs: the film, the track and stills |
 
 ## Engines used
 
@@ -56,7 +66,7 @@ Every Atlas job is cached by content hash under `cache/`, so the whole project r
 ## Honesty notes
 
 - All quantum runs are on the Aer emulator through Atlas, not quantum hardware.
-- The track's echo layer is rendered on Atlas by `retrocausal-echo-v1` from the measured maps (one job per act). The 3D egg sound bed, the CLI demos and the VST use a local renderer of the same taps (classical step), built while that engine was timing out; per act it tracks the engine render with envelope correlation 0.69 to 0.97.
+- The track's echo layer is rendered on Atlas by `retrocausal-echo-v1` from the measured maps (one job per act). The CLI and the VST use a local renderer of the same taps (classical step); per act it tracks the engine render with envelope correlation 0.69 to 0.97.
 - Generative AI: Cursor agents wrote most of the code and drafted the docs under my direction. No generative image, audio or video models were used for the media. The photos and cooking footage are mine.
 
 ## Licence

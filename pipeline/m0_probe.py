@@ -1,11 +1,14 @@
 """M0: account check, engine schemas, and the two otoc-echo-v1 probes (scrambling vs Clifford control)."""
 import json
 import math
+import sys
 from pathlib import Path
 
-import moth
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import moth  # noqa: E402
 
-OUT = Path(__file__).parent / "probes"
+OUT = ROOT / "probes"
 OUT.mkdir(exist_ok=True)
 
 

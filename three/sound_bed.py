@@ -2,7 +2,7 @@
 
 Layers (all classical audio processing of measured data):
   1. bed      media/stem_full.wav (cooking audio) rendered through the measured otoc-echo-v1 tap map
-              with ../audio_local.render (classical multi-tap render of measured taps). The scrambling render
+              with ../pipeline/audio_local.render (classical multi-tap render of measured taps). The scrambling render
               plays under the echo/inside sections, its level following the measured band-mean 1-|F|; the
               Clifford-control render (|F| = 1, clean echoes) plays, quieter, under the control section.
   2. cracks   one short shell "crack" per band, at the moment that band's 1-|F| first crosses the shell's
@@ -15,7 +15,6 @@ Mastering (ffmpeg loudnorm, 2 pass) to -16 LUFS integrated, true peak <= -1 dBTP
 Writes audio/*.wav, audio/events.json, out/quantum_egg.mp4 (with audio), out/quantum_egg_silent.mp4.
 """
 import json
-import re
 import shutil
 import subprocess
 import sys
@@ -27,6 +26,7 @@ import soundfile as sf
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "pipeline"))
 import audio_local  # noqa: E402
 import fmap  # noqa: E402
 

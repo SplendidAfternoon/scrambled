@@ -4,12 +4,10 @@ Used (a) as the independent cross-check against otoc-echo-v1, and (b) to extend 
 engine queue was unavailable. Every number produced here is labelled 'classical' downstream.
 """
 import json
-import math
 import sys
 import time
 from pathlib import Path
 
-import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "core"))

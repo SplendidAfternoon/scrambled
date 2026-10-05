@@ -18,3 +18,4 @@ three/meshes/*.obj
 submission/
 web/.env.local
 web/.vercel/
+.scratch/

@@ -1,4 +1,4 @@
-"""Ship the Atlas blur-v1 / telablur-v1 image ladders (already rendered by m1b_images.py) as static web assets.
+"""Ship the Atlas blur-v1 / telablur-v1 image ladders (already rendered by pipeline/m1b_images.py) as static web assets.
 
 Run from the repo root:  .venv\\Scripts\\python web\\scripts\\build_images.py
 Writes web/public/img/ladder/*.jpg and web/public/data/ladder.json.
@@ -13,7 +13,7 @@ OUT = ROOT / "web" / "public" / "img" / "ladder"
 DATA = ROOT / "web" / "public" / "data"
 SIZE = 512
 
-# Same ladders compose.py uses: "memory" fades whole -> blurred (blur-v1, reach 0 on photo A),
+# Ladders: "memory" fades whole -> blurred (blur-v1, reach 0 on photo A),
 # then "scrambled" morphs whole -> scrambled (telablur-v1 between photo A and photo B).
 BLUR = [0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]
 TELA = [0.02, 0.05, 0.1, 0.15, 0.5, 0.85, 0.9, 0.95, 0.98]

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>SCRAMBLED: the quantum butterfly effect, measured on Moth Atlas</title>
-    <meta name="description" content="Quantum information scrambling (OTOCs) measured with Moth Quantum's otoc-echo-v1 engine, rendered with eggs. An explorer and a game." />
+    <meta name="description" content="Quantum information scrambling (OTOCs) measured with Moth Quantum's otoc-echo-v1 engine, rendered with eggs." />
     <link rel="icon" href="sprites/egg_fresh.png" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
@@ -13,7 +13,6 @@
       <a class="brand" href="./">SCRAMB<span>L</span>ED</a>
       <nav>
         <a href="./explorer.html">Explorer</a>
-        <a href="./game.html">Game</a>
       </nav>
     </header>
 
@@ -27,19 +26,12 @@
       </p>
     </section>
 
-    <section class="cards">
+    <section class="cards single">
       <a class="panel card" href="./explorer.html">
-        <img src="img/ladder/tela_0.95.jpg" alt="Egg photo morphing into scrambled eggs (telablur-v1)" />
+        <img src="img/strips_scrambling.jpg" alt="Twelve strips of a pan of eggs, each scrambled by its measured echo" />
         <div class="body">
           <h2>SCRAMBLED Explorer</h2>
-          <p class="muted">Set the drive angles, measure a chain live on Atlas with your own key (or browse the measured runs), and watch the eggs scramble strip by strip as you scrub through time.</p>
-        </div>
-      </a>
-      <a class="panel card" href="./game.html">
-        <img src="img/ladder/blur_0.25.jpg" alt="Blurred eggs in a pan" />
-        <div class="body">
-          <h2>Don't Scramble the Egg</h2>
-          <p class="muted">A short arcade game. Pick the pan, watch the quantum light cone race toward your eggs, and serve at the moment the echo comes back whole. Five levels, each backed by a chain measured on Atlas.</p>
+          <p class="muted">Set the drive angles, measure a chain live on Atlas (no key needed, or bring your own), browse the measured runs, and watch the eggs scramble strip by strip as you scrub through time.</p>
         </div>
       </a>
     </section>
@@ -48,7 +40,7 @@
       <div class="panel">
         <h3>What is measured</h3>
         <p class="muted small">
-          A kicked Ising chain (RX by θ<sub>x</sub>, RZZ by θ<sub>zz</sub> per layer) of qubits, 12 in the game's runs. The centre qubit gets a Z kick between
+          A kicked Ising chain (RX by θ<sub>x</sub>, RZZ by θ<sub>zz</sub> per layer) of qubits, 12 in the featured runs. The centre qubit gets a Z kick between
           the forward and backward halves. <span class="mono">F(site, t)</span> is the echo measured at each site after t layers. It starts at ±1,
           stays there outside the light cone, and decays once the perturbation has spread. In a finite chain it partly revives
           (around t ≈ 13–16 for 12 sites) when the spreading front reflects off the ends.

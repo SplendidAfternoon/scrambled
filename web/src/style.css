@@ -74,6 +74,7 @@ label { display: block; }
 .card img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: #000; }
 .card .body { padding: 16px 18px 20px; }
 .card h2 { margin: 0 0 6px; }
+.cards.single img { aspect-ratio: 12 / 5; }
 .prose { max-width: 1100px; margin: 0 auto; padding: 0 20px 60px; display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 .prose h3 { margin-top: 0; }
 

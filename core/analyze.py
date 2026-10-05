@@ -85,6 +85,67 @@ def names_available():
     return sorted(names, key=lambda s: (s.rsplit("_n", 1)[0], int(s.rsplit("_n", 1)[1])))
 
 
+def plot_regimes(curves):
+    """Three-regime panel at n = 12."""
+    trio = [n for n in ("control_clifford_n12", "lowx_n12", "scrambling_n12") if n in curves]
+    fig, axes = plt.subplots(1, len(trio), figsize=(5.2 * len(trio), 4), sharey=True)
+    for ax, name in zip(np.atleast_1d(axes), trio):
+        F, ex = F_of(name, allow_classical=True)
+        im = ax.imshow(F.real, aspect="auto", cmap="RdBu", vmin=-1, vmax=1, interpolation="nearest",
+                       extent=[0.5, 32.5, F.shape[0] - 0.5, -0.5])
+        ax.set_title(label(name))
+        ax.set_xlabel("echo step t")
+    np.atleast_1d(axes)[0].set_ylabel("qubit (site)")
+    fig.colorbar(im, ax=list(np.atleast_1d(axes)), pad=0.01, label="Re F")
+    fig.suptitle("Measured OTOC F(site, t) on Moth Atlas (otoc-echo-v1, aer emulator, exact) — 12-qubit chain, Z kick at site 6",
+                 y=1.02)
+    fig.savefig(M / "regimes_n12.png", bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_size_study(curves):
+    """Mean |F| vs t for every chain length in the scrambling regime."""
+    fig, ax = plt.subplots(figsize=(8, 4.2))
+    cmap = plt.get_cmap("viridis")
+    sizes = [n for n in curves if n.startswith("scrambling_")]
+    for i, name in enumerate(sizes):
+        m, ts, tr, engine = curves[name]
+        c = cmap(i / max(1, len(sizes) - 1))
+        ax.plot(np.arange(1, 33), m, "-o" if engine else "--", ms=3, color=c,
+                label=f"n = {name.rsplit('_n', 1)[1]} ({'engine' if engine else 'classical'})")
+        if ts:
+            ax.plot(ts, m[ts - 1], "v", color=c, ms=8)
+        if tr:
+            ax.plot(tr, m[tr - 1], "^", color=c, ms=8)
+    ax.set_xlabel("echo step t")
+    ax.set_ylabel("mean |F| over non-kicked qubits")
+    ax.set_title("Size study, scrambling regime (θx = 0.3π, θzz = 0.35π): ▼ t_sat, ▲ finite-size revival")
+    ax.legend(fontsize=9, ncol=2)
+    ax.grid(alpha=0.3)
+    fig.savefig(M / "size_study.png", bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_crosscheck(xcheck):
+    """Engine F against the independent numpy statevector."""
+    if not xcheck:
+        return
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+    for name, F, G, err in xcheck:
+        axes[0].plot(G.real.ravel(), F.real.ravel(), ".", ms=3, label=f"{name} (max |ΔF| = {err:.1e})")
+        axes[1].semilogy(np.arange(1, 33), np.abs(F - G).max(axis=0) + 1e-17, label=name)
+    axes[0].plot([-1, 1], [-1, 1], "k-", lw=0.5)
+    axes[0].set_xlabel("classical numpy statevector Re F")
+    axes[0].set_ylabel("otoc-echo-v1 Re F")
+    axes[0].legend(fontsize=8)
+    axes[1].set_xlabel("echo step t")
+    axes[1].set_ylabel("max over sites |F_engine − F_numpy|")
+    axes[1].legend(fontsize=8)
+    fig.suptitle("Independent classical cross-check of every engine run")
+    fig.savefig(M / "crosscheck.png", bbox_inches="tight")
+    plt.close(fig)
+
+
 def main():
     rows, curves, xcheck = [], {}, []
     for name in names_available():
@@ -114,59 +175,9 @@ def main():
         curves[name] = (m, ts, tr, engine)
         heatmap(name, F, ex, M / f"heatmap_{name}.png")
 
-    # three-regime panel at n = 12
-    trio = [n for n in ("control_clifford_n12", "lowx_n12", "scrambling_n12") if n in curves]
-    fig, axes = plt.subplots(1, len(trio), figsize=(5.2 * len(trio), 4), sharey=True)
-    for ax, name in zip(np.atleast_1d(axes), trio):
-        F, ex = F_of(name, allow_classical=True)
-        im = ax.imshow(F.real, aspect="auto", cmap="RdBu", vmin=-1, vmax=1, interpolation="nearest",
-                       extent=[0.5, 32.5, F.shape[0] - 0.5, -0.5])
-        ax.set_title(label(name))
-        ax.set_xlabel("echo step t")
-    np.atleast_1d(axes)[0].set_ylabel("qubit (site)")
-    fig.colorbar(im, ax=list(np.atleast_1d(axes)), pad=0.01, label="Re F")
-    fig.suptitle("Measured OTOC F(site, t) on Moth Atlas (otoc-echo-v1, aer emulator, exact) — 12-qubit chain, Z kick at site 6",
-                 y=1.02)
-    fig.savefig(M / "regimes_n12.png", bbox_inches="tight")
-    plt.close(fig)
-
-    # size study
-    fig, ax = plt.subplots(figsize=(8, 4.2))
-    cmap = plt.get_cmap("viridis")
-    sizes = [n for n in curves if n.startswith("scrambling_")]
-    for i, name in enumerate(sizes):
-        m, ts, tr, engine = curves[name]
-        c = cmap(i / max(1, len(sizes) - 1))
-        ax.plot(np.arange(1, 33), m, "-o" if engine else "--", ms=3, color=c,
-                label=f"n = {name.rsplit('_n', 1)[1]} ({'engine' if engine else 'classical'})")
-        if ts:
-            ax.plot(ts, m[ts - 1], "v", color=c, ms=8)
-        if tr:
-            ax.plot(tr, m[tr - 1], "^", color=c, ms=8)
-    ax.set_xlabel("echo step t")
-    ax.set_ylabel("mean |F| over non-kicked qubits")
-    ax.set_title("Size study, scrambling regime (θx = 0.3π, θzz = 0.35π): ▼ t_sat, ▲ finite-size revival")
-    ax.legend(fontsize=9, ncol=2)
-    ax.grid(alpha=0.3)
-    fig.savefig(M / "size_study.png", bbox_inches="tight")
-    plt.close(fig)
-
-    # classical cross-check
-    if xcheck:
-        fig, axes = plt.subplots(1, 2, figsize=(11, 4))
-        for name, F, G, err in xcheck:
-            axes[0].plot(G.real.ravel(), F.real.ravel(), ".", ms=3, label=f"{name} (max |ΔF| = {err:.1e})")
-            axes[1].semilogy(np.arange(1, 33), np.abs(F - G).max(axis=0) + 1e-17, label=name)
-        axes[0].plot([-1, 1], [-1, 1], "k-", lw=0.5)
-        axes[0].set_xlabel("classical numpy statevector Re F")
-        axes[0].set_ylabel("otoc-echo-v1 Re F")
-        axes[0].legend(fontsize=8)
-        axes[1].set_xlabel("echo step t")
-        axes[1].set_ylabel("max over sites |F_engine − F_numpy|")
-        axes[1].legend(fontsize=8)
-        fig.suptitle("Independent classical cross-check of every engine run")
-        fig.savefig(M / "crosscheck.png", bbox_inches="tight")
-        plt.close(fig)
+    plot_regimes(curves)
+    plot_size_study(curves)
+    plot_crosscheck(xcheck)
 
     (M / "summary.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
     write_md(rows, failures())

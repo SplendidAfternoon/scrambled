@@ -3,7 +3,7 @@
  *  - while a site still "remembers" (low accumulated cooking), it slides along the blur-v1 ladder by 1 - |F|;
  *  - once cooked, it morphs along the telablur-v1 ladder from whole eggs (photo A) to scrambled eggs (photo B);
  *  - Re F < 0 (an inverted echo) flips the strip upside down.
- * Same mapping as compose.py; compositing here is classical (canvas drawImage), the ladders and F are from Atlas.
+ * Compositing here is classical (canvas drawImage), the ladders and F are from Atlas.
  */
 import { absFat, cooked, Fat, sites, type Run } from "./otoc";
 

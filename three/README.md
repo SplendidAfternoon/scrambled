@@ -71,7 +71,7 @@ The interior morph uses crack_s000 → s035 → s060 → s060_r05 → s090_r10. 
 
 All of the sound processing is classical. It is designed from measured data, and no engine runs at audio time.
 
-- **Bed.** The project's cooking audio (`../media/stem_full.wav`) is rendered through the measured otoc-echo-v1 tap map with `../audio_local.render`, a classical multi-tap render of measured taps. Each tap becomes one echo: depth sets the delay, |F| the level, site the pan, and negative polarity inverts the echo.
+- **Bed.** The project's cooking audio (`../media/stem_full.wav`) is rendered through the measured otoc-echo-v1 tap map with `../pipeline/audio_local.render`, a classical multi-tap render of measured taps. Each tap becomes one echo: depth sets the delay, |F| the level, site the pan, and negative polarity inverts the echo.
   - The **scrambling** render plays from 8 s to 37 s. Its gain follows the measured band-mean 1−|F|, using the same interpolation as the picture.
   - The dry stem plays under the title and intro.
   - The **Clifford control** render (|F| = 1, so every echo is a clean, in-phase copy) plays at a low level under 37–41 s.

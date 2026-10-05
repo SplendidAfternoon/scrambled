@@ -4,9 +4,10 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import moth
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import moth  # noqa: E402
 
-ROOT = Path(__file__).parent
 IR_DIR = ROOT / "renders" / "ir"
 IR_DIR.mkdir(parents=True, exist_ok=True)
 

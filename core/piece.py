@@ -104,12 +104,10 @@ def spaced(stack, lo, hi):
 
 def ladders():
     idx = json.loads((LADDER / "index.json").read_text(encoding="utf-8"))
-    A = grade(load(LADDER.relative_to(ROOT) / "A_1080.png"))
-    B = grade(load(LADDER.relative_to(ROOT) / "B_1080.png"))
-    blur = [A] + [grade(match_exposure(load(idx[k]["file"]), load(LADDER.relative_to(ROOT) / "A_1080.png")))
-                  for k in BLUR_KEYS]
-    tela = [grade(match_exposure(load(idx[k]["file"]), load(LADDER.relative_to(ROOT) / "B_1080.png")))
-            for k in TELA_KEYS] + [B]
+    a_raw, b_raw = load(LADDER / "A_1080.png"), load(LADDER / "B_1080.png")
+    A, B = grade(a_raw), grade(b_raw)
+    blur = [A] + [grade(match_exposure(load(idx[k]["file"]), a_raw)) for k in BLUR_KEYS]
+    tela = [grade(match_exposure(load(idx[k]["file"]), b_raw)) for k in TELA_KEYS] + [B]
     stack = blur + tela
     knots = spaced(blur, 0.0, L_BLUR) + spaced(tela, L_TELA, L_FULL)
     jobs = {k: idx[k]["job_id"] for k in BLUR_KEYS + TELA_KEYS}
@@ -161,7 +159,6 @@ class Piece:
         self.f_tiny = REG(16)
         self.f_read = LIGHT(50)
         self.f_cap = SEMI(15)
-        self.f_cap_b = SEMI(15)
 
     # ---------- image field ----------
     def strips(self, F, t):
@@ -187,16 +184,17 @@ class Piece:
                 col = tuple(int(c * 255) for c in RDBU(float(np.clip((f[s] + 1) / 2, 0, 1)))[:3])
                 d.rectangle([x0, IMG - band, x1, IMG - 1], fill=col + (a,))
             cx = (self.edges[s] + self.edges[s + 1]) / 2
-            txt = str(s)
-            w = d.textlength(txt, font=self.f_tiny)
-            d.text((cx - w / 2 + 1, IMG - band - 25), txt, fill=(0, 0, 0, int(120 * alpha)), font=self.f_tiny)
-            d.text((cx - w / 2, IMG - band - 26), txt, fill=(255, 255, 255, int(205 * alpha)), font=self.f_tiny)
+            self._shadow_text(d, cx, IMG - band - 26, str(s), alpha, 205)
         if kick is not None:
             cx = (self.edges[kick] + self.edges[kick + 1]) / 2
             d.polygon([(cx - 8, 14), (cx + 8, 14), (cx, 27)], fill=(255, 255, 255, int(235 * alpha)))
-            w = d.textlength("nudge", font=self.f_tiny)
-            d.text((cx - w / 2 + 1, 33), "nudge", fill=(0, 0, 0, int(120 * alpha)), font=self.f_tiny)
-            d.text((cx - w / 2, 32), "nudge", fill=(255, 255, 255, int(230 * alpha)), font=self.f_tiny)
+            self._shadow_text(d, cx, 32, "nudge", alpha, 230)
+
+    def _shadow_text(self, d, cx, y, txt, alpha, opacity):
+        """White tiny text centred on cx with a 1 px dark drop shadow."""
+        w = d.textlength(txt, font=self.f_tiny)
+        d.text((cx - w / 2 + 1, y + 1), txt, fill=(0, 0, 0, int(120 * alpha)), font=self.f_tiny)
+        d.text((cx - w / 2, y), txt, fill=(255, 255, 255, int(opacity * alpha)), font=self.f_tiny)
 
     # ---------- panel ----------
     CELL_W, CELL_H = 18, 11          # heatmap cell: 32 steps x 12 qubits -> 576 x 132 px, integer cells
@@ -223,7 +221,7 @@ class Piece:
         F, ex = self.runs[act]
         num, title, _ = ACT_TEXT[act]
         # left column: act label, heatmap with cursor, legend
-        x = self.caps(d, (M, y0 + 22), f"{num}", FG, self.f_cap_b)
+        x = self.caps(d, (M, y0 + 22), num, FG)
         self.caps(d, (x + 10, y0 + 22), title, DIM)
         hm = self.heat[act].copy()
         hh, hw = hm.shape[:2]
@@ -308,14 +306,13 @@ class Piece:
 
     # ---------- frame ----------
     def frame(self, T):
-        for name, t0, t1, run in SEGMENTS:
+        for name, t0, t1, _ in SEGMENTS:
             if t0 <= T < t1 or (name == SEGMENTS[-1][0] and T >= t0):
                 break
         u = T - t0
         seg = t1 - t0
         if name == "intro":
-            fr = self.A.copy()
-            im = Image.fromarray(fr.clip(0, 255).astype(np.uint8))
+            im = Image.fromarray(self.A.clip(0, 255).astype(np.uint8))
             im = Image.blend(Image.new("RGB", im.size), im, ease(u / 1.2)) if u < 1.2 else im
             canvas = Image.new("RGB", (W, H), BG)
             canvas.paste(im, (0, 0))
@@ -464,10 +461,11 @@ def contact(p, path=OUT / "contact_v3.jpg", cols=6, every=4.0):
     rows = int(np.ceil(len(times) / cols))
     sheet = Image.new("RGB", (cols * tw, rows * (th + 22)), BG)
     d = ImageDraw.Draw(sheet)
+    f = REG(14)
     for i, T in enumerate(times):
         x, y = (i % cols) * tw, (i // cols) * (th + 22)
         sheet.paste(p.frame(float(T)).resize((tw, th), Image.LANCZOS), (x, y + 22))
-        d.text((x + 6, y + 3), f"{T:4.1f} s", fill=DIM, font=REG(14))
+        d.text((x + 6, y + 3), f"{T:4.1f} s", fill=DIM, font=f)
     sheet.save(path, quality=90)
     return path
 

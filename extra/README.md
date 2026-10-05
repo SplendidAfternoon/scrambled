@@ -96,4 +96,3 @@ Also proposed:
 
 - `blur-v1` role text: append "; Challenge 01 hero (strength = 1 - late mean |F|)". Evidence: append `hero/params.json, hero/ladder/index.json`. The 12 hero ladder jobs are now in the blur-v1 count (63 → 75).
 - `tamagotchi-v1` job count: the census counts 47 cache records. 41 are in the figure and 6 are semantic probes. Either keep 47 or say "41 used + 6 probes".
-- The `tessa-image-v1` ROLE text ("game sprite states") is wrong if a Tessa job ever completes. Tessa has no completed job, so it does not appear today. Change the text to "attempted; engine_timeout" or drop the entry.

@@ -1,13 +1,15 @@
 """M1b: square-cropped inputs and finer blur/telablur ladders in the readable ranges."""
 import json
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from PIL import Image, ImageOps
 
-import moth
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+import moth  # noqa: E402
 
-ROOT = Path(__file__).parent
 PREP = ROOT / "media" / "prep"
 OUT = ROOT / "renders" / "v2"
 

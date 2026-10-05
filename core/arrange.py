@@ -101,6 +101,7 @@ def build(allow_classical=False, echo="engine"):
     for name, t0, t1, run in SEGMENTS:
         w0, _ = STEM_WINDOW[name]
         seg_len = t1 - t0
+        n_wet = int((seg_len + TAIL_S) * SR)
         # each segment's dry stem runs XFADE_S past its end so neighbouring segments overlap, not dip
         dry = dry_all[int(w0 * SR):int(w0 * SR) + int((seg_len + XFADE_S) * SR)]
         dry_st = np.stack([dry, dry], axis=1)
@@ -113,17 +114,17 @@ def build(allow_classical=False, echo="engine"):
         manifest["sources"][name] = {"run": run, "source": ex["source"], "job_id": ex.get("job_id")}
         eng, info = engine_wet(name, run, dry) if echo == "engine" else (None, None)
         if eng is not None:
-            wet = eng[: int((seg_len + TAIL_S) * SR)] * g_engine
+            wet = eng[:n_wet] * g_engine
             manifest["echo_renderer"][name] = {
                 "renderer": "retrocausal-echo-v1 (Moth Atlas; IR = this act's otoc-echo-v1 aer measurement)",
                 **info, "ir_job_id": ex.get("job_id"),
                 "level_scale": "engine output / reported bus_gain / n_sites, then the common echo gain"}
         else:
             ir = dsp.tap_ir(F, STEP_S, decay=ECHO_DECAY) * g_echo
-            wet = dsp.convolve_stereo(dry, ir)[: int((seg_len + TAIL_S) * SR)]
+            wet = dsp.convolve_stereo(dry, ir)[:n_wet]
             manifest["echo_renderer"][name] = {"renderer": LOCAL_RENDERER, "ir_job_id": ex.get("job_id")}
-        if len(wet) < int((seg_len + TAIL_S) * SR):
-            wet = np.pad(wet, ((0, int((seg_len + TAIL_S) * SR) - len(wet)), (0, 0)))
+        if len(wet) < n_wet:
+            wet = np.pad(wet, ((0, n_wet - len(wet)), (0, 0)))
         wet = sosfiltfilt(ECHO_HP, wet, axis=0)
         part = np.zeros_like(wet)
         part[: len(dry_st)] += 0.42 * dry_st[: len(part)]

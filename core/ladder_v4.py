@@ -1,6 +1,6 @@
 """Piece v4 image ladders, re-run on lossless input.
 
-Source: the original 3072x4080 photos, square crop (0, 800, 3072, 3872) as in m1b_images.py, exported as PNG.
+Source: the original 3072x4080 photos, square crop (0, 800, 3072, 3872) as in pipeline/m1b_images.py, exported as PNG.
 1024 px PNGs go to the engines (their pixel budget is 1024); 1080 px PNGs are the compositor's A/B endpoints.
 blur-v1  : A, strength = reach = s (the "blurR" ladder the piece used).
 telablur-v1 : A -> B at strength s, direction full or vertical.

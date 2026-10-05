@@ -1,4 +1,4 @@
-/** Canvas drawing shared by the explorer and the game: RdBu heatmap of F, light cone, line plot. */
+/** Canvas drawing for the explorer: RdBu heatmap of F, light cone, line plot. */
 import { arrival, depth, sites, type Run } from "./otoc";
 
 const RDBU: [number, number, number][] = [
@@ -31,10 +31,6 @@ export function fitCanvas(c: HTMLCanvasElement): CanvasRenderingContext2D {
 
 export interface HeatOpts {
   t?: number;
-  /** only reveal columns up to t (game) */
-  reveal?: boolean;
-  highlight?: number[];
-  showCone?: boolean;
 }
 
 /** Heatmap of Re F: x = echo step t, y = site (qubit). */
@@ -50,33 +46,25 @@ export function drawHeatmap(c: HTMLCanvasElement, run: Run, o: HeatOpts = {}) {
   ctx.fillRect(0, 0, W, H);
   for (let s = 0; s < n; s++) {
     for (let i = 0; i < d; i++) {
-      if (o.reveal && o.t !== undefined && i + 1 > Math.floor(o.t)) continue;
       const [r, g, b] = rdbu(run.F_re[s][i]);
       ctx.fillStyle = `rgb(${r | 0},${g | 0},${b | 0})`;
       ctx.fillRect(Math.floor(i * cw), Math.floor(s * ch), Math.ceil(cw) + 1, Math.ceil(ch) + 1);
     }
   }
-  if (o.showCone !== false) {
-    const arr = arrival(run);
-    ctx.strokeStyle = "rgba(255, 196, 0, 0.95)";
-    ctx.lineWidth = Math.max(1.5, W / 400);
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    arr.forEach((a, s) => {
-      const x = a === null ? W : (a - 1) * cw;
-      const y0 = s * ch;
-      if (s === 0) ctx.moveTo(x, y0);
-      else ctx.lineTo(x, y0);
-      ctx.lineTo(x, y0 + ch);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-  for (const s of o.highlight ?? []) {
-    ctx.strokeStyle = "#ffd54a";
-    ctx.lineWidth = Math.max(2, W / 300);
-    ctx.strokeRect(1, s * ch + 1, W - 2, ch - 2);
-  }
+  const arr = arrival(run);
+  ctx.strokeStyle = "rgba(255, 196, 0, 0.95)";
+  ctx.lineWidth = Math.max(1.5, W / 400);
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  arr.forEach((a, s) => {
+    const x = a === null ? W : (a - 1) * cw;
+    const y0 = s * ch;
+    if (s === 0) ctx.moveTo(x, y0);
+    else ctx.lineTo(x, y0);
+    ctx.lineTo(x, y0 + ch);
+  });
+  ctx.stroke();
+  ctx.setLineDash([]);
   ctx.fillStyle = "rgba(0,0,0,0.55)";
   ctx.fillRect(0, run.kick_site * ch, Math.max(4, W / 120), ch);
   if (o.t !== undefined) {
