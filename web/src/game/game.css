@@ -4,7 +4,7 @@
 .screen[hidden] { display: none; }
 @keyframes rise { from { transform: translateY(10px); } to { transform: none; } }
 
-.icon-btn { background: none; border: 0; cursor: pointer; font-size: 1.1em; padding: 0 4px; }
+.icon-btn { background: none; border: 0; cursor: pointer; padding: 0; }
 
 .game-title { font-size: clamp(2.6rem, 12vw, 5.2rem); line-height: 0.92; margin: 8px 0 4px; font-weight: 900; letter-spacing: 0.03em; }
 .game-title span { color: var(--yolk); text-shadow: 0 0 30px rgba(255, 201, 60, 0.35); display: inline-block; animation: jiggle 2.4s ease-in-out infinite; }

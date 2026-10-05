@@ -463,7 +463,7 @@ async function main() {
   const mute = $<HTMLButtonElement>("mute");
   mute.addEventListener("click", () => {
     sfx.setMuted(!sfx.muted);
-    mute.textContent = sfx.muted ? "🔇" : "🔊";
+    mute.textContent = sfx.muted ? "Sound off" : "Sound on";
   });
   initLive();
 }
