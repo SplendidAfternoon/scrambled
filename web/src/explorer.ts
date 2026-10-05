@@ -254,24 +254,14 @@ function bind() {
   ui.cancel.addEventListener("click", () => abort?.abort());
   ui.key.addEventListener("input", syncMeasure);
   ui.recordedBtn.addEventListener("click", () => recorded[0] && showRecorded(recorded[0]));
+  // Pressing a slider inside a text selection makes Chrome drag the selection and the knob freezes.
+  document.addEventListener(
+    "pointerdown",
+    (e) => (e.target as HTMLElement).matches?.('input[type="range"]') && document.getSelection()?.removeAllRanges(),
+    true,
+  );
   window.addEventListener("resize", render);
 }
 
 main().catch((e) => status(`Failed to load data: ${(e as Error).message}`, true));
 
-// [DEBUG-sl] slider diagnosis overlay, only with ?debug; remove once the slider bug is fixed.
-if (location.search.includes("debug")) {
-  const box = document.createElement("div");
-  box.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:99;background:#ffc93c;color:#1b1407;font:14px Consolas,monospace;padding:10px 12px;border-radius:8px;max-width:420px";
-  document.body.append(box);
-  const n = { down: 0, move: 0, input: 0, up: 0, frames: 0 };
-  let last = performance.now(), worst = 0;
-  const show = () => (box.textContent = `kick ${ui.tx.value} · down ${n.down} · move held ${n.move} · input ${n.input} · up ${n.up} · slowest frame ${worst.toFixed(0)} ms`);
-  ui.tx.addEventListener("pointerdown", () => { n.down++; worst = 0; show(); });
-  ui.tx.addEventListener("pointermove", (e) => { if (e.buttons) { n.move++; show(); } });
-  ui.tx.addEventListener("pointerup", () => { n.up++; show(); });
-  ui.tx.addEventListener("input", () => { n.input++; show(); });
-  const frame = (t: number) => { worst = Math.max(worst, t - last); last = t; requestAnimationFrame(frame); };
-  requestAnimationFrame(frame);
-  setInterval(show, 500);
-}

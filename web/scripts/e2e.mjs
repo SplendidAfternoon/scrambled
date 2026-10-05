@@ -30,10 +30,27 @@ const setRange = (p, sel, v) =>
     el.dispatchEvent(new Event("input", { bubbles: true }));
   }, [sel, v]);
 
+// A page-wide text selection used to make Chrome drag the selection instead of the knob.
+async function dragWithSelection(p) {
+  await p.evaluate(() => document.getSelection().selectAllChildren(document.body));
+  const el = p.locator("#tx");
+  const box = await el.boundingBox();
+  const v0 = +(await el.inputValue());
+  const x0 = box.x + ((v0 - 0.05) / 0.55) * box.width, y = box.y + box.height / 2;
+  await p.mouse.move(x0, y);
+  await p.mouse.down();
+  await p.mouse.move(x0 + 60, y, { steps: 8 });
+  await p.mouse.up();
+  const v1 = +(await el.inputValue());
+  if (!(v1 > v0 + 0.05)) errors.push(`[explorer] slider frozen while text was selected: ${v0} -> ${v1}`);
+  await setRange(p, "#tx", v0);
+}
+
 async function explorer(p, tag) {
   await p.goto(`${BASE}/explorer.html`);
   await p.waitForFunction(() => document.querySelector("#prov")?.textContent?.includes("job"));
   await p.waitForTimeout(800);
+  if (tag === "desktop") await dragWithSelection(p);
   await p.click("#play"); // pause autoplay
   await setRange(p, "#t", 9);
   await p.waitForTimeout(300);
