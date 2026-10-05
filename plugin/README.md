@@ -98,7 +98,8 @@ exceeds the Feedback knob.
 The header shows **measured on Moth Atlas (otoc-echo-v1, aer)** while every node sits on its measured
 position. As soon as any site is split or its gain changed, or the Split macro is above 0, it switches to
 **edited from measured map** (custom JSON maps say *custom map* / *edited from custom map* instead). Scramble
-does not count as an edit: it blends two measured maps.
+does not count as an edit: it blends two measured maps. If a host selects Custom JSON before any file has loaded,
+the label turns amber and names the measured map that is actually playing.
 
 ## Controls
 
@@ -106,7 +107,7 @@ The strip under the egg keeps the original controls.
 
 | control | range | what it does |
 |---|---|---|
-| **Map** | 9 measured maps + Custom JSON | `<` / `>` or click the name in the header to step |
+| **Map** | 9 measured maps + Custom JSON | `<` / `>` or click the name in the header to step; Custom JSON joins the cycle once a map has loaded |
 | **Scramble** | 0–100 % | interpolates F cell by cell from the **Control (Clifford)** map at 0 % to the selected map at 100 % |
 | **View** | F / C | **F**: gain = signed \|F\| (the echo that survives). **C**: gain = `(1 − Re F) / 2`, the normalised squared commutator, loud only where the kicked operator has spread: the light cone itself. The egg always cracks by `1 − \|F\|` |
 | **Time** | 50 ms – 8 s | length of the whole echo train. Smoothed, so sweeping it bends pitch like tape, with no clicks |
@@ -115,7 +116,8 @@ The strip under the egg keeps the original controls.
 | **Feedback** | 0–95 % | re-injects the final echo step (`t = depth`) so the whole train replays. Loop gain is normalised by that column's summed \|gain\| (including site gains), so it never exceeds the knob value |
 | **Width** | 0–100 % | scales the site → pan spread (0 % = mono; split sites still move outward) |
 | **Split** | 0–100 % | macro added to every site's split: the whole egg comes apart |
-| **Load JSON…** | file | loads a custom map and selects Custom JSON |
+| **Load JSON…** | file | loads a custom map and selects Custom JSON; a cancelled or unreadable file leaves the current map playing |
+| **i** (header) | | short explanation of the plugin, the gestures, the selected map and its Moth Atlas job |
 | **Site N split** (×12) | 0–100 % | automatable parameter behind each node's outward drag |
 | **Site N gain** (×12) | −60…+12 dB (−60 = mute) | automatable parameter behind each node's vertical drag |
 

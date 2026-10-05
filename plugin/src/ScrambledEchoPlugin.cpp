@@ -171,12 +171,13 @@ protected:
         } else {
             se::TapMap m;
             std::string err;
-            if (!se::loadMapFile(value, m, err)) {
+            if (se::loadMapFile(value, m, err)) {
+                fCustom = std::move(m);
+                fHasCustom = true;
+            } else {
                 d_stderr("Scrambled Echo: %s", err.c_str());
-                return;
+                fHasCustom = false;
             }
-            fCustom = std::move(m);
-            fHasCustom = true;
         }
         applyMaps();
     }

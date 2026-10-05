@@ -103,6 +103,7 @@ public:
         if (!fixedTime.empty()) { fFixedTime = (float) std::atof(fixedTime.c_str()); fSnapAlways = true; }
         const std::string view = envString("SE_UI_VIEW");
         if (!view.empty()) se::decodeEggView(view, fView);
+        fInfoOpen = !envString("SE_UI_INFO").empty();
         loadDemo(envString("SE_UI_DEMO"));
     }
 
@@ -130,6 +131,9 @@ protected:
             if (se::loadMapFile(value, m, err)) { fCustom = std::move(m); fHasCustom = true; }
             else fCustomError = err;
         }
+        // switch to the custom slot only once a file the user picked has actually loaded
+        if (fAwaitingFile && fHasCustom) pulse(kParamMap, (float) se::kCustomMapIndex);
+        fAwaitingFile = false;
         repaint();
     }
 
@@ -176,6 +180,7 @@ protected:
         drawEggOverlay(LW, LH);
         drawHeader(LW);
         drawStrip(LW, LH);
+        drawInfoPanel(LW);
         restore();
         fFramesDrawn++;
     }
@@ -322,6 +327,13 @@ protected:
             const bool dbl = (ev.time - fLastClickTime) < 350 && std::fabs(x - fLastClickX) < 6 && std::fabs(y - fLastClickY) < 6;
             fLastClickTime = ev.time; fLastClickX = x; fLastClickY = y;
 
+            if (fInfoOpen && !infoRect().contains(x, y)) {
+                Rect r = infoPanelRect(LW);
+                r.h = fInfoPanelH;
+                fInfoOpen = false;
+                repaint();
+                if (r.contains(x, y)) return true;
+            }
             if (headerClick(x, y, LW) || stripClick(x, y, LW, LH)) return true;
 
             const int node = hitNode(x, y);
@@ -698,7 +710,6 @@ private:
     void drawEggOverlay(float LW, float LH)
     {
         const float top = kHeaderH + 14.f, left = 24.f;
-        const se::TapMap& m = selectedMap();
         const int nT = fSelGrid.nT, nS = fSelGrid.nS;
 
         // scrims keep the text readable when shards fly over it
@@ -758,36 +769,72 @@ private:
         std::snprintf(buf, sizeof buf, "%d sites x %d steps", nS, nT);
         text(hx + hw, hy + hh + 4.f, buf, nullptr);
 
-        fontSize(11.f);
-        fillColor(kMuted);
-        textAlign(ALIGN_LEFT | ALIGN_TOP);
-        const char* legend = "12 bands = 12 qubit sites.\nCrack = 1 - |F(site, t)|.\nShards flash as their taps fire:\ngold in phase, blue inverted.";
-        textBox(left, hy + hh + 22.f, 200.f, legend, nullptr);
-        float lb[4];
-        textBoxBounds(left, hy + hh + 22.f, 200.f, legend, nullptr, lb);
-
-        // map description under the legend
-        if (!fCustomError.empty() || !m.description.empty()) {
-            const std::string desc = !fCustomError.empty() ? "Custom map not loaded: " + fCustomError : m.description;
-            fontSize(10.5f);
-            fillColor(kDim);
-            textBox(left, lb[3] + 12.f, 200.f, desc.c_str(), nullptr);
+        if (!fCustomError.empty()) {
+            fontSize(11.f);
+            fillColor(kAmber);
+            textAlign(ALIGN_LEFT | ALIGN_TOP);
+            textBox(left, hy + hh + 22.f, 220.f, ("Custom map not loaded: " + fCustomError).c_str(), nullptr);
         }
+    }
 
-        // provenance, top right
-        textAlign(ALIGN_RIGHT | ALIGN_TOP);
-        fontSize(10.f);
-        fillColor(kDim);
-        const std::string job = m.jobId.empty() ? std::string("no job id") : "otoc-echo-v1 " + m.jobId.substr(0, 8);
-        text(LW - 24.f, top, ("Moth Atlas  " + job).c_str(), nullptr);
-        text(LW - 24.f, top + 14.f, "shell: entanglement-shader-v1 9214cb9d", nullptr);
-        text(LW - 24.f, top + 28.f, "emulator (aer)", nullptr);
+    Rect infoRect() const { return {214.f, 13.f, 22.f, 22.f}; }
 
-        // interaction hint, bottom left of the egg area
-        fontSize(10.5f);
-        fillColor(kDim);
-        textAlign(ALIGN_LEFT | ALIGN_BOTTOM);
-        text(left, LH - kStripH - 10.f, "drag a site node: out = split (pan + delay spread), up/down = gain  |  double-click resets  |  right-drag orbit, wheel zoom", nullptr);
+    void drawInfoIcon()
+    {
+        const Rect r = infoRect();
+        const float cx = r.x + r.w * 0.5f, cy = r.y + r.h * 0.5f;
+        beginPath();
+        circle(cx, cy, 9.f);
+        fillColor(fInfoOpen ? kGold.withAlpha(0.18f) : Color(22, 26, 38, 220));
+        fill();
+        strokeColor(fInfoOpen ? kGold : kMuted);
+        strokeWidth(1.2f);
+        stroke();
+        fontSize(13.f);
+        fillColor(fInfoOpen ? kGold : kText);
+        textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
+        text(cx, cy + 1.f, "i", nullptr);
+    }
+
+    Rect infoPanelRect(float LW) const { return {24.f, kHeaderH + 2.f, std::fmin(380.f, LW - 48.f), 0.f}; }
+
+    std::string infoText() const
+    {
+        const se::TapMap& m = selectedMap();
+        std::string s =
+            "An echo whose taps come from a quantum scrambling run. Each of the 12 bands is a qubit site, "
+            "and each repeat plays how much of the echo survives at that site and step, F(site, t). "
+            "Scramble fades from a clean control map into the measured one.\n\n"
+            "Drag a site node out to split it (pan and delay spread), up or down for gain. "
+            "Double-click resets it. Right-drag orbits, the wheel zooms.";
+        if (!m.description.empty()) s += "\n\n" + m.name + ": " + m.description;
+        s += "\n\nMoth Atlas otoc-echo-v1" + (m.jobId.empty() ? std::string() : " " + m.jobId.substr(0, 8)) + ", emulator (aer).";
+        return s;
+    }
+
+    void drawInfoPanel(float LW)
+    {
+        if (!fInfoOpen) return;
+        Rect r = infoPanelRect(LW);
+        const std::string s = infoText();
+        const float pad = 14.f;
+        fontSize(11.5f);
+        textLineHeight(1.3f);
+        textAlign(ALIGN_LEFT | ALIGN_TOP);
+        float b[4];
+        textBoxBounds(r.x + pad, r.y + pad, r.w - 2 * pad, s.c_str(), nullptr, b);
+        r.h = b[3] - r.y + pad;
+        beginPath();
+        roundedRect(r.x, r.y, r.w, r.h, 8.f);
+        fillColor(Color(10, 12, 20, 245));
+        fill();
+        strokeColor(kGold.withAlpha(0.5f));
+        strokeWidth(1.f);
+        stroke();
+        fillColor(kText);
+        textBox(r.x + pad, r.y + pad, r.w - 2 * pad, s.c_str(), nullptr);
+        textLineHeight(1.f);
+        fInfoPanelH = r.h;
     }
 
     Rect prevRect(float LW) const { return {LW * 0.5f - 210.f, 15.f, 28.f, 28.f}; }
@@ -808,24 +855,27 @@ private:
         fontSize(10.5f);
         fillColor(kMuted);
         text(24.f, 46.f, "the egg is the tap map", nullptr);
+        drawInfoIcon();
 
         button(prevRect(LW), "<");
         button(nextRect(LW), ">");
         const int idx = (int) (fValues[kParamMap] + 0.5f);
+        const bool customSlot = idx == se::kCustomMapIndex;
         std::string name;
-        if (idx == se::kCustomMapIndex) name = fHasCustom ? "Custom: " + fCustom.name : "Custom JSON (none loaded)";
+        if (customSlot) name = fHasCustom ? "Custom: " + fCustom.name : "Custom JSON (none loaded)";
         else name = selectedMap().name;
         char buf[160];
-        std::snprintf(buf, sizeof buf, "%d/%d  %s", idx + 1, se::kCustomMapIndex + 1, name.c_str());
+        if (customSlot) std::snprintf(buf, sizeof buf, "%s", name.c_str());
+        else std::snprintf(buf, sizeof buf, "%d/%d  %s", idx + 1, se::kNumPresets, name.c_str());
         button(nameRect(LW), buf);
 
         // honesty label
         const bool edited = isEdited();
-        const bool custom = idx == se::kCustomMapIndex && fHasCustom;
         std::string label;
-        if (custom) label = edited ? "edited from custom map" : "custom map: " + fCustom.name;
+        Color c = edited ? kGold : kMeasured;
+        if (customSlot && !fHasCustom) { label = "no custom map, playing " + selectedMap().name; c = kAmber; }
+        else if (customSlot) label = edited ? "edited from custom map" : "custom map: " + fCustom.name;
         else label = edited ? "edited from measured map" : "measured on Moth Atlas (otoc-echo-v1, aer)";
-        const Color c = edited ? kGold : kMeasured;
         fontSize(11.5f);
         Rectangle<float> bounds;
         textBounds(0, 0, label.c_str(), nullptr, bounds);
@@ -960,10 +1010,12 @@ private:
 
     bool headerClick(double x, double y, float LW)
     {
-        const int nMaps = se::kCustomMapIndex + 1;
-        const int map = (int) (fValues[kParamMap] + 0.5f);
-        if (prevRect(LW).contains(x, y)) { pulse(kParamMap, (float) ((map + nMaps - 1) % nMaps)); return true; }
-        if (nextRect(LW).contains(x, y) || nameRect(LW).contains(x, y)) { pulse(kParamMap, (float) ((map + 1) % nMaps)); return true; }
+        if (infoRect().contains(x, y)) { fInfoOpen = !fInfoOpen; repaint(); return true; }
+        // the custom slot is only in the cycle once a JSON map has loaded
+        const int nMaps = fHasCustom ? se::kCustomMapIndex + 1 : se::kNumPresets;
+        const int map = std::min(std::max((int) (fValues[kParamMap] + 0.5f), 0), nMaps);
+        if (prevRect(LW).contains(x, y)) { pulse(kParamMap, (float) (map == 0 ? nMaps - 1 : map - 1)); return true; }
+        if (nextRect(LW).contains(x, y) || nameRect(LW).contains(x, y)) { pulse(kParamMap, (float) (map >= nMaps - 1 ? 0 : map + 1)); return true; }
         return false;
     }
 
@@ -977,8 +1029,7 @@ private:
         }
         if (stripButton(2, LW, LH).contains(x, y)) { pulse(kParamView, fValues[kParamView] > 0.5f ? 0.f : 1.f); return true; }
         if (stripButton(3, LW, LH).contains(x, y)) {
-            requestStateFile(SE_STATE_CUSTOM_MAP);
-            pulse(kParamMap, (float) se::kCustomMapIndex);
+            fAwaitingFile = requestStateFile(SE_STATE_CUSTOM_MAP);
             return true;
         }
         if (stripButton(4, LW, LH).contains(x, y)) { resetAllEdits(); return true; }
@@ -1034,7 +1085,8 @@ private:
     float fValues[kParamCount];
     std::vector<se::TapMap> fPresets;
     se::TapMap fCustom;
-    bool fHasCustom = false;
+    bool fHasCustom = false, fAwaitingFile = false, fInfoOpen = false;
+    float fInfoPanelH = 0.f;
     std::string fCustomError;
 
     se::EggRenderer fEgg;
