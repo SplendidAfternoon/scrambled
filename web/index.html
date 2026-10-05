@@ -12,80 +12,137 @@
     <header class="topbar">
       <a class="brand" href="./">SCRAMB<span>L</span>ED</a>
       <nav>
+        <a href="#film">Film</a>
+        <a href="#pieces">Pieces</a>
+        <a href="#how">How it works</a>
         <a href="./explorer.html">Explorer</a>
-        <a href="./notebook.html">Notebook</a>
         <a href="https://github.com/SplendidAfternoon/scrambled">GitHub</a>
       </nav>
     </header>
 
-    <section class="hero">
-      <h1>You can't <em>unscramble</em> an egg.<br />Can a qubit chain?</h1>
-      <p class="lede">
-        Nudge one qubit in a chain, run the chain forward, then run it backwards. If nothing spread, the echo comes back clean.
-        If the dynamics scramble, the nudge smears across every qubit and the echo at each site fades. That fading is the
-        out-of-time-order correlator <span class="mono">F(site, t)</span>, the "quantum butterfly effect". Every number on this site
-        was measured with Moth Quantum's <span class="mono">otoc-echo-v1</span> engine on the Atlas platform (emulator backend).
-      </p>
-    </section>
-
-    <section class="cards single">
-      <a class="panel card" href="./explorer.html">
-        <img src="img/strips_scrambling.jpg" alt="Twelve strips of a pan of eggs, each scrambled by its measured echo" />
-        <div class="body">
-          <h2>SCRAMBLED Explorer</h2>
-          <p class="muted">Set the drive angles, measure a chain live on Atlas (no key needed, or bring your own), browse the measured runs, and watch the eggs scramble strip by strip as you scrub through time.</p>
+    <main>
+      <section class="hero" id="film">
+        <div class="hero-text">
+          <p class="eyebrow">Moth Hack 2026 · measured on Moth Atlas</p>
+          <h1>You can't<br /><em>unscramble</em> an egg.</h1>
+          <p class="lede">
+            Nudge one qubit in a chain of twelve, run the chain forward and back, and measure how much of the nudge returns.
+            SCRAMBLED turns that measurement into a film, a track, a plugin and an app.
+          </p>
+          <div class="film-note">
+            <p><b>The film</b> · 88 s · sound on</p>
+            <p class="muted">Three acts: a circuit that cannot scramble, a gentle drive, then full scrambling with a partial return around the middle.</p>
+          </div>
+          <div class="actions">
+            <a class="btn primary" href="./explorer.html">Try the explorer</a>
+            <a class="btn" href="#pieces">See all the pieces</a>
+          </div>
         </div>
-      </a>
-    </section>
+        <video class="film" controls preload="metadata" playsinline poster="media/scrambled_film_poster.jpg" src="media/scrambled_film.mp4" aria-label="SCRAMBLED, the film"></video>
+      </section>
 
-    <section class="pieces" id="pieces">
-      <h2>The pieces</h2>
-      <div class="panel piece wide">
-        <h3>SCRAMBLED, the film <span class="muted small">88 s</span></h3>
-        <video controls preload="metadata" playsinline poster="media/scrambled_film_poster.jpg" src="media/scrambled_film.mp4"></video>
-        <p class="muted small">Twelve strips of egg, one per qubit, each cooked by its measured echo: the Clifford control that never scrambles, a gentle drive, then full scrambling with its finite-size revival.</p>
-      </div>
-      <div class="panel piece">
-        <h3>The track</h3>
-        <audio controls preload="none" src="media/scrambled_track.mp3"></audio>
-        <p class="muted small">Cooking audio echoed on Atlas by <span class="mono">retrocausal-echo-v1</span> through each act's measured map, with a qrc-midi and blur-midi melody.</p>
-      </div>
-      <div class="panel piece">
-        <h3>Scrambled Echo VST3</h3>
-        <p class="muted small">A delay whose echo taps are measured OTOC maps. VST3 for Windows and macOS. <a href="https://github.com/SplendidAfternoon/scrambled/releases/tag/vst">Download</a> (install steps on that page).</p>
-      </div>
-      <div class="panel piece">
-        <h3>Workflow notebook</h3>
-        <p class="muted small">From the first probe to the film, with every Atlas job id. <a href="./notebook.html">Read it here</a>, or <a href="https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb">run it in Colab</a> (no key needed; it replays from the job cache).</p>
-      </div>
-    </section>
+      <section class="section" id="pieces">
+        <h2>Four more ways in</h2>
+        <p class="section-lede muted">Each piece is driven by the same measured data.</p>
+        <div class="gallery">
+          <article class="panel tile">
+            <a class="tile-media" href="./explorer.html"><img src="img/strips_scrambling.jpg" alt="Twelve strips of a pan of eggs, each scrambled by its measured echo" loading="lazy" /></a>
+            <div class="tile-body">
+              <p class="kind">Web app</p>
+              <h3>Explorer</h3>
+              <p class="muted">Set the circuit, measure it live on Atlas with no key needed, and watch the eggs scramble strip by strip.</p>
+              <a class="btn primary" href="./explorer.html">Open the explorer</a>
+            </div>
+          </article>
+          <article class="panel tile">
+            <div class="tile-media"><img src="img/track.jpg" alt="Spectrogram of the track above the three measured scrambling maps" loading="lazy" /></div>
+            <div class="tile-body">
+              <p class="kind">Audio · 88 s</p>
+              <h3>The track</h3>
+              <p class="muted">The sound of eggs cooking, echoed through each act's measured map with <span class="mono">retrocausal-echo-v1</span>.</p>
+              <audio controls preload="none" src="media/scrambled_track.mp3"></audio>
+            </div>
+          </article>
+          <article class="panel tile">
+            <a class="tile-media" href="https://github.com/SplendidAfternoon/scrambled/releases/tag/vst"><img src="img/vst_egg.jpg" alt="The Scrambled Echo plugin's glass egg, shattered by a scrambling map" loading="lazy" /></a>
+            <div class="tile-body">
+              <p class="kind">VST3 plugin · Windows and macOS</p>
+              <h3>Scrambled Echo</h3>
+              <p class="muted">A delay whose taps are measured maps, played through a glass egg you can pull apart to reshape the echo.</p>
+              <a class="btn primary" href="https://github.com/SplendidAfternoon/scrambled/releases/tag/vst">Download</a>
+            </div>
+          </article>
+          <article class="panel tile">
+            <a class="tile-media" href="./notebook.html"><img src="img/notebook.jpg" alt="Notebook figures: a scrambling phase diagram and the residual memory against coupling" loading="lazy" /></a>
+            <div class="tile-body">
+              <p class="kind">Python notebook</p>
+              <h3>The workflow</h3>
+              <p class="muted">From one raw API call to the film, with a new sweep of where scrambling switches on. Runs without a key.</p>
+              <div class="btn-row">
+                <a class="btn primary" href="./notebook.html">Read it</a>
+                <a class="btn" href="https://colab.research.google.com/github/SplendidAfternoon/scrambled/blob/main/notebook/scrambled_workflow.ipynb">Run in Colab</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
 
-    <section class="prose">
-      <div class="panel">
-        <h3>What is measured</h3>
-        <p class="muted small">
-          A kicked Ising chain (RX by θ<sub>x</sub>, RZZ by θ<sub>zz</sub> per layer) of qubits, 12 in the featured runs. The centre qubit gets a Z kick between
-          the forward and backward halves. <span class="mono">F(site, t)</span> is the echo measured at each site after t layers. It starts at ±1,
-          stays there outside the light cone, and decays once the perturbation has spread. In a finite chain it partly revives
-          (around t ≈ 13–16 for 12 sites) when the spreading front reflects off the ends.
-        </p>
-      </div>
-      <div class="panel">
-        <h3>The control</h3>
-        <p class="muted small">
-          At θ<sub>zz</sub> = π every gate is a Clifford. Cliffords map Pauli operators to single Pauli strings, so the nudge never
-          spreads into a superposition of strings: F stays at ±1 forever. Only the kicked qubit flips sign. No scrambling, by
-          construction. The explorer's θ<sub>zz</sub> slider snaps to π so you can see it.
-        </p>
-      </div>
-      <div class="panel">
-        <h3>Honesty notes</h3>
-        <p class="muted small">
-          All runs use Atlas's <span class="mono">aer</span> emulator with exact expectation values. No quantum hardware was used. The blur and morph images come from
-          Atlas's <span class="mono">blur-v1</span> and <span class="mono">telablur-v1</span> engines. Cutting them into strips and crossfading in the browser is classical compositing.
-          Job ids for every run are listed in the app and in the project's <span class="mono">web/README.md</span>.
-        </p>
-      </div>
-    </section>
+      <section class="section" id="how">
+        <h2>How it works</h2>
+        <ol class="steps">
+          <li class="panel">
+            <span class="num">1</span>
+            <h3>Nudge</h3>
+            <p class="muted">A chain of twelve qubits runs forward in time, and the middle qubit gets a small kick.</p>
+          </li>
+          <li class="panel">
+            <span class="num">2</span>
+            <h3>Rewind</h3>
+            <p class="muted">The chain runs backwards. If nothing spread, every qubit returns to where it started.</p>
+          </li>
+          <li class="panel">
+            <span class="num">3</span>
+            <h3>Measure</h3>
+            <p class="muted">Atlas measures how much of the kick each qubit still carries at every step. When the dynamics scramble, it fades.</p>
+          </li>
+          <li class="panel">
+            <span class="num">4</span>
+            <h3>Cook</h3>
+            <p class="muted">Each qubit becomes a strip of egg, an echo tap or a band of the plugin's shell, so you see and hear the fading.</p>
+          </li>
+        </ol>
+
+        <details class="panel physics">
+          <summary>The physics in more detail</summary>
+          <div class="physics-body">
+            <div>
+              <h3>What is measured</h3>
+              <p class="muted">
+                A kicked Ising chain (RX by θ<sub>x</sub>, RZZ by θ<sub>zz</sub> per layer), 12 qubits in the featured runs. The centre qubit gets a Z kick between the
+                forward and backward halves. <span class="mono">F(site, t)</span>, the out-of-time-order correlator, is the echo measured at each site after t layers.
+                It starts at ±1, stays there outside the light cone, and decays once the perturbation has spread. In a finite chain it partly revives around
+                t ≈ 13–16 when the spreading front reflects off the ends.
+              </p>
+            </div>
+            <div>
+              <h3>The control</h3>
+              <p class="muted">
+                At θ<sub>zz</sub> = π every gate is a Clifford. Cliffords map Pauli operators to single Pauli strings, so the nudge never spreads into a superposition
+                of strings and F stays at ±1. Only the kicked qubit flips sign. The explorer's coupling slider snaps to π so you can see it.
+              </p>
+            </div>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p class="muted small">
+        All runs use Atlas's <span class="mono">aer</span> emulator with exact expectation values; no quantum hardware was used. Images come from Atlas's
+        <span class="mono">blur-v1</span> and <span class="mono">telablur-v1</span>; cutting them into strips is classical compositing. Every job id is in the
+        <a href="https://github.com/SplendidAfternoon/scrambled">repository</a>.
+      </p>
+      <p class="muted small">Mana Blumicz · Moth Hack 2026</p>
+    </footer>
   </body>
 </html>

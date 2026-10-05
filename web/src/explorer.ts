@@ -32,6 +32,7 @@ const ui = {
   recorded: $("recorded"),
   recordedText: $("recorded-text"),
   recordedBtn: $<HTMLButtonElement>("recorded-btn"),
+  ownKey: $<HTMLDetailsElement>("own-key"),
 };
 
 const route = pickRoute(location);
@@ -75,12 +76,12 @@ function syncMeasure() {
   const q = health?.remaining;
   if (lending() && q) {
     const left = Math.min(q.ip_hour, q.today);
-    ui.measure.textContent = left > 0 ? `Measure on Atlas (demo key, ${left} left)` : "Demo quota used up";
+    ui.measure.textContent = left > 0 ? `Measure on Atlas (${left} left)` : "Lent runs used up";
     ui.measure.disabled = left <= 0 || !!abort;
     ui.lent.hidden = false;
     ui.lent.textContent =
-      `No key? This site lends its own for small emulator runs: ${q.ip_hour} of ${health!.limits?.per_ip_hourly ?? "?"} left for you this hour, ` +
-      `${q.today} of ${health!.limits?.daily ?? "?"} left today for everyone. Paste your own key for more runs or 16 qubits.`;
+      `No key needed: the site lends its own. ${q.ip_hour} of ${health!.limits?.per_ip_hourly ?? "?"} runs left for you this hour, ` +
+      `${q.today} of ${health!.limits?.daily ?? "?"} left today across all visitors.`;
   } else {
     ui.measure.textContent = "Measure on Atlas";
     ui.measure.disabled = !!abort;
@@ -90,6 +91,7 @@ function syncMeasure() {
 
 async function refreshHealth() {
   health = await serverHealth();
+  if (!health?.server_key || ui.key.value) ui.ownKey.open = true;
   syncMeasure();
 }
 
@@ -195,11 +197,13 @@ async function measure() {
   const key = ui.key.value.trim();
   const lent = lending();
   if (!key && !lent) {
+    ui.ownKey.open = true;
     status("Paste your Atlas API key first. Until then the explorer shows the measured runs.", true);
     return;
   }
   if (lent && n > (health?.limits?.n_sites ?? 12)) {
-    status(`Demo-key runs are limited to ${health?.limits?.n_sites ?? 12} qubits. Pick 8 or 12, or paste your own key.`, true);
+    ui.ownKey.open = true;
+    status(`The lent key is limited to ${health?.limits?.n_sites ?? 12} qubits. Pick 8 or 12, or paste your own key.`, true);
     return;
   }
   keyStore.set(key, ui.remember.checked);

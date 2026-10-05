@@ -10,8 +10,8 @@
   <body>
     <header class="topbar">
       <a class="brand" href="./">SCRAMB<span>L</span>ED</a>
-      <span class="muted small">Explorer</span>
       <nav>
+        <a href="./">Home</a>
         <a href="./explorer.html" aria-current="page">Explorer</a>
         <a href="./notebook.html">Notebook</a>
         <a href="https://github.com/SplendidAfternoon/scrambled">GitHub</a>
@@ -19,99 +19,100 @@
     </header>
 
     <main class="explorer">
+      <div class="explorer-head">
+        <h1>Explorer</h1>
+        <p class="muted">Set the circuit on the left. Each strip of egg is one qubit: it blurs as its echo fades, turns to scrambled egg once the nudge has spread, and flips when the echo inverts.</p>
+      </div>
+
       <aside class="controls">
-        <div class="panel recorded" id="recorded" hidden>
-          <div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <strong>A real live run</strong><span class="tag live">recorded</span>
+        <div class="panel group">
+          <h2 class="panel-title">Circuit</h2>
+          <div class="ctrl">
+            <div class="row"><label for="tx">Kick strength <span class="muted">θ<sub>x</sub></span></label><span class="val" id="tx-val"></span></div>
+            <input id="tx" type="range" min="0.05" max="0.6" step="0.01" value="0.3" />
+            <p class="muted small">Low keeps the echo loud and regular; high inverts, weakens and erases it.</p>
           </div>
-          <p class="muted small" id="recorded-text" style="margin:6px 0 10px"></p>
-          <button class="btn" id="recorded-btn" style="width:100%">Show the recorded live run</button>
-        </div>
-        <div class="panel ctrl">
-          <div class="row"><label for="tx">θ<sub>x</sub> transverse kick</label><span class="val" id="tx-val"></span></div>
-          <input id="tx" type="range" min="0.05" max="0.6" step="0.01" value="0.3" />
-          <p class="muted small">Low: the echo stays loud and regular. High: inverted, attenuated, erased.</p>
-        </div>
-        <div class="panel ctrl">
-          <div class="row"><label for="tzz">θ<sub>zz</sub> coupling</label><span class="val" id="tzz-val"></span></div>
-          <input id="tzz" type="range" min="0.1" max="1" step="0.01" value="0.35" />
-          <p class="muted small">Snaps to <b>π = Clifford</b> near the top: a circuit that cannot scramble.</p>
-        </div>
-        <div class="panel ctrl">
-          <div class="row"><span>qubits in the chain</span><span class="val" id="n-val"></span></div>
-          <div class="seg" id="n-seg">
-            <button class="btn" data-n="8" aria-pressed="false">8</button>
-            <button class="btn" data-n="12" aria-pressed="true">12</button>
-            <button class="btn" data-n="16" aria-pressed="false" title="live only">16</button>
+          <div class="ctrl">
+            <div class="row"><label for="tzz">Coupling <span class="muted">θ<sub>zz</sub></span></label><span class="val" id="tzz-val"></span></div>
+            <input id="tzz" type="range" min="0.1" max="1" step="0.01" value="0.35" />
+            <p class="muted small">At the far right it snaps to π, a Clifford circuit that cannot scramble.</p>
+          </div>
+          <div class="ctrl">
+            <div class="row"><span>Qubits</span><span class="val" id="n-val"></span></div>
+            <div class="seg" id="n-seg">
+              <button class="btn" data-n="8" aria-pressed="false">8</button>
+              <button class="btn" data-n="12" aria-pressed="true">12</button>
+              <button class="btn" data-n="16" aria-pressed="false" title="Needs your own key">16</button>
+            </div>
           </div>
         </div>
 
-        <div class="panel">
-          <div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
-            <strong>Measure on Atlas</strong><span class="tag cached" id="mode-tag">cached</span>
+        <div class="panel group">
+          <div class="row">
+            <h2 class="panel-title">Measure on Atlas</h2><span class="tag cached" id="mode-tag">cached</span>
           </div>
-          <p class="muted small" style="margin:6px 0 10px">
-            Runs <span class="mono">otoc-echo-v1</span> (aer emulator, exact, depth 32, 1 credit) with your own Atlas key. The key stays in this tab and is sent only to
-            <span class="mono" id="route-host">api.mothquantum.com</span>.
-          </p>
+          <p class="muted small">Runs a real <span class="mono">otoc-echo-v1</span> job at these settings on Atlas's emulator. Until then you are browsing runs measured in advance.</p>
           <p class="small lent" id="lent" hidden></p>
-          <label for="key" class="small muted">Atlas API key</label>
-          <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="moth_…" />
-          <label class="small muted" style="margin:8px 0"><input type="checkbox" id="remember" /> remember for this tab (sessionStorage)</label>
-          <div style="display:flex;gap:8px">
-            <button class="btn primary" id="measure" style="flex:1">Measure on Atlas</button>
+          <div class="btn-row">
+            <button class="btn primary" id="measure">Measure on Atlas</button>
             <button class="btn" id="cancel" hidden>Cancel</button>
           </div>
           <div class="status" id="status" aria-live="polite"></div>
-          <details style="margin-top:8px">
-            <summary class="small">How the browser reaches Atlas</summary>
+          <details id="own-key">
+            <summary class="small">Use your own Atlas key</summary>
+            <label for="key" class="small muted">Atlas API key</label>
+            <input id="key" type="password" autocomplete="off" spellcheck="false" placeholder="moth_…" />
+            <label class="small muted check"><input type="checkbox" id="remember" /> Remember for this tab</label>
             <p class="small muted">
-              Atlas's CORS policy only admits <span class="mono">http://localhost:3000</span>. Running locally (<span class="mono">npm run dev</span>), the page calls the API directly.
-              On a deployed site it goes through a small same-origin proxy (<span class="mono">/api/atlas</span>) that forwards only otoc-echo-v1 submit/status/result
-              calls with your key. If the site owner has enabled it, the proxy can also lend its own key when you leave the field empty: only for small
-              emulator runs (12 qubits, depth 32, aer, exact), a few per visitor per hour and a daily cap, and the key never reaches your browser.
-              On a static host without the proxy, the explorer runs on the measured runs only.
+              Your key stays in this tab and goes only to <span class="mono" id="route-host">api.mothquantum.com</span>. Atlas only accepts browser calls from
+              localhost, so the deployed site forwards otoc-echo-v1 requests through its own <span class="mono">/api/atlas</span> proxy. Without a key, the proxy
+              lends the site's key for 12-qubit emulator runs, a few per visitor per hour, and that key never reaches your browser.
             </p>
           </details>
         </div>
+
+        <div class="panel group recorded" id="recorded" hidden>
+          <div class="row">
+            <h2 class="panel-title">A real browser run</h2><span class="tag live">recorded</span>
+          </div>
+          <p class="muted small" id="recorded-text"></p>
+          <button class="btn" id="recorded-btn">Replay it</button>
+        </div>
       </aside>
 
-      <section>
-        <div class="stage">
-          <div class="panel photo">
-            <canvas id="photo" width="512" height="512" aria-label="Egg photo cut into one strip per qubit"></canvas>
-            <div class="ticks" id="ticks"></div>
-            <div class="scrub">
-              <button class="btn" id="play" aria-label="Play">▶</button>
-              <input id="t" type="range" min="1" max="32" step="0.01" value="1" aria-label="echo step t" />
-              <span class="t" id="t-val">t = 1</span>
-            </div>
-            <p class="muted small" style="margin:8px 0 0">
-              One strip per qubit. A strip blurs as its echo |F| drops, turns into scrambled egg once it has been scrambled for long enough, and flips upside
-              down when the echo is inverted (Re F &lt; 0).
-            </p>
+      <section class="stage">
+        <div class="panel photo">
+          <canvas id="photo" width="512" height="512" aria-label="Egg photo cut into one strip per qubit"></canvas>
+          <div class="ticks" id="ticks"></div>
+          <div class="scrub">
+            <button class="btn" id="play" aria-label="Play">▶</button>
+            <input id="t" type="range" min="1" max="32" step="0.01" value="1" aria-label="echo step t" />
+            <span class="t" id="t-val">t = 1</span>
           </div>
-          <div class="plots">
-            <div class="panel">
-              <div class="legend" style="margin-bottom:8px">
-                <strong style="color:var(--ink)">Re F(site, t)</strong>
-                <span><span class="swatch" style="background:linear-gradient(90deg,#b2182b,#f7f7f7,#2166ac)"></span>−1 … +1</span>
-                <span><span class="swatch" style="border-top:2px dashed #ffc400;height:0"></span>light cone</span>
-                <span>▮ kicked qubit</span>
-              </div>
-              <canvas id="heat" aria-label="Heatmap of the measured echo"></canvas>
-              <div class="legend small" style="justify-content:space-between;margin-top:4px"><span>t = 1</span><span>echo step →</span><span>t = 32</span></div>
+        </div>
+        <div class="plots">
+          <div class="panel">
+            <div class="plot-head">
+              <h2 class="panel-title">Echo at each qubit</h2>
+              <span class="mono small muted">Re F(site, t)</span>
             </div>
-            <div class="panel">
-              <div class="legend" style="margin-bottom:8px">
-                <strong style="color:var(--ink)">How much survives</strong>
-                <span><span class="swatch" style="background:#ffc93c"></span>mean |F| (all but the kicked qubit)</span>
-                <span><span class="swatch" style="background:#4393c3"></span>|F| at the far end</span>
-              </div>
-              <canvas id="lines" aria-label="Mean echo magnitude over time"></canvas>
+            <div class="legend">
+              <span><span class="swatch" style="background:linear-gradient(90deg,#b2182b,#f7f7f7,#2166ac)"></span>inverted … returns</span>
+              <span><span class="swatch" style="border-top:2px dashed #ffc400;height:0"></span>light cone</span>
+              <span>▮ kicked qubit</span>
             </div>
-            <div class="panel provenance" id="prov"></div>
+            <canvas id="heat" aria-label="Heatmap of the measured echo"></canvas>
+            <div class="legend small axis"><span>t = 1</span><span>echo step →</span><span>t = 32</span></div>
           </div>
+          <div class="panel">
+            <div class="plot-head"><h2 class="panel-title">How much survives</h2></div>
+            <div class="legend">
+              <span><span class="swatch" style="background:#ffc93c"></span>average over the other qubits</span>
+              <span><span class="swatch" style="background:#4393c3"></span>the far end</span>
+            </div>
+            <canvas id="lines" aria-label="Mean echo magnitude over time"></canvas>
+          </div>
+          <div class="panel provenance" id="prov"></div>
         </div>
       </section>
     </main>
