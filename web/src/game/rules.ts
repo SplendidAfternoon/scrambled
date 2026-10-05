@@ -4,6 +4,8 @@ import { absFat, meanAbs, type Run } from "../lib/otoc";
 export interface PanChoice {
   label: string;
   hint: string;
+  /** heat shown on the card, 0 (lid) .. 3 */
+  flames: number;
   n_sites: number;
   theta_x_pi: number;
   theta_zz_pi: number;

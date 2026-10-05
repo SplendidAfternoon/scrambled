@@ -69,6 +69,7 @@ let choice: PanChoice;
 let run: Run;
 let t = 1;
 let cooking = false;
+let ready = false;
 let lastFrame = 0;
 let lastStep = 1;
 const custom = new Map<number, { choice: PanChoice; run: Run }[]>();
@@ -94,23 +95,23 @@ function showChoose() {
   $("c-title").textContent = `${level.id}. ${level.title}`;
   $("c-blurb").textContent = level.blurb;
   $("c-rules").innerHTML = `
-    <span class="tag">golden eggs: ${level.targetOffsets.length}</span>
-    <span class="tag">cook at least t = ${level.minT}</span>
-    <span class="tag">echo needed ≥ ${level.threshold.toFixed(2)}</span>
+    <span class="tag">${level.targetOffsets.length} golden eggs</span>
+    <span class="tag">keep them ${Math.round(level.threshold * 100)}% whole</span>
     <span class="tag">${level.seconds} s on the clock</span>`;
+  $("c-pick").textContent = choicesFor(level).length > 1 ? "Pick a pan:" : "Your pan:";
   const box = $("c-choices");
   box.innerHTML = "";
   for (const { choice: c, run: r } of choicesFor(level)) {
     const b = document.createElement("button");
     b.className = "choice";
-    b.innerHTML = `<h3>${c.label}</h3><p>${c.hint}</p><div class="params">θx ${fmtPi(c.theta_x_pi)} · θzz ${fmtPi(c.theta_zz_pi)} · ${c.n_sites} qubits · job ${shortId(r.job_id)}</div><canvas></canvas>`;
+    const heat = c.flames === 0 ? `<span class="lid">lid on</span>` : Array.from({ length: 3 }, (_, i) => `<i class="${i < c.flames ? "on" : ""}"></i>`).join("");
+    b.innerHTML = `<div class="heat" aria-hidden="true">${heat}</div><h3>${c.label}</h3><p>${c.hint}</p><div class="params" title="θx ${fmtPi(c.theta_x_pi)} · θzz ${fmtPi(c.theta_zz_pi)} · job ${r.job_id}">measured on Moth Atlas</div>`;
     b.addEventListener("click", () => {
       sfx.unlock();
       sfx.click();
       startCook(c, r);
     });
     box.appendChild(b);
-    requestAnimationFrame(() => drawHeatmap(b.querySelector("canvas")!, r, { highlight: targets(level, r) }));
   }
   show("s-choose");
 }
@@ -152,7 +153,8 @@ function initLive() {
         timeoutMs: 600_000,
         onStatus: (s) => (st.textContent = `job ${s.job_id ? shortId(s.job_id) : ""} · ${s.status} · ${(s.elapsed / 1000).toFixed(0)} s`),
       });
-      const c: PanChoice = { label: "Your pan (live)", hint: `Measured just now on Atlas, job ${shortId(r.job_id)}.`, n_sites: 12, theta_x_pi: txp, theta_zz_pi: tzp };
+      const flames = tzp === 1 ? 0 : Math.min(3, Math.max(1, Math.round(txp / 0.1)));
+      const c: PanChoice = { label: "Your pan (live)", hint: `Measured just now on Atlas, job ${shortId(r.job_id)}.`, flames, n_sites: 12, theta_x_pi: txp, theta_zz_pi: tzp };
       custom.set(forLevel, [...(custom.get(forLevel) ?? []), { choice: c, run: r }]);
       st.textContent = `Done: job ${r.job_id}. Your pan is in the list above.`;
       if (!$("s-choose").hidden && level.id === forLevel) showChoose();
@@ -167,7 +169,6 @@ function initLive() {
 
 /* ---------------- cook screen ---------------- */
 const pan = $<HTMLCanvasElement>("pan");
-const mini = $<HTMLCanvasElement>("mini");
 interface Puff { x: number; y: number; vy: number; life: number; r: number }
 let puffs: Puff[] = [];
 
@@ -240,9 +241,9 @@ function drawPan(now: number) {
     const ang = Math.sin(now / 90 + s * 1.7) * (1 - m) * 0.25;
     const dx = Math.sin(now / 70 + s) * wob;
     if (tg.has(s)) {
-      ctx.strokeStyle = "#ffd54a";
+      ctx.strokeStyle = ready ? "#7ad17a" : "#ffd54a";
       ctx.lineWidth = Math.max(3, size * 0.07);
-      ctx.shadowColor = "#ffc93c";
+      ctx.shadowColor = ready ? "#7ad17a" : "#ffc93c";
       ctx.shadowBlur = size * 0.35;
       ctx.beginPath();
       ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
@@ -297,12 +298,17 @@ function drawPan(now: number) {
 function updateMeters() {
   const d = depth(run);
   const mem = meanAbs(run, targets(level, run), t);
-  $("k-t").textContent = `t = ${t.toFixed(1)} / ${d}`;
+  ready = t < d && judge(level, run, t).win;
+  const cookedEnough = t >= level.minT;
+  $("k-t").textContent = cookedEnough ? "done enough" : "still raw";
   $("k-fill").style.width = `${((t - 1) / (d - 1)) * 100}%`;
-  $("k-mem").textContent = mem.toFixed(2);
+  $("k-mem").textContent = `${Math.round(mem * 100)}%`;
   const mf = $("k-memfill");
   mf.style.width = `${mem * 100}%`;
   mf.classList.toggle("low", mem < level.threshold);
+  const btn = $<HTMLButtonElement>("serve");
+  btn.classList.toggle("ready", ready);
+  btn.textContent = ready ? "SERVE NOW" : "SERVE";
   return mem;
 }
 
@@ -318,7 +324,6 @@ function frame(now: number) {
   if (Math.floor(t) > lastStep) {
     lastStep = Math.floor(t);
     sfx.ping(mem);
-    drawHeatmap(mini, run, { t, reveal: true, highlight: targets(level, run) });
   }
   if (t >= d) {
     serve();
@@ -340,12 +345,11 @@ function startCook(c: PanChoice, r: Run) {
   z.style.left = `${((level.minT - 1) / (d - 1)) * 100}%`;
   z.style.right = "0";
   $("k-thr").style.left = `${level.threshold * 100}%`;
-  $("k-prov").textContent = `${c.label}: θx ${fmtPi(c.theta_x_pi)}, θzz ${fmtPi(c.theta_zz_pi)} · measured with otoc-echo-v1 on Atlas (aer emulator) · job ${shortId(r.job_id)}`;
+  $("k-prov").textContent = `${c.label} · every egg follows a real measurement from Moth Atlas (otoc-echo-v1, job ${shortId(r.job_id)})`;
   $("stamp").hidden = true;
   $<HTMLButtonElement>("serve").disabled = false;
   updateMeters();
   show("s-cook");
-  drawHeatmap(mini, run, { t, reveal: true, highlight: targets(level, run) });
   sfx.startSizzle();
   cooking = true;
   requestAnimationFrame(frame);
@@ -364,6 +368,7 @@ function serve() {
   stamp.className = `stamp ${v.win ? "good" : "bad"}`;
   stamp.hidden = false;
   $<HTMLButtonElement>("serve").disabled = true;
+  $("serve").classList.remove("ready");
   if (v.win) sfx.win(v.outcome === "perfect");
   else {
     sfx.lose();
@@ -383,22 +388,26 @@ function why(v: Verdict, l: Level, r: Run, c: PanChoice): string {
   const arr = arrival(r);
   const firstHit = Math.min(...tg.map((s) => arr[s] ?? Infinity));
   const win = winningSteps(l, r);
-  const windowTxt = win.length ? `This pan had a whole-egg window at t = ${win[0]}${win.length > 1 ? `–${win[win.length - 1]}` : ""}.` : "This pan never gets the golden eggs back above the line after the minimum cook. Try another pan.";
-  const at = `At t = ${v.t.toFixed(1)} the golden eggs' echo was |F| = ${v.memory.toFixed(2)}`;
-  const cone = Number.isFinite(firstHit) ? ` The light cone reached the nearest golden egg at t = ${firstHit}.` : "";
+  const d = depth(r);
+  const pct = (x: number) => `${Math.round(x * 100)}%`;
+  const when = (step: number) => (step / d < 0.34 ? "early" : step / d < 0.67 ? "about halfway" : "late");
+  const windowTxt = win.length
+    ? `With this pan the moment to serve was ${when(win[0])} in the cook${win.length <= 2 ? ", and it was brief" : ""}. Watch for the SERVE NOW button.`
+    : "This pan never works for this level, so try another one.";
+  const cone = Number.isFinite(firstHit) && firstHit < v.t ? " The crack had already reached them." : "";
   switch (v.outcome) {
     case "raw":
-      return `Served at t = ${v.t.toFixed(1)}. This level needs at least t = ${l.minT} of cooking. ${windowTxt}`;
+      return `Too early: the eggs were still raw. Wait for the cook bar to reach the green zone. ${windowTxt}`;
     case "burnt":
-      return `The clock ran out at t = ${depth(r)}. ${windowTxt}`;
+      return `The clock ran out and the eggs burnt. ${windowTxt}`;
     case "scrambled":
-      return `${at}, below the ${l.threshold.toFixed(2)} you needed.${cone} ${windowTxt}`;
+      return `The golden eggs were only ${pct(v.memory)} whole and you needed ${pct(l.threshold)}.${cone} ${windowTxt}`;
     default: {
       let physics = "";
-      if (c.theta_zz_pi === 1) physics = "θzz = π makes every gate a Clifford. A Clifford maps the kicked Pauli to a single Pauli string, so the echo stays at ±1 everywhere: no scrambling, by construction.";
-      else if (v.t >= 13 && firstHit <= v.t) physics = "You caught the finite-size revival. The scrambled front reflected off the ends of the 12-qubit chain and partly refocused the echo.";
-      else physics = "You served before the scrambling front had washed over the golden eggs.";
-      return `${at}. ${physics}`;
+      if (c.theta_zz_pi === 1) physics = "Under the Clifford lid the crack still moves from egg to egg, but it never smears out, so nothing scrambles. In a real quantum circuit made only of Clifford gates, that is guaranteed.";
+      else if (v.t >= 13 && firstHit <= v.t) physics = "You caught the echo. The scramble bounced off the edge of the pan and briefly put the golden eggs back together, which really happens in a short chain of qubits.";
+      else physics = "You served before the crack reached them.";
+      return `The golden eggs were ${pct(v.memory)} whole. ${physics}`;
     }
   }
 }
@@ -410,9 +419,13 @@ function showResult(v: Verdict, levelIdx: number) {
   verdict.className = `verdict ${v.win ? "good" : "bad"}`;
   $("r-score").textContent = v.win ? `+${v.score} pts` : `${state.lives} ${state.lives === 1 ? "life" : "lives"} left`;
   $("r-why").textContent = why(v, l, run, choice);
-  $("r-prov").textContent = `Full measured echo for "${choice.label}" (golden eggs outlined, white line = when you served). otoc-echo-v1 · aer · job ${run.job_id}`;
+  $("r-prov").textContent = `Each row is one egg and time runs left to right. Strong colour means whole (red is whole but flipped), pale means scrambled. Golden eggs are outlined and the white line is when you served. Measured with otoc-echo-v1 on Moth Atlas (aer emulator), job ${run.job_id}.`;
   show("s-result");
-  requestAnimationFrame(() => drawHeatmap($<HTMLCanvasElement>("r-heat"), run, { t: v.t, highlight: targets(l, run) }));
+  const sci = $<HTMLDetailsElement>("r-sci");
+  const r = run;
+  const draw = () => sci.open && drawHeatmap($<HTMLCanvasElement>("r-heat"), r, { t: v.t, highlight: targets(l, r) });
+  sci.ontoggle = draw;
+  requestAnimationFrame(draw);
   const next = $<HTMLButtonElement>("r-next");
   next.textContent = state.over ? "See results" : v.win ? "Next level" : "Try again";
   next.onclick = () => {
@@ -429,8 +442,8 @@ function showEnd() {
   $("e-score").textContent = `${state.score} pts · best ${best}`;
   const perfects = state.history.filter((h) => h.outcome === "perfect").length;
   $("e-text").textContent = state.cleared
-    ? `You cleared all ${LEVELS.length} pans${perfects ? ` with ${perfects} perfect serve${perfects > 1 ? "s" : ""}` : ""}. You read the light cone, used a Clifford circuit to stop scrambling outright, and timed a finite-size echo revival.`
-    : `You reached level ${state.level + 1}. Scrambling is fast. The trick is to read where the light cone is going before it gets there.`;
+    ? `You cleared all ${LEVELS.length} pans${perfects ? ` with ${perfects} perfect serve${perfects > 1 ? "s" : ""}` : ""}. Along the way you outran a spreading crack, used a Clifford lid to stop scrambling outright and caught an echo bouncing back off the pan's edge. All three are real behaviours of qubits, measured on Moth Atlas.`
+    : `You reached level ${state.level + 1}. Scrambling is fast. The trick is to see where the crack is heading before it gets there.`;
   $("e-eggs").innerHTML = state.history
     .map((h) => `<img src="${spriteUrl(h.outcome === "perfect" ? "egg_fresh" : h.win ? "egg_crack" : h.outcome === "burnt" ? "egg_burnt" : "egg_scrambled")}" alt="${h.outcome}" title="${STAMP[h.outcome]} t=${h.t.toFixed(1)}" />`)
     .join("");

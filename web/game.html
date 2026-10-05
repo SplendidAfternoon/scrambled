@@ -29,17 +29,16 @@
           <img class="sprite wob d2" data-sprite="egg_scrambled" alt="" />
         </div>
         <h1 class="game-title">DON'T<br /><span>SCRAMBLE</span><br />THE EGG</h1>
-        <p class="tagline">A qubit chain is a pan of eggs. Nudge one and the nudge spreads to the rest: that's scrambling. Serve before your golden eggs lose their echo.</p>
+        <p class="tagline">Twelve qubits, drawn as a pan of eggs. Crack one and the crack spreads to the rest: that is quantum scrambling, measured for real on Moth Atlas. Serve before your golden eggs scramble.</p>
         <button class="btn primary big" id="start">Start cooking</button>
         <p class="muted small" id="best"></p>
         <details class="how">
           <summary>How to play</summary>
           <ol>
-            <li>Each level is a chain of 12 qubits, drawn as eggs. The middle one gets nudged (◆).</li>
-            <li>Pick a pan. Each pan is a different circuit, measured on Moth Atlas with <span class="mono">otoc-echo-v1</span>.</li>
-            <li>The clock runs through 32 echo steps. Eggs blur, crack and scramble as their measured echo |F| fades.</li>
-            <li>Tap <b>SERVE</b> (or press space) once the cook bar is green, while the golden eggs' echo is above the line.</li>
-            <li>Too early: raw. Echo too low: scrambled. Too late: burnt. You get three lives.</li>
+            <li>The egg with the red ring gets cracked. Protect the eggs with the golden rings.</li>
+            <li>Pick a pan. Each one spreads the crack differently, so read the descriptions.</li>
+            <li>Cooking starts at once. The rings turn green and the button says <b>SERVE NOW</b> when serving would win.</li>
+            <li>Tap <b>SERVE</b>, press space or tap the pan. Too early: raw. Too late: scrambled or burnt. You have three lives.</li>
           </ol>
         </details>
       </section>
@@ -50,6 +49,7 @@
         <h2 id="c-title"></h2>
         <p id="c-blurb" class="muted"></p>
         <div class="rules" id="c-rules"></div>
+        <h3 class="pick" id="c-pick"></h3>
         <div class="choices" id="c-choices"></div>
         <details class="live" id="live-box">
           <summary>Measure your own pan on Atlas</summary>
@@ -71,19 +71,16 @@
         </div>
         <div class="meters">
           <div class="meter" aria-label="cook time">
-            <div class="meter-label"><span>cook</span><span class="mono" id="k-t"></span></div>
+            <div class="meter-label"><span>cooking (green = done enough)</span><span id="k-t"></span></div>
             <div class="bar cook"><div class="zone" id="k-zone"></div><div class="fill" id="k-fill"></div></div>
           </div>
-          <div class="meter" aria-label="golden egg echo">
-            <div class="meter-label"><span>golden egg echo |F|</span><span class="mono" id="k-mem"></span></div>
+          <div class="meter" aria-label="golden eggs whole">
+            <div class="meter-label"><span>golden eggs whole (stay right of the white line)</span><span class="mono" id="k-mem"></span></div>
             <div class="bar mem"><div class="line" id="k-thr"></div><div class="fill" id="k-memfill"></div></div>
           </div>
         </div>
         <button class="btn primary serve" id="serve">SERVE</button>
-        <div class="mini">
-          <canvas id="mini" aria-label="Measured echo so far"></canvas>
-          <div class="small muted" id="k-prov"></div>
-        </div>
+        <div class="small muted" id="k-prov"></div>
       </section>
 
       <!-- result -->
@@ -91,11 +88,14 @@
         <h2 class="verdict" id="r-verdict"></h2>
         <p class="score-pop" id="r-score"></p>
         <p id="r-why"></p>
-        <canvas id="r-heat" class="r-heat" aria-label="The full measured echo for this pan"></canvas>
-        <p class="small muted" id="r-prov"></p>
         <div class="row-btns">
           <button class="btn primary big" id="r-next"></button>
         </div>
+        <details class="how science" id="r-sci">
+          <summary>See what Atlas measured</summary>
+          <canvas id="r-heat" class="r-heat" aria-label="The full measured echo for this pan"></canvas>
+          <p class="small muted" id="r-prov"></p>
+        </details>
       </section>
 
       <!-- end -->
