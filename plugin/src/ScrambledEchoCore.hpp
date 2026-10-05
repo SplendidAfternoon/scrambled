@@ -29,13 +29,6 @@ struct TapMap {
     std::vector<Tap> taps;
 };
 
-// The egg has 12 latitude bands, one per qubit site; taps of maps with another site count go to the band
-// nearest their pan position.
-constexpr int kBands = 12;
-constexpr float kMinSiteGainDb = -24.f, kMaxSiteGainDb = 6.f;
-constexpr float kSplitPan = 0.75f;    // full split moves a site 75 % of the way to its stereo edge
-constexpr float kSplitDelay = 0.5f;   // full split stretches an edge site's delays by 50 % (centre: 12.5 %)
-
 struct Params {
     float trainMs = 1000.f;  // length of the whole echo train (t = depth lands here)
     float mix = 0.5f;        // 0 dry .. 1 wet
@@ -44,36 +37,6 @@ struct Params {
     float width = 1.f;       // 0 mono .. 1 full site->pan spread
     bool commutator = false; // false: gain = |F| (signed); true: gain = C = (1 - Re F) / 2, the normalised
                              // squared commutator, loud only where the kicked operator has spread
-    float split = 0.f;                // global Split macro, added to every site's split
-    float siteSplit[kBands] = {};     // 0 = on the shell (measured), 1 = dragged fully out
-    float siteGainDb[kBands] = {};    // vertical drag, kMinSiteGainDb .. kMaxSiteGainDb
-};
-
-inline bool isEdited(const Params& p)
-{
-    if (std::fabs(p.split) > 1e-4f) return true;
-    for (int i = 0; i < kBands; ++i)
-        if (std::fabs(p.siteSplit[i]) > 1e-4f || std::fabs(p.siteGainDb[i]) > 1e-3f) return true;
-    return false;
-}
-
-inline int bandOfPan(float pan) { return std::clamp((int) std::lround(pan * (kBands - 1)), 0, kBands - 1); }
-
-// Written by the audio thread once per block with relaxed atomics, read by the UI at frame rate.
-struct Telemetry {
-    std::atomic<float> bandPos[kBands];  // recent activity of the band's in-phase taps (peak-held, decaying)
-    std::atomic<float> bandNeg[kBands];  // ... and of its inverted (F < 0) taps
-    std::atomic<float> phase;            // train lengths elapsed since the last input onset
-    std::atomic<float> level;            // wet output peak, decaying
-    std::atomic<uint32_t> blocks;        // incremented every processed block
-    Telemetry() { clear(); }
-    void clear()
-    {
-        for (int i = 0; i < kBands; ++i) { bandPos[i].store(0.f, std::memory_order_relaxed); bandNeg[i].store(0.f, std::memory_order_relaxed); }
-        phase.store(1e3f, std::memory_order_relaxed);
-        level.store(0.f, std::memory_order_relaxed);
-        blocks.store(0, std::memory_order_relaxed);
-    }
 };
 
 class Core {
@@ -94,9 +57,6 @@ public:
         trainCoef = 1.f - std::exp(-1.f / (0.08f * sr));
         mixCoef = 1.f - std::exp(-1.f / (0.02f * sr));
         fadeLen = std::max(1, (int) (0.02f * sr));
-        envAtk = 1.f - std::exp(-1.f / (0.001f * sr));
-        envRel = 1.f - std::exp(-1.f / (0.03f * sr));
-        envSlowCoef = 1.f - std::exp(-1.f / (0.3f * sr));
         reset();
     }
 
@@ -104,14 +64,8 @@ public:
     {
         std::fill(buf.begin(), buf.end(), 0.f);
         w = 0; fbState = lpState = hpIn = hpOut = 0.f;
-        envFast = envSlow = 0.f;
-        sinceOnset = 1e9f;
-        holdoff = 0;
         snap = true;
-        tel.clear();
     }
-
-    const Telemetry& telemetry() const { return tel; }
 
     // Message thread. Compiles both maps into one merged tap set and hands it to the audio thread.
     void setMaps(const TapMap& control, const TapMap& target)
