@@ -85,6 +85,15 @@
             </div>
           </article>
         </div>
+        <a class="panel bonus" href="./game.html">
+          <img src="sprites/egg_scrambled.png" alt="" width="56" height="56" />
+          <span>
+            <span class="kind">Bonus · not an entry</span>
+            <b>Don't scramble the egg</b>
+            <span class="muted">A short game on the same measured runs: serve the pan before the scramble reaches your golden eggs.</span>
+          </span>
+          <span class="btn">Play</span>
+        </a>
       </section>
 
       <section class="section" id="how">
@@ -111,28 +120,6 @@
             <p class="muted">Each qubit becomes a strip of egg, an echo tap or a band of the plugin's shell, so you see and hear the fading.</p>
           </li>
         </ol>
-
-        <details class="panel physics">
-          <summary>The physics in more detail</summary>
-          <div class="physics-body">
-            <div>
-              <h3>What is measured</h3>
-              <p class="muted">
-                A kicked Ising chain (RX by θ<sub>x</sub>, RZZ by θ<sub>zz</sub> per layer), 12 qubits in the featured runs. The centre qubit gets a Z kick between the
-                forward and backward halves. <span class="mono">F(site, t)</span>, the out-of-time-order correlator, is the echo measured at each site after t layers.
-                It starts at ±1, stays there outside the light cone, and decays once the perturbation has spread. In a finite chain it partly revives around
-                t ≈ 13–16 when the spreading front reflects off the ends.
-              </p>
-            </div>
-            <div>
-              <h3>The control</h3>
-              <p class="muted">
-                At θ<sub>zz</sub> = π every gate is a Clifford. Cliffords map Pauli operators to single Pauli strings, so the nudge never spreads into a superposition
-                of strings and F stays at ±1. Only the kicked qubit flips sign. The explorer's coupling slider snaps to π so you can see it.
-              </p>
-            </div>
-          </div>
-        </details>
       </section>
     </main>
 

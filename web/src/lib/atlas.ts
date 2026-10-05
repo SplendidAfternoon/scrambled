@@ -114,7 +114,7 @@ export interface MeasureOpts {
   fetchFn?: Fetch;
   signal?: AbortSignal;
   onStatus?: (s: { job_id?: string; status: string; elapsed: number }) => void;
-  onSubmitted?: (s: { job_id: string; lent: boolean; remaining?: { ip_hour: number; today: number } }) => void;
+  onSubmitted?: (s: { job_id: string; lent: boolean }) => void;
   timeoutMs?: number;
   sleep?: (ms: number) => Promise<void>;
 }
@@ -136,7 +136,7 @@ export async function measureOtoc(params: OtocParams, o: MeasureOpts): Promise<R
   const jobId: string = job.job_id;
   const tokenHeader: Record<string, string> = job.job_token ? { "X-Job-Token": job.job_token } : {};
   const sent = (job.params as OtocParams | undefined) ?? params;
-  o.onSubmitted?.({ job_id: jobId, lent: !!job.lent_key, remaining: job.remaining });
+  o.onSubmitted?.({ job_id: jobId, lent: !!job.lent_key });
   o.onStatus?.({ job_id: jobId, status: "submitted", elapsed: 0 });
   let delay = 1500;
   for (;;) {
@@ -156,16 +156,10 @@ export async function measureOtoc(params: OtocParams, o: MeasureOpts): Promise<R
   return fromAtlasResult(body, jobId, sent as unknown as Record<string, unknown>);
 }
 
-export interface Quota {
-  ip_hour: number;
-  today: number;
-}
-
 export interface ServerHealth {
   proxy: boolean;
   server_key: boolean;
-  remaining?: Quota;
-  limits?: { per_ip_hourly: number; daily: number; n_sites: number; depth: number };
+  limits?: { n_sites: number; depth: number };
 }
 
 /** Ask the same-origin proxy whether it will lend its key (no key is ever returned). Null when there is no proxy. */

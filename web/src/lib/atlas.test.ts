@@ -70,13 +70,13 @@ describe("measureOtoc", () => {
     const f = (async (url: string, init: RequestInit) => {
       calls.push({ url, init });
       if (url.endsWith("/process"))
-        return ok({ job_id: "11111111-2222-3333-4444-555555555555", job_token: "tok", lent_key: true, remaining: { ip_hour: 2, today: 9 }, params: { ...otocParams(2, 2, 0.3, 0.5) } }, 202);
+        return ok({ job_id: "11111111-2222-3333-4444-555555555555", job_token: "tok", lent_key: true, params: { ...otocParams(2, 2, 0.3, 0.5) } }, 202);
       if (url.endsWith("/status")) return ok({ status: "completed" });
       return ok(result);
     }) as unknown as typeof fetch;
     let sub: unknown;
     const run = await measureOtoc(otocParams(16, 40, 0.3, 0.5), { route: "proxy", key: "", fetchFn: f, sleep: async () => {}, onSubmitted: (s) => (sub = s) });
-    expect(sub).toEqual({ job_id: "11111111-2222-3333-4444-555555555555", lent: true, remaining: { ip_hour: 2, today: 9 } });
+    expect(sub).toEqual({ job_id: "11111111-2222-3333-4444-555555555555", lent: true });
     expect((calls[0].init.headers as Record<string, string>)["X-Job-Token"]).toBeUndefined();
     expect(calls.slice(1).every((c) => (c.init.headers as Record<string, string>)["X-Job-Token"] === "tok")).toBe(true);
     expect(run.params.n_sites).toBe(2);
@@ -85,7 +85,7 @@ describe("measureOtoc", () => {
 
 describe("serverHealth", () => {
   it("returns the proxy's lent-key status, or null when there is no proxy", async () => {
-    const h = { proxy: true, server_key: true, remaining: { ip_hour: 3, today: 60 } };
+    const h = { proxy: true, server_key: true, limits: { n_sites: 16, depth: 32 } };
     expect(await serverHealth((async () => ok(h)) as unknown as typeof fetch, "./api/atlas")).toEqual(h);
     expect(await serverHealth((async () => ok({}, 404)) as unknown as typeof fetch, "./api/atlas")).toBeNull();
     expect(await serverHealth((async () => new Response("<html>", { status: 200 })) as unknown as typeof fetch, "./api/atlas")).toBeNull();

@@ -13,6 +13,7 @@
       <nav>
         <a href="./">Home</a>
         <a href="./explorer.html" aria-current="page">Explorer</a>
+        <a href="./game.html">Game</a>
         <a href="./notebook.html">Notebook</a>
         <a href="https://github.com/SplendidAfternoon/scrambled">GitHub</a>
       </nav>
@@ -42,7 +43,7 @@
             <div class="seg" id="n-seg">
               <button class="btn" data-n="8" aria-pressed="false">8</button>
               <button class="btn" data-n="12" aria-pressed="true">12</button>
-              <button class="btn" data-n="16" aria-pressed="false" title="Needs your own key">16</button>
+              <button class="btn" data-n="16" aria-pressed="false">16</button>
             </div>
           </div>
         </div>
@@ -52,7 +53,7 @@
             <h2 class="panel-title">Measure on Atlas</h2><span class="tag cached" id="mode-tag">cached</span>
           </div>
           <p class="muted small">Runs a real <span class="mono">otoc-echo-v1</span> job at these settings on Atlas's emulator. Until then you are browsing runs measured in advance.</p>
-          <p class="small lent" id="lent" hidden></p>
+          <p class="small lent" id="lent" hidden>No key needed: the site lends its own.</p>
           <div class="btn-row">
             <button class="btn primary" id="measure">Measure on Atlas</button>
             <button class="btn" id="cancel" hidden>Cancel</button>
@@ -66,7 +67,7 @@
             <p class="small muted">
               Your key stays in this tab and goes only to <span class="mono" id="route-host">api.mothquantum.com</span>. Atlas only accepts browser calls from
               localhost, so the deployed site forwards otoc-echo-v1 requests through its own <span class="mono">/api/atlas</span> proxy. Without a key, the proxy
-              lends the site's key for 12-qubit emulator runs, a few per visitor per hour, and that key never reaches your browser.
+              lends the site's key for emulator runs, and that key never reaches your browser.
             </p>
           </details>
         </div>

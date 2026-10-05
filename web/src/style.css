@@ -68,7 +68,7 @@ label { display: block; }
 [hidden] { display: none !important; }
 .hero { padding-top: 48px; padding-bottom: 16px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 48px; align-items: center; }
 .eyebrow { margin: 0 0 14px; font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--yolk); font-weight: 600; }
-.hero h1 { font-size: clamp(2.2rem, 5.4vw, 3.6rem); line-height: 1.05; margin: 0 0 18px; letter-spacing: 0.01em; }
+.hero h1 { font-size: clamp(2.2rem, 4.6vw, 3.2rem); line-height: 1.05; margin: 0 0 18px; letter-spacing: 0.01em; }
 .hero h1 em { font-style: normal; color: var(--yolk); }
 .lede { font-size: 1.15rem; max-width: 46ch; margin: 0; color: #d9cfc3; }
 .film-note { margin-top: 24px; padding-left: 14px; border-left: 2px solid var(--yolk); font-size: 0.92rem; }
@@ -99,18 +99,17 @@ label { display: block; }
 .steps h3 { margin: 10px 0 6px; font-size: 1.05rem; }
 .steps p { margin: 0; font-size: 0.92rem; }
 .num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--yolk); color: #1b1407; font-weight: 700; font-size: 0.9rem; }
-.physics { margin-top: 16px; }
-.physics summary { color: var(--ink); font-weight: 600; }
-.physics-body { display: grid; gap: 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
-.physics-body h3 { margin: 0 0 6px; font-size: 1rem; }
-.physics-body p { margin: 0; font-size: 0.92rem; }
+.bonus { margin-top: 20px; display: flex; align-items: center; gap: 16px; text-decoration: none; color: var(--ink); transition: border-color 0.15s; }
+.bonus:hover { border-color: #4a4036; }
+.bonus > span:nth-child(2) { display: flex; flex-direction: column; gap: 2px; flex: 1; font-size: 0.92rem; }
+.bonus img { flex: none; }
 .footer { padding-top: 48px; padding-bottom: 40px; border-top: 1px solid #2a2520; margin-top: 56px; }
 .footer p { max-width: 80ch; }
 
 @media (max-width: 860px) {
   .hero { grid-template-columns: 1fr; gap: 28px; }
   .film { max-width: 420px; }
-  .gallery, .physics-body { grid-template-columns: 1fr; }
+  .gallery { grid-template-columns: 1fr; }
   .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 520px) {

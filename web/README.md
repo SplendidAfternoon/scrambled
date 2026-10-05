@@ -29,14 +29,14 @@ The client is `src/lib/atlas.ts`. It makes the documented three calls with `Auth
 
 Active only when `ALLOW_SERVER_KEY=1` and `MOTH_API_KEY` are set on the server and the request carries no `Authorization` header:
 
-- **Submit only, clamped.** Only `POST engines/otoc-echo-v1/process`, with the body rebuilt from a whitelist: `n_sites` 2–12, `depth` 1–32, `theta_x` 0–π, `theta_zz` (−π, π], `theta_z` 0–π, always `machine: "aer"`, `exact: true`, `include_taps: false`.
+- **Submit only, clamped.** Only `POST engines/otoc-echo-v1/process`, with the body rebuilt from a whitelist: `n_sites` 2–16, `depth` 1–32, `theta_x` 0–π, `theta_zz` (−π, π], `theta_z` 0–π, always `machine: "aer"`, `exact: true`, `include_taps: false`.
 - **Signed job ids.** The submit response adds `job_token`, an HMAC-SHA256 of the job id (`PROXY_SECRET`). Lent-key status and result reads need it in `X-Job-Token`, so the proxy only reads jobs it created. The key never reaches the browser.
-- **Rate limits.** `SERVER_KEY_PER_IP_HOURLY` (default 3) per IP per hour and `SERVER_KEY_DAILY_CAP` (default 60) per UTC day. Counters use Upstash Redis / Vercel KV when configured, otherwise in-memory per function instance (a cold start resets them).
-- **Health.** `GET /api/atlas/health` returns `{proxy, server_key, remaining, limits, counter}`, never the key. The explorer reads it on load and labels the button "Measure on Atlas (demo key, N left)".
+- **No rate limit.** The site is meant for the judges during judging; rotate the key afterwards.
+- **Health.** `GET /api/atlas/health` returns `{proxy, server_key, limits}`, never the key. The explorer reads it on load to decide whether a key is needed.
 
-`api/atlas.test.ts` covers clamping, both rate limits, token signing and forgery, 403 on unsigned lent-key reads, BYOK pass-through, and that no response body contains the key.
+`api/atlas.test.ts` covers clamping, token signing and forgery, 403 on unsigned lent-key reads, BYOK pass-through, and that no response body contains the key.
 
-Production env: `ALLOW_SERVER_KEY`, `MOTH_API_KEY`, `PROXY_SECRET`, `SERVER_KEY_DAILY_CAP`, `SERVER_KEY_PER_IP_HOURLY`. Set `ALLOW_SERVER_KEY=0` once the key is rotated.
+Production env: `ALLOW_SERVER_KEY`, `MOTH_API_KEY`, `PROXY_SECRET`. Set `ALLOW_SERVER_KEY=0` once the key is rotated.
 
 ## Engines and job ids
 

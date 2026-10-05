@@ -73,20 +73,8 @@ function pickRun(): { run: Run; exact: boolean; live: boolean; rec?: RecordedRun
 const lending = () => !ui.key.value.trim() && !!health?.server_key;
 
 function syncMeasure() {
-  const q = health?.remaining;
-  if (lending() && q) {
-    const left = Math.min(q.ip_hour, q.today);
-    ui.measure.textContent = left > 0 ? `Measure on Atlas (${left} left)` : "Lent runs used up";
-    ui.measure.disabled = left <= 0 || !!abort;
-    ui.lent.hidden = false;
-    ui.lent.textContent =
-      `No key needed: the site lends its own. ${q.ip_hour} of ${health!.limits?.per_ip_hourly ?? "?"} runs left for you this hour, ` +
-      `${q.today} of ${health!.limits?.daily ?? "?"} left today across all visitors.`;
-  } else {
-    ui.measure.textContent = "Measure on Atlas";
-    ui.measure.disabled = !!abort;
-    ui.lent.hidden = true;
-  }
+  ui.measure.disabled = !!abort;
+  ui.lent.hidden = !lending();
 }
 
 async function refreshHealth() {
@@ -201,38 +189,28 @@ async function measure() {
     status("Paste your Atlas API key first. Until then the explorer shows the measured runs.", true);
     return;
   }
-  if (lent && n > (health?.limits?.n_sites ?? 12)) {
-    ui.ownKey.open = true;
-    status(`The lent key is limited to ${health?.limits?.n_sites ?? 12} qubits. Pick 8 or 12, or paste your own key.`, true);
-    return;
-  }
   keyStore.set(key, ui.remember.checked);
   const params = otocParams(n, 32, txPi(), tzzPi());
   abort = new AbortController();
   ui.measure.disabled = true;
   ui.cancel.hidden = false;
-  status(`Submitting otoc-echo-v1${lent ? " with the site's demo key" : ""} …`);
+  status("Submitting otoc-echo-v1 …");
   try {
     const r = await measureOtoc(params, {
       route: lent ? "proxy" : route,
       key,
       signal: abort.signal,
       timeoutMs: 600_000,
-      onSubmitted: (s) => {
-        if (s.remaining && health) health.remaining = s.remaining;
-        syncMeasure();
-      },
       onStatus: (s) => status(`job ${s.job_id ? shortId(s.job_id) : ""} · ${s.status} · ${(s.elapsed / 1000).toFixed(0)} s`),
     });
     live = [r, ...live.filter((x) => x.job_id !== r.job_id)];
-    status(`Done: job ${r.job_id}${lent ? " (demo key)" : ""}`);
+    status(`Done: job ${r.job_id}`);
     ui.t.value = "1";
     setRun();
     setPlaying(true);
   } catch (e) {
     const err = e as AtlasError;
-    status(err.message + (err.cors || err.status === 429 ? "\nShowing the measured runs instead." : ""), true);
-    if (err.status === 429) void refreshHealth();
+    status(err.message + (err.cors ? "\nShowing the measured runs instead." : ""), true);
   } finally {
     ui.cancel.hidden = true;
     abort = null;
@@ -280,3 +258,20 @@ function bind() {
 }
 
 main().catch((e) => status(`Failed to load data: ${(e as Error).message}`, true));
+
+// [DEBUG-sl] slider diagnosis overlay, only with ?debug; remove once the slider bug is fixed.
+if (location.search.includes("debug")) {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;right:12px;bottom:12px;z-index:99;background:#ffc93c;color:#1b1407;font:14px Consolas,monospace;padding:10px 12px;border-radius:8px;max-width:420px";
+  document.body.append(box);
+  const n = { down: 0, move: 0, input: 0, up: 0, frames: 0 };
+  let last = performance.now(), worst = 0;
+  const show = () => (box.textContent = `kick ${ui.tx.value} · down ${n.down} · move held ${n.move} · input ${n.input} · up ${n.up} · slowest frame ${worst.toFixed(0)} ms`);
+  ui.tx.addEventListener("pointerdown", () => { n.down++; worst = 0; show(); });
+  ui.tx.addEventListener("pointermove", (e) => { if (e.buttons) { n.move++; show(); } });
+  ui.tx.addEventListener("pointerup", () => { n.up++; show(); });
+  ui.tx.addEventListener("input", () => { n.input++; show(); });
+  const frame = (t: number) => { worst = Math.max(worst, t - last); last = t; requestAnimationFrame(frame); };
+  requestAnimationFrame(frame);
+  setInterval(show, 500);
+}

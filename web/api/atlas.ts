@@ -8,11 +8,9 @@
  *  - Bring your own key: the caller's "Authorization: Bearer <key>" is forwarded as-is (never logged or stored).
  *    Only otoc-echo-v1 submit and job status/result paths are allowed.
  *  - Lent server key (ALLOW_SERVER_KEY=1 + MOTH_API_KEY): for callers without a key. Submit params are rebuilt
- *    from a whitelist and clamped (aer, exact, n_sites <= 12, depth <= 32); submissions are rate limited per IP
- *    and per day; status/result reads need the HMAC token this proxy returned with the job id, so the server key
- *    can only read jobs it created. The key never leaves the server.
- * Rate-limit counters live in Upstash Redis REST (UPSTASH_REDIS_REST_URL/TOKEN or Vercel KV_REST_API_URL/TOKEN)
- * when configured, otherwise in this instance's memory (resets on cold start; each instance counts separately).
+ *    from a whitelist and clamped (aer, exact, n_sites <= 16, depth <= 32); status/result reads need the HMAC
+ *    token this proxy returned with the job id, so the server key can only read jobs it created. There is no
+ *    rate limit. The key never leaves the server.
  */
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
@@ -30,9 +28,9 @@ const clamp = (v: unknown, lo: number, hi: number, dflt: number) => {
   return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : dflt;
 };
 
-export const LIMITS = { n_sites: 12, depth: 32 } as const;
+export const LIMITS = { n_sites: 16, depth: 32 } as const;
 
-/** Rebuild otoc-echo-v1 params from a whitelist for the lent key: cheap, emulator-only, no secrets passed through. */
+/** Rebuild otoc-echo-v1 params from a whitelist for the lent key: emulator-only, no secrets passed through. */
 export function clampParams(input: unknown) {
   const p = (input ?? {}) as Record<string, unknown>;
   const PI = Math.PI;
@@ -66,91 +64,6 @@ export function verifyJob(jobId: string, token: string | undefined, secret: stri
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-/* ---------------- rate limit ---------------- */
-
-export interface Store {
-  /** increment key (creating it with ttl seconds) and return the new count */
-  incr(key: string, ttlSec: number): Promise<number>;
-  get(key: string): Promise<number>;
-}
-
-export class MemoryStore implements Store {
-  private m = new Map<string, { n: number; exp: number }>();
-  constructor(private now: () => number = Date.now) {}
-  private live(key: string) {
-    const e = this.m.get(key);
-    if (e && e.exp <= this.now()) {
-      this.m.delete(key);
-      return undefined;
-    }
-    return e;
-  }
-  async incr(key: string, ttlSec: number) {
-    const e = this.live(key) ?? { n: 0, exp: this.now() + ttlSec * 1000 };
-    e.n += 1;
-    this.m.set(key, e);
-    return e.n;
-  }
-  async get(key: string) {
-    return this.live(key)?.n ?? 0;
-  }
-}
-
-export class UpstashStore implements Store {
-  constructor(private url: string, private token: string, private fetchFn: typeof fetch = fetch) {}
-  private async pipe(cmds: (string | number)[][]) {
-    const r = await this.fetchFn(`${this.url.replace(/\/$/, "")}/pipeline`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${this.token}`, "Content-Type": "application/json" },
-      body: JSON.stringify(cmds),
-    });
-    if (!r.ok) throw new Error(`upstash ${r.status}`);
-    return (await r.json()) as { result: unknown }[];
-  }
-  async incr(key: string, ttlSec: number) {
-    const out = await this.pipe([["INCR", key], ["EXPIRE", key, ttlSec, "NX"]]);
-    return Number(out[0].result);
-  }
-  async get(key: string) {
-    const out = await this.pipe([["GET", key]]);
-    return Number(out[0].result ?? 0);
-  }
-}
-
-let memStore: MemoryStore | null = null;
-export function storeFor(env: Env): { store: Store; kind: "upstash" | "memory" } {
-  const url = env.UPSTASH_REDIS_REST_URL ?? env.KV_REST_API_URL;
-  const token = env.UPSTASH_REDIS_REST_TOKEN ?? env.KV_REST_API_TOKEN;
-  if (url && token) return { store: new UpstashStore(url, token), kind: "upstash" };
-  memStore ??= new MemoryStore();
-  return { store: memStore, kind: "memory" };
-}
-
-export function limitsFor(env: Env) {
-  return {
-    perIpHourly: Math.max(0, Math.floor(clamp(env.SERVER_KEY_PER_IP_HOURLY, 0, 1000, 3))),
-    daily: Math.max(0, Math.floor(clamp(env.SERVER_KEY_DAILY_CAP, 0, 100000, 60))),
-  };
-}
-
-const dayKey = (now: number) => `scr:day:${new Date(now).toISOString().slice(0, 10)}`;
-const ipKey = (ip: string, now: number) => `scr:ip:${createHash("sha256").update(ip).digest("hex").slice(0, 16)}:${Math.floor(now / 3_600_000)}`;
-
-export async function quota(store: Store, env: Env, ip: string, now: number) {
-  const lim = limitsFor(env);
-  const [d, i] = await Promise.all([store.get(dayKey(now)), store.get(ipKey(ip, now))]);
-  return { ip: Math.max(0, lim.perIpHourly - i), daily: Math.max(0, lim.daily - d), perIpHourly: lim.perIpHourly, dailyCap: lim.daily };
-}
-
-/** Consume one submission. Checks before incrementing so refused calls don't burn quota. */
-export async function consume(store: Store, env: Env, ip: string, now: number): Promise<{ ok: boolean; reason?: string }> {
-  const q = await quota(store, env, ip, now);
-  if (q.daily <= 0) return { ok: false, reason: `daily cap of ${q.dailyCap} lent-key runs reached; try again tomorrow or use your own key` };
-  if (q.ip <= 0) return { ok: false, reason: `limit of ${q.perIpHourly} lent-key runs per hour reached; try again later or use your own key` };
-  await Promise.all([store.incr(dayKey(now), 26 * 3600), store.incr(ipKey(ip, now), 3600)]);
-  return { ok: true };
-}
-
 /* ---------------- routing ---------------- */
 
 export interface ProxyRequest {
@@ -158,7 +71,6 @@ export interface ProxyRequest {
   path: string;
   auth?: string;
   jobToken?: string;
-  ip: string;
   body?: unknown;
 }
 
@@ -169,9 +81,6 @@ export interface ProxyResult {
 
 export interface Deps {
   fetchFn?: typeof fetch;
-  store?: Store;
-  storeKind?: string;
-  now?: () => number;
 }
 
 const serverKeyOn = (env: Env) => env.ALLOW_SERVER_KEY === "1" && !!env.MOTH_API_KEY;
@@ -194,18 +103,12 @@ async function upstream(fetchFn: typeof fetch, url: string, init: RequestInit): 
 
 export async function route(req: ProxyRequest, env: Env, deps: Deps = {}): Promise<ProxyResult> {
   const fetchFn = deps.fetchFn ?? fetch;
-  const now = (deps.now ?? Date.now)();
-  const { store, kind } = deps.store ? { store: deps.store, kind: deps.storeKind ?? "custom" } : storeFor(env);
   const path = (req.path || "").replace(/^\/+/, "");
 
   if (path === "health") {
     if (req.method !== "GET") return { status: 405, body: { error: "method not allowed" } };
     if (!serverKeyOn(env)) return { status: 200, body: { proxy: true, server_key: false } };
-    const q = await quota(store, env, req.ip, now);
-    return {
-      status: 200,
-      body: { proxy: true, server_key: true, remaining: { ip_hour: q.ip, today: q.daily }, limits: { per_ip_hourly: q.perIpHourly, daily: q.dailyCap, n_sites: LIMITS.n_sites, depth: LIMITS.depth, machine: "aer" }, counter: kind },
-    };
+    return { status: 200, body: { proxy: true, server_key: true, limits: { n_sites: LIMITS.n_sites, depth: LIMITS.depth, machine: "aer" } } };
   }
 
   const isSubmit = SUBMIT.test(path);
@@ -235,15 +138,12 @@ export async function route(req: ProxyRequest, env: Env, deps: Deps = {}): Promi
     return upstream(fetchFn, `${ATLAS}/${path}`, { method: "GET", headers });
   }
 
-  const c = await consume(store, env, req.ip, now);
-  if (!c.ok) return { status: 429, body: { error: c.reason } };
   const params = clampParams(((req.body ?? {}) as { params?: unknown }).params);
   headers["Content-Type"] = "application/json";
   const res = await upstream(fetchFn, `${ATLAS}/${path}`, { method: "POST", headers, body: JSON.stringify({ params }) });
   const b = res.body as { job_id?: string } | null;
   if (res.status < 300 && b && typeof b === "object" && b.job_id && new RegExp(`^${UUID}$`).test(b.job_id)) {
-    const q = await quota(store, env, req.ip, now);
-    return { status: res.status, body: { ...b, job_token: signJob(b.job_id, secret), lent_key: true, params, remaining: { ip_hour: q.ip, today: q.daily } } };
+    return { status: res.status, body: { ...b, job_token: signJob(b.job_id, secret), lent_key: true, params } };
   }
   return res;
 }
@@ -255,7 +155,6 @@ interface VReq {
   query?: Record<string, string | string[] | undefined>;
   headers: Record<string, string | string[] | undefined>;
   body?: unknown;
-  socket?: { remoteAddress?: string };
 }
 interface VRes {
   status(code: number): VRes;
@@ -264,11 +163,6 @@ interface VRes {
 }
 
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
-
-export function clientIp(req: VReq): string {
-  const xff = first(req.headers["x-forwarded-for"]);
-  return (xff?.split(",")[0].trim() || first(req.headers["x-real-ip"]) || req.socket?.remoteAddress || "unknown").slice(0, 64);
-}
 
 export default async function handler(req: VReq, res: VRes) {
   const q = req.query?.path;
@@ -287,7 +181,6 @@ export default async function handler(req: VReq, res: VRes) {
       path,
       auth: first(req.headers.authorization),
       jobToken: first(req.headers["x-job-token"]),
-      ip: clientIp(req),
       body,
     },
     process.env,

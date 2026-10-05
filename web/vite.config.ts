@@ -52,6 +52,7 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, "index.html"),
         explorer: resolve(__dirname, "explorer.html"),
+        game: resolve(__dirname, "game.html"),
       },
     },
   },
