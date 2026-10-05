@@ -54,9 +54,20 @@ def test_classical_simulation_of_clifford_control():
     np.testing.assert_allclose(sim.F, atlas.F, atol=1e-9)
 
 
+def _cached_atlas(params):
+    from scrambled.client import cache_key
+    rec = json.loads((ROOT / "cache" / "otoc-echo-v1" / f"{cache_key('otoc-echo-v1', params.engine_params())}.json")
+                     .read_text(encoding="utf-8"))
+    return otoc.parse_record(rec)
+
+
+@pytest.mark.parametrize("kick, theta_z", [("X", 0.0), ("X", 0.3 * math.pi), ("Z", 0.3 * math.pi)])
+def test_classical_simulation_reproduces_atlas_with_x_kick_and_rz_layer(kick, theta_z):
+    params = otoc.OTOCParams(kick=kick, theta_z=theta_z)
+    np.testing.assert_allclose(otoc.simulate(params).F, _cached_atlas(params).F, atol=1e-9)
+
+
 def test_classical_mode_refuses_unverified_conventions():
-    with pytest.raises(NotImplementedError):
-        otoc.simulate(otoc.OTOCParams(theta_z=0.1))
     with pytest.raises(NotImplementedError):
         otoc.simulate(otoc.OTOCParams(disorder=0.2))
 

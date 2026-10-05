@@ -149,9 +149,10 @@ _Z = np.array([[1, 0], [0, -1]], complex)
 
 
 def simulate(params: OTOCParams):
-    """Exact statevector OTOC. Verified to 1e-12 against otoc-echo-v1 (aer, exact) for the conventions it supports."""
-    if params.theta_z != 0:
-        raise NotImplementedError("classical mode: theta_z ordering is not verified against Atlas; use --mode atlas")
+    """Exact statevector OTOC. Verified to 1e-12 against otoc-echo-v1 (aer, exact) for the conventions it supports.
+
+    The engine applies the theta_z phase layer after the Rx layer: U = Rz(theta_z)^n . Rx(theta_x)^n . ZZ(theta_zz).
+    """
     if params.disorder != 0:
         raise NotImplementedError("classical mode: disorder model 'additive-v1' is not reproduced; use --mode atlas")
     n = params.n_sites
@@ -164,6 +165,7 @@ def simulate(params: OTOCParams):
     z = 1 - 2 * ((np.arange(2 ** n)[:, None] >> (n - 1 - np.arange(n))) & 1)
     zz = (z[:, :-1] * z[:, 1:]).sum(axis=1)
     fwd_phase = np.exp(-0.5j * params.theta_zz * zz)
+    rz_phase = np.exp(-0.5j * params.theta_z * z.sum(axis=1))
     c, s = math.cos(params.theta_x / 2), math.sin(params.theta_x / 2)
     rx_f = np.array([[c, -1j * s], [-1j * s, c]])
     rx_b = rx_f.conj().T
@@ -178,7 +180,9 @@ def simulate(params: OTOCParams):
             psi = psi * fwd_phase
             for q in range(n):
                 psi = one_q(psi, rx_f, q)
+            psi = psi * rz_phase
         else:
+            psi = psi * rz_phase.conj()
             for q in range(n):
                 psi = one_q(psi, rx_b, q)
             psi = psi * fwd_phase.conj()

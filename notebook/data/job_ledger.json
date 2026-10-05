@@ -200,6 +200,30 @@
    "what": "12-qubit echo circuit, t = 3",
    "outcome": "failed: engine_timeout (server side)",
    "credits": null
+  },
+  {
+   "section": "5.2 integrability",
+   "engine": "otoc-echo-v1",
+   "job_id": "72267593-77a2-4273-82c0-2af7e98a721e",
+   "what": "kick X, theta_z = 0 (integrable)",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5.2 integrability",
+   "engine": "otoc-echo-v1",
+   "job_id": "ee0243dd-f887-4a81-9a79-73d4f8519d3c",
+   "what": "kick X, theta_z = 0.3pi (integrability broken)",
+   "outcome": "completed",
+   "credits": 1
+  },
+  {
+   "section": "5.2 integrability",
+   "engine": "otoc-echo-v1",
+   "job_id": "20de4ef0-5943-4ff6-9225-9a9c8ff14fb1",
+   "what": "kick Z, theta_z = 0.3pi (integrability broken)",
+   "outcome": "completed",
+   "credits": 1
   }
  ]
 }

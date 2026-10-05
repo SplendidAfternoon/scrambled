@@ -116,6 +116,7 @@ def test_bad_input_returns_error_code_not_traceback(tmp_path, capsys):
     assert "error:" in capsys.readouterr().err
 
 
-def test_classical_mode_rejects_unverified_physics(tiny_image, tmp_path, capsys):
-    rc = cli.main(["image", str(tiny_image), "-o", str(tmp_path / "x.png"), *SMALL, "--theta-z", "0.1"])
-    assert rc == 2 and "theta_z" in capsys.readouterr().err
+def test_classical_mode_accepts_theta_z_now_verified_against_atlas(tiny_image, tmp_path):
+    out = tmp_path / "x.png"
+    assert cli.main(["image", str(tiny_image), "-o", str(out), *SMALL, "--theta-z", "0.1"]) == 0
+    assert out.exists()

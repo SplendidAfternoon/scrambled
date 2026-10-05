@@ -8,7 +8,9 @@ top to bottom:
    redacted), caching and cost
 3. `otoc-echo-v1`: the scrambling run and the Clifford control
 4. an independent classical statevector check (matches Atlas to about 1e-13)
-5. a theta_zz sweep over 10 Atlas runs (7 of them new) with a scrambling phase-diagram figure (`out/theta_zz_sweep.png`)
+5. a theta_zz sweep over 10 Atlas runs (7 of them new) with a scrambling phase-diagram figure (`out/theta_zz_sweep.png`),
+   and an integrability test (3 more runs, X and Z kicks with and without theta_z) that separates genuine scrambling
+   from integrable spreading; it also pins down the engine's theta_z gate ordering to 3e-14
 6. F to image: `blur-v1` / `telablur-v1` ladders and the per-qubit strip mapping
 7. F to audio: the measured taps as an echo, rendered locally (labelled classical) and on Atlas by
    `retrocausal-echo-v1` (the track's three per-act renders, with an A/B against the local renderer)

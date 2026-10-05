@@ -28,7 +28,7 @@ This notebook is the complete SCRAMBLED workflow, end to end, on [Moth Quantum's
 2. **Atlas API anatomy**: engine schemas, the upload, process, poll and result job lifecycle, caching and cost. The raw HTTP calls are shown once.
 3. **Measure**: `otoc-echo-v1` on a scrambling circuit and on a non-scrambling control.
 4. **Verify**: an independent classical statevector simulation reproduces the Atlas data to rounding error (about $10^{-13}$).
-5. **New physics**: a $\theta_{zz}$ sweep (10 Atlas runs) showing scrambling switch on and off, plotted as a scrambling phase diagram.
+5. **New physics**: a $\theta_{zz}$ sweep (10 Atlas runs) showing scrambling switch on and off, plotted as a scrambling phase diagram, and a test that separates genuine scrambling from integrable spreading (3 more runs).
 6. **F to image**: quantum image ladders (`blur-v1`, `telablur-v1`) composed strip by strip from the measured map.
 7. **F to audio**: the measured taps as a multi-tap echo, rendered locally and on Atlas by `retrocausal-echo-v1`.
 8. **F to video**: the `scrambled` package on an excerpt of a cooking clip.
@@ -127,7 +127,7 @@ Information scrambling is the quantum version of the butterfly effect. A small l
 
 * Prepare every qubit in $|+\rangle$.
 * One Floquet step is $U = R_x(\theta_x)^{\otimes n}\, \exp\!\big(-i\tfrac{\theta_{zz}}{2}\sum_i Z_i Z_{i+1}\big)$. Here $\theta_x = 0.3\pi$ and $\theta_{zz} = 0.35\pi$.
-* For each echo depth $t = 1..32$: apply $U^t$, kick the centre qubit ($k = 6$) with a Pauli $Z$, run the dynamics backwards with $U^{-t}$, and measure $\langle X_i\rangle + i\langle Y_i\rangle$ on every qubit $i$. The result is divided by the same quantity without the kick, which is exactly 1 here because the un-kicked echo returns to $|{+}\rangle^{\otimes n}$.
+* For each echo depth $t = 1..32$: apply $U^t$, kick the centre qubit ($k = 6$) with a Pauli $Z$, run the dynamics backwards with $U^{-t}$, and measure $\langle X_i\rangle + i\langle Y_i\rangle$ on every qubit $i$. The result is divided by the same quantity without the kick, which is exactly 1 here because the un-kicked echo returns to $|{+}\rangle^{\otimes n}$. On noisy hardware that reference falls below 1, and dividing by it largely cancels the decay both circuits share, such as decoherence, so what remains is scrambling. This normalisation is the standard way to keep noise from posing as scrambling (Swingle and Yunger Halpern, *Phys. Rev. A* **97**, 062113, 2018).
 
 That ratio is the OTOC
 
@@ -397,7 +397,9 @@ plt.tight_layout(); plt.show()
 
 # =====================================================================================================================
 md(r"""
-## 5. New physics: switching scrambling on and off with $\theta_{zz}$
+## 5. New physics: where scrambling switches on, and whether it is chaos
+
+### 5.1 Sweeping the coupling $\theta_{zz}$
 
 The two runs above are the two extremes. Between them sits a family of circuits. The sweep keeps $\theta_x = 0.3\pi$ and the 12-site chain fixed and varies the coupling angle:
 
@@ -481,8 +483,70 @@ md(r"""
 **Caveats, stated precisely.**
 
 * This is a 12-qubit system, so the plot shows a *crossover*, not a sharp thermodynamic phase transition. "Phase diagram" is meant in the sense of a map of where scrambling switches on.
-* A clean kicked Ising chain with only a transverse field ($\theta_z = 0$, no disorder) maps to free fermions, so it is integrable. The decay of $|F|$ for a $Z$ kick reflects the operator spreading as a non-local (Jordan-Wigner string) object, not chaos. The engine's `theta_z` and `disorder` parameters break integrability. They are not swept here.
+* A clean kicked Ising chain with only a transverse field ($\theta_z = 0$, no disorder) maps to free fermions, so it is integrable. The decay of $|F|$ for a $Z$ kick reflects the operator spreading as a non-local (Jordan-Wigner string) object, not chaos. The engine's `theta_z` parameter breaks integrability, and section 5.2 uses it to test the difference directly.
 * Every Atlas point agrees with the classical simulation to about $10^{-13}$. The dense grey curve is classical and is labelled as such.
+""")
+
+md(r"""
+### 5.2 Scrambling or only spreading? Breaking integrability with $\theta_z$
+
+With $\theta_z = 0$ the kicked Ising chain is integrable: a Jordan-Wigner transformation maps it to free fermions. In that picture a $Z$ kick is the end of a fermion string, a non-local object, so $|F|$ falls even though nothing chaotic happens. The clean test is a kick along the field, $X_k$, which is a local fermion bilinear. In an integrable chain its information is carried away by quasiparticles and $|F|$ recovers behind the front; in a chaotic chain the information stays spread over many-body correlations (Lin and Motrunich, *Phys. Rev. B* **97**, 144304, 2018). The engine's `theta_z` dial adds a phase layer $R_z(\theta_z)$ to every step, which breaks integrability.
+
+Three new runs keep $\theta_x = 0.3\pi$, $\theta_{zz} = 0.35\pi$, 12 sites and depth 32: an $X$ kick at $\theta_z = 0$, an $X$ kick at $\theta_z = 0.3\pi$, and a $Z$ kick at $\theta_z = 0.3\pi$. The fourth map is the section 3 scrambling run.
+
+**Pinning down the circuit.** The classical simulator used to refuse $\theta_z \neq 0$, because the engine's gate ordering was unknown. $R_z$ commutes with the $ZZ$ layer, so only its position relative to $R_x$ and its sign convention are open. Fitting those candidates against the Atlas maps singles out one, $U = R_z(\theta_z)^{\otimes n}\, R_x(\theta_x)^{\otimes n}\, \exp\!\big(-i\tfrac{\theta_{zz}}{2}\sum_i Z_i Z_{i+1}\big)$, which matches to about $3 \times 10^{-14}$, while every other candidate is off by order 1. `scrambled.otoc.simulate` now uses that convention and is tested against these Atlas maps.
+""")
+
+code(r"""
+CHAOS = [("Z", 0.0, r"$Z$ kick, $\theta_z = 0$ (section 3)"), ("Z", 0.3, r"$Z$ kick, $\theta_z = 0.3\pi$"),
+         ("X", 0.0, r"$X$ kick, $\theta_z = 0$ (integrable)"), ("X", 0.3, r"$X$ kick, $\theta_z = 0.3\pi$")]
+n0 = len(client.jobs)
+chaos = {}
+for kick, tz, label in CHAOS:
+    p = dataclasses.replace(P_SCR, kick=kick, theta_z=tz * math.pi)
+    chaos[(kick, tz)] = (otoc.measure(p, mode=MODE, client=client), otoc.simulate(p), label)
+ledger_new_since(n0, "5.2 integrability", "integrability test run")
+
+rows = []
+for (kick, tz), (m, sim, label) in chaos.items():
+    off = offkick_mean(m.F)
+    rows.append([label, f"`{m.job_id[:8]}`", f"{off[16:].mean():.3f}", f"{off[10:20].max() - off[:12].min():+.3f}",
+                 "same" if otoc.arrival_steps(m.F) == otoc.arrival_steps(scr.F) else "different",
+                 f"{np.abs(m.F - sim.F).max():.1e}"])
+md_table(["run", "Atlas job", "late mean abs(F) (t=17..32)", "revival (t=11..20 peak − early dip)",
+          "light cone vs section 3", "max abs(Atlas − classical)"], rows)
+
+fig = plt.figure(figsize=(13, 5.6))
+gs = fig.add_gridspec(2, 5, width_ratios=[1, 1, 0.05, 0.22, 1.25], wspace=0.3, hspace=0.35)
+for idx, (key, (m, sim, label)) in enumerate(chaos.items()):
+    a_ = fig.add_subplot(gs[idx // 2, idx % 2])
+    im = a_.imshow(np.abs(m.F), cmap="Blues", vmin=0, vmax=1, aspect="auto", origin="lower",
+                   extent=[0.5, 32.5, -0.5, 11.5], interpolation="nearest")
+    a_.set_title(label, fontsize=10)
+    a_.set_ylabel("qubit" if idx % 2 == 0 else "")
+    if idx // 2 == 1:
+        a_.set_xlabel("echo depth t")
+    else:
+        a_.tick_params(labelbottom=False)
+fig.colorbar(im, cax=fig.add_subplot(gs[:, 2]), label="|F|")
+ax = fig.add_subplot(gs[:, 4])
+styles = {("Z", 0.0): ("C0", "--"), ("Z", 0.3): ("C0", "-"), ("X", 0.0): ("C3", "--"), ("X", 0.3): ("C3", "-")}
+for key, (m, sim, label) in chaos.items():
+    ax.plot(np.arange(1, 33), offkick_mean(m.F), color=styles[key][0], ls=styles[key][1], lw=1.5, label=label)
+ax.set_ylim(0, 1.03); ax.set_xlabel("echo depth t"); ax.set_ylabel(r"mean $|F|$ over the 11 non-kicked qubits")
+ax.set_title("memory of the kick (dashed: integrable)"); ax.legend(fontsize=8, loc="upper right")
+fig.suptitle(r"Integrable or chaotic: $|F(i,t)|$ measured on Atlas otoc-echo-v1 (aer)", y=1.0)
+plt.show()
+""")
+
+md(r"""
+**Reading it.** All four runs have the same light cone, because the front speed is set by the nearest-neighbour gates. What happens behind the front differs.
+
+* With an $X$ kick in the integrable chain, about 0.71 of the memory survives at late times. The information spreads and then largely comes back, which is spreading without scrambling.
+* Breaking integrability ($\theta_z = 0.3\pi$) drops the same $X$-kick memory to about 0.22. The light cone is unchanged, but the information stays lost, which is the signature of genuine scrambling.
+* With a $Z$ kick both chains look scrambled at late times (about 0.25 and 0.29), which is why the integrable run in section 3 is a fair source for the media but is not by itself proof of chaos. Breaking integrability removes its finite-size revival, from +0.26 to +0.02.
+
+The media in this project use the section 3 run. Its light cone and decay are real measurements of operator spreading, and this section shows which part of that picture survives in a chaotic chain.
 """)
 
 # =====================================================================================================================
@@ -849,7 +913,7 @@ md(r"""
 
 | step | where it runs |
 |---|---|
-| $F(i,t)$, all 10 maps in sections 3 and 5 (the two section 3 runs are part of the sweep) | Atlas `otoc-echo-v1`, `machine: aer`: the exact, noiseless **emulator**, not quantum hardware |
+| $F(i,t)$, all 13 maps in sections 3 and 5 (the two section 3 runs are part of the sweep) | Atlas `otoc-echo-v1`, `machine: aer`: the exact, noiseless **emulator**, not quantum hardware |
 | image ladders (blur, morph) | Atlas `blur-v1` / `telablur-v1` (quantum image-encoding circuits, run by Atlas) |
 | verification and the dense sweep curve | classical numpy statevector (labelled) |
 | strip cutting, crossfades, overlays, video encoding | classical, local |

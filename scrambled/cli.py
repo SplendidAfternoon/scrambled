@@ -186,7 +186,7 @@ def build_parser():
     g.add_argument("--depth", type=int, default=32, help="echo depths t = 1..depth (max 32, default 32)")
     g.add_argument("--theta-x", type=_angle, default=0.3 * math.pi, help="transverse kick angle (default 0.3pi)")
     g.add_argument("--theta-zz", type=_angle, default=0.35 * math.pi, help="ZZ coupling angle (default 0.35pi)")
-    g.add_argument("--theta-z", type=_angle, default=0.0, help="longitudinal field (default 0; atlas mode only)")
+    g.add_argument("--theta-z", type=_angle, default=0.0, help="longitudinal field, breaks integrability (default 0)")
     g.add_argument("--kick", choices=("Z", "Y", "X"), default="Z")
     g.add_argument("--kick-site", type=int, default=None, help="default: centre of the chain")
     g.add_argument("--machine", default="aer", help="aer (emulator, default) or an IBM backend name")
