@@ -11,6 +11,7 @@ import json
 import shutil
 import subprocess
 import sys
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -19,6 +20,7 @@ DPF = HERE / "third_party" / "DPF"
 SRC = HERE / "src"
 BUILD = HERE / "build"
 DIST = HERE / "dist"
+VERSION = "2.0.0"
 ZIG = [sys.executable, "-m", "ziglang"]
 TARGET = ["-target", "x86_64-windows-gnu"]
 OPT = ["-O2", "-DNDEBUG", "-ffunction-sections", "-fdata-sections"]
@@ -92,7 +94,8 @@ def build_vst3():
     jobs += [(DPF / "distrho" / "DistrhoPluginMain.cpp", BUILD / "vst3" / "DistrhoPluginMain.o", PLUGIN_FLAGS),
              (DPF / "distrho" / "DistrhoUIMain.cpp", BUILD / "vst3" / "DistrhoUIMain.o", PLUGIN_FLAGS),
              (SRC / "ScrambledEchoPlugin.cpp", BUILD / "vst3" / "ScrambledEchoPlugin.o", PLUGIN_FLAGS),
-             (SRC / "ScrambledEchoUI.cpp", BUILD / "vst3" / "ScrambledEchoUI.o", PLUGIN_FLAGS)]
+             (SRC / "ScrambledEchoUI.cpp", BUILD / "vst3" / "ScrambledEchoUI.o", PLUGIN_FLAGS),
+             (SRC / "EggRenderer.cpp", BUILD / "vst3" / "EggRenderer.o", [f"-I{SRC}", "-Wall", "-Wno-unused-parameter"])]
 
     def needs(job):
         src, obj, _ = job
@@ -117,6 +120,13 @@ def build_vst3():
     for stray in binary.parent.glob("*.pdb"):
         stray.unlink()
     print("built", binary.relative_to(HERE), f"{binary.stat().st_size // 1024} KiB")
+    for old in DIST.glob("ScrambledEcho-*-win64-vst3.zip"):
+        old.unlink()
+    archive = DIST / f"ScrambledEcho-{VERSION}-win64-vst3.zip"
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in sorted(bundle.rglob("*")):
+            z.write(f, f.relative_to(DIST))
+    print("zipped", archive.relative_to(HERE), f"{archive.stat().st_size // 1024} KiB")
 
 
 if __name__ == "__main__":

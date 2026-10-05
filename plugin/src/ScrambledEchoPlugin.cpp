@@ -9,9 +9,10 @@ class ScrambledEchoPlugin : public Plugin
 {
 public:
     ScrambledEchoPlugin()
-        : Plugin(kParamCount, 0, 1),
+        : Plugin(kParamCount, 0, 2),
           fPresets(se::loadEmbeddedPresets())
     {
+        std::fill(fValues, fValues + kParamCount, 0.f);
         fValues[kParamMap] = se::kDefaultPreset;
         fValues[kParamSync] = 0.f;
         fValues[kParamTimeMs] = 1600.f;
@@ -35,7 +36,7 @@ protected:
     const char* getMaker() const override { return "Moth Hack 2026 / SCRAMBLED"; }
     const char* getHomePage() const override { return DISTRHO_PLUGIN_URI; }
     const char* getLicense() const override { return "ISC"; }
-    uint32_t getVersion() const override { return d_version(1, 0, 0); }
+    uint32_t getVersion() const override { return d_version(2, 0, 0); }
 
     void initAudioPort(bool input, uint32_t index, AudioPort& port) override
     {
@@ -107,6 +108,27 @@ protected:
             p.enumValues.count = 2; p.enumValues.restrictedMode = true; p.enumValues.values = ev;
             break;
         }
+        case kParamSplit:
+            p.name = "Split"; p.symbol = "split"; p.unit = "%";
+            p.ranges.min = 0.f; p.ranges.max = 100.f; p.ranges.def = 0.f;
+            break;
+        default:
+            if (index >= (uint32_t) kParamSiteSplit0 && index < (uint32_t) kParamSiteSplit0 + se::kBands) {
+                const int s = (int) index - kParamSiteSplit0;
+                p.name = String("Site ") + String(s) + " split";
+                p.shortName = String("S") + String(s) + " split";
+                p.symbol = String("site") + String(s) + "_split";
+                p.unit = "%";
+                p.ranges.min = 0.f; p.ranges.max = 100.f; p.ranges.def = 0.f;
+            } else if (index >= (uint32_t) kParamSiteGain0 && index < (uint32_t) kParamSiteGain0 + se::kBands) {
+                const int s = (int) index - kParamSiteGain0;
+                p.name = String("Site ") + String(s) + " gain";
+                p.shortName = String("S") + String(s) + " gain";
+                p.symbol = String("site") + String(s) + "_gain";
+                p.unit = "dB";
+                p.ranges.min = se::kMinSiteGainDb; p.ranges.max = se::kMaxSiteGainDb; p.ranges.def = 0.f;
+            }
+            break;
         }
     }
 
@@ -124,6 +146,13 @@ protected:
 
     void initState(uint32_t index, State& state) override
     {
+        if (index == 1) {
+            state.key = SE_STATE_EGG_VIEW;
+            state.label = "Egg view";
+            state.description = "camera of the 3D egg editor";
+            state.defaultValue = "";
+            return;
+        }
         if (index != 0) return;
         state.key = SE_STATE_CUSTOM_MAP;
         state.label = "Custom map JSON";
@@ -134,6 +163,7 @@ protected:
 
     void setState(const char* key, const char* value) override
     {
+        if (std::strcmp(key, SE_STATE_EGG_VIEW) == 0) { fEggView = value; return; }
         if (std::strcmp(key, SE_STATE_CUSTOM_MAP) != 0) return;
         fCustomPath = value;
         if (value == nullptr || value[0] == '\0') {
@@ -153,8 +183,15 @@ protected:
 
     String getState(const char* key) const override
     {
+        if (std::strcmp(key, SE_STATE_EGG_VIEW) == 0) return fEggView;
         return std::strcmp(key, SE_STATE_CUSTOM_MAP) == 0 ? fCustomPath : String();
     }
+
+public:
+    // Direct access for the UI (same process): lock-free, read-only.
+    const se::Telemetry& telemetry() const { return fCore.telemetry(); }
+
+protected:
 
     void sampleRateChanged(double newSampleRate) override
     {
@@ -177,6 +214,11 @@ protected:
         p.scramble = fValues[kParamScramble] * 0.01f;
         p.width = fValues[kParamWidth] * 0.01f;
         p.commutator = fValues[kParamView] > 0.5f;
+        p.split = fValues[kParamSplit] * 0.01f;
+        for (int s = 0; s < se::kBands; ++s) {
+            p.siteSplit[s] = fValues[kParamSiteSplit0 + s] * 0.01f;
+            p.siteGainDb[s] = fValues[kParamSiteGain0 + s];
+        }
         fCore.setParams(p);
         fCore.process(inputs[0], inputs[1], outputs[0], outputs[1], (int) frames);
     }
@@ -200,7 +242,7 @@ private:
     std::vector<se::TapMap> fPresets;
     se::TapMap fCustom;
     bool fHasCustom = false;
-    String fCustomPath;
+    String fCustomPath, fEggView;
     se::Core fCore;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScrambledEchoPlugin)
@@ -209,6 +251,11 @@ private:
 Plugin* createPlugin()
 {
     return new ScrambledEchoPlugin();
+}
+
+const se::Telemetry* scrambledEchoTelemetry(void* pluginInstance)
+{
+    return pluginInstance != nullptr ? &static_cast<ScrambledEchoPlugin*>(static_cast<Plugin*>(pluginInstance))->telemetry() : nullptr;
 }
 
 END_NAMESPACE_DISTRHO

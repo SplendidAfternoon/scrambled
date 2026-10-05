@@ -18,9 +18,11 @@
 #define DISTRHO_PLUGIN_WANT_FULL_STATE 1
 #define DISTRHO_UI_USE_NANOVG          1
 #define DISTRHO_UI_FILE_BROWSER        1
-#define DISTRHO_UI_USER_RESIZABLE      0
-#define DISTRHO_UI_DEFAULT_WIDTH       760
-#define DISTRHO_UI_DEFAULT_HEIGHT      470
+#define DISTRHO_UI_USER_RESIZABLE      1
+#define DISTRHO_UI_DEFAULT_WIDTH       900
+#define DISTRHO_UI_DEFAULT_HEIGHT      640
+// The egg UI reads tap activity straight from the DSP core's lock-free telemetry (same process).
+#define DISTRHO_PLUGIN_WANT_DIRECT_ACCESS 1
 
 #define DISTRHO_PLUGIN_VST3_CATEGORIES "Fx|Delay|Stereo"
 
@@ -34,9 +36,13 @@ enum ScrambledEchoParams {
     kParamScramble,
     kParamWidth,
     kParamView,
-    kParamCount
+    kParamSplit,                       // global Split macro
+    kParamSiteSplit0,                  // 12 x per-site split (egg drag outward)
+    kParamSiteGain0 = kParamSiteSplit0 + 12,  // 12 x per-site gain in dB (egg drag vertical)
+    kParamCount = kParamSiteGain0 + 12
 };
 
 #define SE_STATE_CUSTOM_MAP "custom_map"
+#define SE_STATE_EGG_VIEW   "egg_view"
 
 #endif

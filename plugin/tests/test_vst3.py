@@ -49,6 +49,87 @@ def impulse_response(p, seconds):
     return p.process(x, SR, reset=True)
 
 
+def reset_edits(p):
+    p.split = 0.0
+    for s in range(12):
+        setattr(p, f"site_{s}_split", 0.0)
+        setattr(p, f"site_{s}_gain_db", 0.0)
+
+
+def egg_edits(p, presets):
+    """Egg drags: per-site split and gain parameters, and the global Split macro."""
+    names = set(p.parameters)
+    want = {"split"} | {f"site_{s}_split" for s in range(12)} | {f"site_{s}_gain_db" for s in range(12)}
+    check(want <= names, "exposes Split macro + 12 site split + 12 site gain parameters (automatable)")
+    g = p.parameters["site_3_gain_db"]
+    check(abs(g.min_value - -24) < 1e-6 and abs(g.max_value - 6) < 1e-6, f"site gain range {g.min_value}..{g.max_value} dB")
+
+    ctl = json.loads(presets[0].read_text(encoding="utf-8"))
+    p.map = "Control (Clifford)"
+    p.view = "F (echo survives)"
+    p.scramble = 100.0
+    p.mix = 100.0
+    p.feedback = 0.0
+    p.width = 100.0
+    p.sync = False
+    p.time_ms = 1000.0
+    reset_edits(p)
+    base = impulse_response(p, 1.8)
+
+    # Site 11 at -24 dB: the right channel loses exactly (1 - 10^(-24/20)) of site 11's taps.
+    p.site_11_gain_db = -24.0
+    y = impulse_response(p, 1.8)
+    p.site_11_gain_db = 0.0
+    step = SR / ctl["depth"]
+    norm = 1 / np.sqrt(sum(float(np.hypot(t["F_re"], t["F_im"])) ** 2 for t in ctl["taps"]))
+    err = 0.0
+    for tap in (t for t in ctl["taps"] if t["site"] == 11):
+        c = int(np.floor(tap["depth"] * step))
+        mag = float(np.hypot(tap["F_re"], tap["F_im"])) * (-1 if tap["F_re"] < 0 else 1)
+        diff = float((base[1, c - 2:c + 3] - y[1, c - 2:c + 3]).sum())
+        err = max(err, abs(diff - (1 - 10 ** (-24 / 20)) * mag * norm))
+    left_same = float(np.abs(base[0] - y[0]).max())
+    check(err < 2e-3 and left_same < 1e-5, f"site 11 gain -24 dB scales only that site (err {err:.1e}, left change {left_same:.1e})")
+
+    # Site 0 split 100 %: its delays stretch by 1.5 (edge site), so the last echo moves from 1.0 s to 1.5 s.
+    p.site_0_split = 100.0
+    y = impulse_response(p, 1.8)
+    last_l = int(np.nonzero(np.abs(y[0]) > 1e-6)[0][-1])
+    check(abs(last_l - 1.5 * SR) <= 3, f"site 0 split 100 %: last left echo at {last_l / SR:.4f} s (expect 1.5000)")
+    p.site_0_split = 0.0
+
+    # Split macro moves every site off the shell; at 0 the IR is the measured map again.
+    p.split = 100.0
+    y = impulse_response(p, 1.8)
+    moved = float(np.abs(y - base).max())
+    p.split = 0.0
+    y = impulse_response(p, 1.8)
+    back = float(np.abs(y - base).max())
+    check(moved > 0.05 and back < 1e-6, f"Split macro changes the IR ({moved:.2f}) and 0 % restores it ({back:.1e})")
+
+
+def state_round_trip(p):
+    """Edits survive a host save/load (Ableton stores the VST3 state blob)."""
+    p.map = "Kick left (site 2)"
+    p.scramble = 80.0
+    p.time_ms = 700.0
+    p.split = 25.0
+    p.site_2_split = 60.0
+    p.site_9_gain_db = -9.0
+    p.process(np.zeros((2, 512), np.float32), SR, reset=False)
+    blob = p.raw_state
+    ref = impulse_response(p, 1.2)
+    q = pedalboard.load_plugin(os.fspath(VST3))
+    q.raw_state = blob
+    q.process(np.zeros((2, 512), np.float32), SR, reset=False)
+    same = (q.map == p.map and abs(q.split - 25.0) < 1e-3 and abs(q.site_2_split - 60.0) < 1e-3
+            and abs(q.site_9_gain_db - -9.0) < 1e-3 and abs(q.time_ms - p.time_ms) < 1e-3)
+    check(same, f"state round trip restores params (map {q.map}, split {q.split}, s2 {q.site_2_split}, s9 {q.site_9_gain_db} dB)")
+    y = impulse_response(q, 1.2)
+    check(float(np.abs(y - ref).max()) < 1e-6, f"restored instance renders the same IR (max diff {np.abs(y - ref).max():.1e})")
+    reset_edits(p)
+
+
 def main():
     p = pedalboard.load_plugin(os.fspath(VST3))
     check(p.name == "Scrambled Echo", f"loads as '{p.name}'")
@@ -150,6 +231,9 @@ def main():
     p.feedback = 30.0
     y = p.process(noise, SR, reset=True)
     check(float(np.abs(y - noise).max()) < 1e-5, "Mix 0 % passes the input unchanged")
+
+    egg_edits(p, presets)
+    state_round_trip(p)
 
     print(f"{len(failures)} failure(s)")
     return 1 if failures else 0

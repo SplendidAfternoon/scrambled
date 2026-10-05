@@ -29,6 +29,13 @@ struct TapMap {
     std::vector<Tap> taps;
 };
 
+// The egg has 12 latitude bands, one per qubit site; taps of maps with another site count go to the band
+// nearest their pan position.
+constexpr int kBands = 12;
+constexpr float kMinSiteGainDb = -24.f, kMaxSiteGainDb = 6.f;
+constexpr float kSplitPan = 0.75f;    // full split moves a site 75 % of the way to its stereo edge
+constexpr float kSplitDelay = 0.5f;   // full split stretches an edge site's delays by 50 % (centre: 12.5 %)
+
 struct Params {
     float trainMs = 1000.f;  // length of the whole echo train (t = depth lands here)
     float mix = 0.5f;        // 0 dry .. 1 wet
@@ -37,6 +44,36 @@ struct Params {
     float width = 1.f;       // 0 mono .. 1 full site->pan spread
     bool commutator = false; // false: gain = |F| (signed); true: gain = C = (1 - Re F) / 2, the normalised
                              // squared commutator, loud only where the kicked operator has spread
+    float split = 0.f;                // global Split macro, added to every site's split
+    float siteSplit[kBands] = {};     // 0 = on the shell (measured), 1 = dragged fully out
+    float siteGainDb[kBands] = {};    // vertical drag, kMinSiteGainDb .. kMaxSiteGainDb
+};
+
+inline bool isEdited(const Params& p)
+{
+    if (std::fabs(p.split) > 1e-4f) return true;
+    for (int i = 0; i < kBands; ++i)
+        if (std::fabs(p.siteSplit[i]) > 1e-4f || std::fabs(p.siteGainDb[i]) > 1e-3f) return true;
+    return false;
+}
+
+inline int bandOfPan(float pan) { return std::clamp((int) std::lround(pan * (kBands - 1)), 0, kBands - 1); }
+
+// Written by the audio thread once per block with relaxed atomics, read by the UI at frame rate.
+struct Telemetry {
+    std::atomic<float> bandPos[kBands];  // recent activity of the band's in-phase taps (peak-held, decaying)
+    std::atomic<float> bandNeg[kBands];  // ... and of its inverted (F < 0) taps
+    std::atomic<float> phase;            // train lengths elapsed since the last input onset
+    std::atomic<float> level;            // wet output peak, decaying
+    std::atomic<uint32_t> blocks;        // incremented every processed block
+    Telemetry() { clear(); }
+    void clear()
+    {
+        for (int i = 0; i < kBands; ++i) { bandPos[i].store(0.f, std::memory_order_relaxed); bandNeg[i].store(0.f, std::memory_order_relaxed); }
+        phase.store(1e3f, std::memory_order_relaxed);
+        level.store(0.f, std::memory_order_relaxed);
+        blocks.store(0, std::memory_order_relaxed);
+    }
 };
 
 class Core {
@@ -57,6 +94,9 @@ public:
         trainCoef = 1.f - std::exp(-1.f / (0.08f * sr));
         mixCoef = 1.f - std::exp(-1.f / (0.02f * sr));
         fadeLen = std::max(1, (int) (0.02f * sr));
+        envAtk = 1.f - std::exp(-1.f / (0.001f * sr));
+        envRel = 1.f - std::exp(-1.f / (0.03f * sr));
+        envSlowCoef = 1.f - std::exp(-1.f / (0.3f * sr));
         reset();
     }
 
@@ -64,8 +104,15 @@ public:
     {
         std::fill(buf.begin(), buf.end(), 0.f);
         w = 0; fbState = lpState = hpIn = hpOut = 0.f;
+        envFast = envSlow = 0.f;
+        sinceOnset = 1e9f;
+        holdoff = 0;
+        onsetArmed = true;
         snap = true;
+        tel.clear();
     }
+
+    const Telemetry& telemetry() const { return tel; }
 
     // Message thread. Compiles both maps into one merged tap set and hands it to the audio thread.
     void setMaps(const TapMap& control, const TapMap& target)
@@ -100,16 +147,41 @@ public:
         const float targetMix = std::clamp(params.mix, 0.f, 1.f);
         if (snap) { train = targetTrain; mix = targetMix; }
 
+        // Per-site edits glide with a 30 ms one-pole per block; taps then ramp linearly inside the block.
+        const float macro = std::clamp(params.split, 0.f, 1.f);
+        const float bandCoef = snap ? 1.f : 1.f - std::exp(-(float) n / (0.03f * sr));
+        for (int b = 0; b < kBands; ++b) {
+            const float e = std::clamp(macro + std::clamp(params.siteSplit[b], 0.f, 1.f), 0.f, 1.f);
+            const float db = std::isfinite(params.siteGainDb[b]) ? std::clamp(params.siteGainDb[b], kMinSiteGainDb, kMaxSiteGainDb) : 0.f;
+            const float g = std::pow(10.f, db / 20.f);
+            bandSplit[b] += (e - bandSplit[b]) * bandCoef;
+            bandGain[b] += (g - bandGain[b]) * bandCoef;
+        }
+
         updateGains(active, n);
         if (fadePos < fadeLen) updateGains(previous, n);
         snap = false;
 
         const float maxDelay = (float) (buf.size() - 4);
+        float peak = 0.f;
         for (int i = 0; i < n; ++i) {
             train += (targetTrain - train) * trainCoef;
             mix += (targetMix - mix) * mixCoef;
             const float dryL = inL[i], dryR = inR[i];
-            buf[w] = 0.5f * (dryL + dryR) + fbState;
+            const float mono = 0.5f * (dryL + dryR);
+            // Onset follower for the UI time cursor (not part of the audio path).
+            const float a = std::fabs(mono);
+            envFast += (a - envFast) * (a > envFast ? envAtk : envRel);
+            envSlow += (a - envSlow) * envSlowCoef;
+            sinceOnset += 1.f;
+            if (holdoff > 0) --holdoff;
+            if (!onsetArmed) onsetArmed = envFast < 1.5f * envSlow + 1e-3f;
+            else if (holdoff == 0 && envFast > 2.5f * envSlow + 1e-3f && envFast > 0.01f) {
+                sinceOnset = 0.f;
+                holdoff = (int) (0.12f * sr);
+                onsetArmed = false;
+            }
+            buf[w] = mono + fbState;
 
             float wl = 0.f, wr = 0.f, wm = 0.f;
             runTaps(active, train, maxDelay, wl, wr, wm);
@@ -130,8 +202,10 @@ public:
 
             outL[i] = dryL * (1.f - mix) + wl * mix;
             outR[i] = dryR * (1.f - mix) + wr * mix;
+            peak = std::max(peak, std::max(std::fabs(wl), std::fabs(wr)));
             w = (w + 1) & mask;
         }
+        publish(n, peak);
     }
 
 private:
@@ -143,8 +217,12 @@ private:
         float cA;    // C = (1 - Re F) / 2 in the Control map
         float cB;    // C in the selected map
         bool regen;  // t == depth: this echo is re-injected by Feedback
-        float gl, gr, gm;      // current per-sample gains (left, right, feedback)
-        float dl, dr, dm;      // per-sample ramp increments for this block
+        int band = 0;          // egg band (site) this tap belongs to
+        float gl = 0.f, gr = 0.f, gm = 0.f;  // current per-sample gains (left, right, feedback)
+        float dl = 0.f, dr = 0.f, dm = 0.f;  // per-sample ramp increments for this block
+        float st = 1.f, dst = 0.f;           // delay stretch from the site's split, and its ramp
+        float shown = 0.f;     // signed effective gain this block (telemetry)
+        float acc = 0.f;       // sum of |delayed signal| this block (telemetry)
     };
     struct TapSet {
         std::vector<CTap> taps;
@@ -180,7 +258,9 @@ private:
                 auto it = index.find(key);
                 if (it == index.end()) {
                     it = index.emplace(key, set.taps.size()).first;
-                    set.taps.push_back({frac, pan, 0.f, 0.f, 0.f, 0.f, t.step == m.depth, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f});
+                    CTap fresh{frac, pan, 0.f, 0.f, 0.f, 0.f, t.step == m.depth};
+                    fresh.band = bandOfPan(pan);
+                    set.taps.push_back(fresh);
                 }
                 CTap& ct = set.taps[it->second];
                 if (std::fabs(g) >= 1e-4f) (isB ? ct.gB : ct.gA) += g;
@@ -202,38 +282,64 @@ private:
         float sumSq = 0.f, sumAbs = 0.f;
         for (const CTap& t : set.taps) {
             const float g = gain(t);
-            sumSq += g * g;
-            if (t.regen) sumAbs += std::fabs(g);
+            sumSq += g * g;  // makeup follows the measured map, so a dragged gain stays audible
+            if (t.regen) sumAbs += std::fabs(g * bandGain[t.band]);
         }
         const float makeup = sumSq > 1e-12f ? 1.f / std::sqrt(sumSq) : 0.f;
         // Only the final echo step (t = depth) is fed back, one train length later; normalising by its
-        // summed |g| keeps the loop gain <= feedback.
+        // summed |g| (including site gains) keeps the loop gain <= feedback.
         const float fbScale = fb / std::max(1.f, sumAbs);
         const bool jump = snap || !set.primed;
         const float inv = 1.f / (float) n;
         for (CTap& t : set.taps) {
-            const float g = gain(t);
-            const float p = 0.5f + (t.pan - 0.5f) * width;
+            const float e = bandSplit[t.band];
+            const float g = gain(t) * bandGain[t.band];
+            const float p0 = 0.5f + (t.pan - 0.5f) * width;
+            const float edge = t.band < kBands / 2 ? 0.f : 1.f;
+            const float p = p0 + (edge - p0) * kSplitPan * e;
             const float angle = p * 1.57079633f;
             const float tl = g * makeup * std::cos(angle), tr = g * makeup * std::sin(angle), tm = t.regen ? g * fbScale : 0.f;
-            if (jump) { t.gl = tl; t.gr = tr; t.gm = tm; t.dl = t.dr = t.dm = 0.f; }
-            else { t.dl = (tl - t.gl) * inv; t.dr = (tr - t.gr) * inv; t.dm = (tm - t.gm) * inv; }
+            const float ts = 1.f + kSplitDelay * e * (0.25f + 1.5f * std::fabs(t.pan - 0.5f));
+            t.shown = g * makeup;
+            if (jump) { t.gl = tl; t.gr = tr; t.gm = tm; t.st = ts; t.dl = t.dr = t.dm = t.dst = 0.f; }
+            else { t.dl = (tl - t.gl) * inv; t.dr = (tr - t.gr) * inv; t.dm = (tm - t.gm) * inv; t.dst = (ts - t.st) * inv; }
         }
         set.primed = true;
+    }
+
+    void publish(int n, float peak)
+    {
+        float pos[kBands] = {}, neg[kBands] = {};
+        const float inv = 1.f / (float) n;
+        for (CTap& t : active.taps) {
+            const float a = std::fabs(t.shown) * t.acc * inv;
+            (t.shown >= 0.f ? pos : neg)[t.band] += a;
+            t.acc = 0.f;
+        }
+        for (CTap& t : previous.taps) t.acc = 0.f;
+        const float decay = std::exp(-(float) n / (0.08f * sr));
+        for (int b = 0; b < kBands; ++b) {
+            tel.bandPos[b].store(std::max(pos[b], tel.bandPos[b].load(std::memory_order_relaxed) * decay), std::memory_order_relaxed);
+            tel.bandNeg[b].store(std::max(neg[b], tel.bandNeg[b].load(std::memory_order_relaxed) * decay), std::memory_order_relaxed);
+        }
+        tel.level.store(std::max(peak, tel.level.load(std::memory_order_relaxed) * decay), std::memory_order_relaxed);
+        tel.phase.store(std::min(sinceOnset / std::max(1.f, train), 1e3f), std::memory_order_relaxed);
+        tel.blocks.store(tel.blocks.load(std::memory_order_relaxed) + 1, std::memory_order_relaxed);
     }
 
     void runTaps(TapSet& set, float trainSamples, float maxDelay, float& wl, float& wr, float& wm)
     {
         const float* b = buf.data();
         for (CTap& t : set.taps) {
-            const float d = std::clamp(t.frac * trainSamples, 1.f, maxDelay);
+            const float d = std::clamp(t.frac * t.st * trainSamples, 1.f, maxDelay);
             const int di = (int) d;
             const float fr = d - (float) di;
             const float v0 = b[(w - (size_t) di) & mask];
             const float v1 = b[(w - (size_t) di - 1) & mask];
             const float v = v0 + (v1 - v0) * fr;
             wl += t.gl * v; wr += t.gr * v; wm += t.gm * v;
-            t.gl += t.dl; t.gr += t.dr; t.gm += t.dm;
+            t.acc += std::fabs(v);
+            t.gl += t.dl; t.gr += t.dr; t.gm += t.dm; t.st += t.dst;
         }
     }
 
@@ -249,6 +355,12 @@ private:
     float train = 48000.f, mix = 0.5f;
     int fadeLen = 1, fadePos = 1;
     bool snap = true;
+    float bandSplit[kBands] = {};
+    float bandGain[kBands] = {1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f};
+    float envAtk = 1.f, envRel = 1.f, envSlowCoef = 1.f, envFast = 0.f, envSlow = 0.f, sinceOnset = 1e9f;
+    int holdoff = 0;
+    bool onsetArmed = true;
+    Telemetry tel;
     Params params;
     TapSet active, previous, pending;
     bool hasPending = false;
